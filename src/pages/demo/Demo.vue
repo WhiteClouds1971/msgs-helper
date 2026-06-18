@@ -613,6 +613,12 @@ onMounted(() => {
   transform: scale(1.02);
 }
 
+.anim-card.is-selected {
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-glow-gold);
+  transform: scale(1.02);
+}
+
 /* Button Demo */
 .btn-matrix {
   display: flex;
@@ -714,7 +720,8 @@ onMounted(() => {
 @media (prefers-reduced-motion: reduce) {
   .card-demo,
   .card-demo--clickable,
-  .btn-demo {
+  .btn-demo,
+  .anim-trigger-btn {
     transition: none;
   }
 }
