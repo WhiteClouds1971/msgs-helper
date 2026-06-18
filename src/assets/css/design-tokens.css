@@ -1,0 +1,519 @@
+/* ================================================================
+   Design Tokens — 面杀辅助工具 (msgs-helper)
+   墨韵金章 x 暗夜谋局  |  Generated: 2026-06-18
+
+   扎根来源：三国物质文化
+   · 宣纸 (Rice Paper)      — 暖白底色、纤维肌理、吸墨半透
+   · 松烟墨 (Pine Soot Ink) — 暖黑非纯黑、微妙棕底
+   · 朱砂 (Vermillion)      — 印章红、非荧光、有灰度
+   · 古铜金 (Aged Bronze)   — 青铜器鎏金、漆器金粉
+   · 竹简 (Bamboo Slips)    — 纵向窄条、绳编串联
+   · 漆器 (Lacquerware)     — 黑底朱纹、光泽表面
+   ================================================================ */
+
+/* ================================================================
+   1. Google Fonts — Ma Shan Zheng (毛笔书法体)
+   ================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+
+/* ================================================================
+   2. Color Tokens — Light Mode (宣纸 · Rice Paper)
+   暖白纸底、浓墨文字、古铜金点缀、朱砂红强调
+   ================================================================ */
+:root {
+  /* --- Background --- */
+  --bg:                 #faf6f0;  /* 宣纸暖白 */
+  --bg-surface:         #ffffff;  /* 白绢面 */
+  --bg-surface-hover:   #f5f0e5;  /* 旧纸微黄 */
+  --bg-overlay:         rgba(0, 0, 0, 0.4);  /* 遮罩 */
+
+  /* --- Text --- */
+  --text-primary:       #2c2c2c;  /* 浓墨 */
+  --text-secondary:     #78716c;  /* 淡墨 / 石色 */
+  --text-tertiary:      #a8a098;  /* 更淡墨 */
+  --text-inverse:       #ffffff;  /* 深色底反白 */
+
+  /* --- Border --- */
+  --border:             #e7e0d5;  /* 纸缘色 */
+  --border-light:       #f0ebe0;  /* 微边框 */
+
+  /* --- Accent: Gold (古铜金 · 主色调) --- */
+  --accent-gold:        #b8860b;  /* DarkGoldenRod — 沉稳古铜金 */
+  --accent-gold-dark:   #7a5c10;  /* 深金 — 按钮背景，确保 WCAG AA */
+  --accent-gold-light:  #d4a843;  /* 亮金 */
+  --accent-gold-bg:     rgba(184, 134, 11, 0.08);  /* 金色浅底 */
+
+  /* --- Accent: Red (朱砂 · 强调色) --- */
+  --accent-red:         #c44536;  /* 印章朱砂红（有灰度，非荧光） */
+  --accent-red-light:   #e0554a;  /* 亮朱砂 */
+  --accent-red-bg:      rgba(196, 69, 54, 0.08);   /* 朱砂浅底 */
+
+  /* --- Accent: Green (铜锈绿 · 正向色) --- */
+  --accent-green:       #5b8c5a;  /* 青铜锈绿 */
+  --accent-green-light: #6b9b6a;  /* 亮铜绿 */
+  --accent-green-bg:    rgba(91, 140, 90, 0.08);    /* 铜绿浅底 */
+
+  /* ================================================================
+     3. Shadows — Light Mode (暖棕基调)
+     非冷灰 #000 阴影，而是墨色渗透纸面的暖调投影
+     ================================================================ */
+  --shadow-sm:          0 1px 2px rgba(120, 100, 80, 0.06);
+  --shadow-md:          0 4px 12px rgba(120, 100, 80, 0.10);
+  --shadow-lg:          0 8px 24px rgba(120, 100, 80, 0.14);
+  --shadow-xl:          0 16px 40px rgba(120, 100, 80, 0.18);
+
+  /* 金色辉光 — 选中/高亮/悬浮 */
+  --shadow-glow-gold:   0 0 12px rgba(184, 134, 11, 0.20);
+  /* 朱砂辉光 — 危险/警告 */
+  --shadow-glow-red:    0 0 8px rgba(196, 69, 54, 0.15);
+
+  /* ================================================================
+     4. Signature Effects — Light Mode
+     ================================================================ */
+  /* 卡牌漆器光感 — 顶光打在漆面上的微妙渐变 */
+  --card-lacquer-gradient: radial-gradient(
+    ellipse at 50% -10%,
+    rgba(184, 134, 11, 0.06) 0%,
+    transparent 50%
+  );
+
+  /* 章节金色装饰线 — 竹简编绳意象 */
+  --decorative-line: linear-gradient(
+    90deg,
+    transparent 0%,
+    #b8860b 20%,
+    #d4a843 50%,
+    #b8860b 80%,
+    transparent 100%
+  );
+}
+
+/* ================================================================
+   5. Color Tokens — Dark Mode (松烟墨 · Pine Soot Ink)
+   暖黑底（非 #000）、绢白文字、亮金点缀
+   ================================================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* --- Background --- */
+    --bg:                 #1a1a1f;  /* 松烟墨暖黑 */
+    --bg-surface:         #25252b;  /* 墨层浮面 */
+    --bg-surface-hover:   #2e2e35;  /* 微提亮 */
+    --bg-overlay:         rgba(0, 0, 0, 0.6);
+
+    /* --- Text --- */
+    --text-primary:       #e8e0d5;  /* 绢白 */
+    --text-secondary:     #a0988c;  /* 石色 */
+    --text-tertiary:      #6b6560;  /* 暗石色 */
+    --text-inverse:       #1a1a1f;  /* 亮底反暗 */
+
+    /* --- Border --- */
+    --border:             #333338;
+    --border-light:       #2a2a30;
+
+    /* --- Accent: Gold --- */
+    --accent-gold:        #d4a843;  /* 暗底亮金 */
+    --accent-gold-dark:   #b8860b;  /* 深金 — 按钮背景 */
+    --accent-gold-light:  #e8c560;  /* 更亮金 */
+    --accent-gold-bg:     rgba(212, 168, 67, 0.10);
+
+    /* --- Accent: Red --- */
+    --accent-red:         #e0554a;  /* 暗底亮朱砂 */
+    --accent-red-light:   #f0706a;
+    --accent-red-bg:      rgba(224, 85, 74, 0.10);
+
+    /* --- Accent: Green --- */
+    --accent-green:       #6b9b6a;  /* 暗底亮铜绿 */
+    --accent-green-light: #7fad7e;
+    --accent-green-bg:    rgba(107, 155, 106, 0.10);
+
+    /* --- Shadows --- */
+    --shadow-sm:          0 1px 2px rgba(0, 0, 0, 0.20);
+    --shadow-md:          0 4px 12px rgba(0, 0, 0, 0.30);
+    --shadow-lg:          0 8px 24px rgba(0, 0, 0, 0.40);
+    --shadow-xl:          0 16px 40px rgba(0, 0, 0, 0.50);
+
+    --shadow-glow-gold:   0 0 16px rgba(212, 168, 67, 0.25);
+    --shadow-glow-red:    0 0 12px rgba(224, 85, 74, 0.20);
+
+    /* --- Signature Effects --- */
+    --card-lacquer-gradient: radial-gradient(
+      ellipse at 50% -10%,
+      rgba(212, 168, 67, 0.08) 0%,
+      transparent 50%
+    );
+
+    --decorative-line: linear-gradient(
+      90deg,
+      transparent 0%,
+      #d4a843 20%,
+      #e8c560 50%,
+      #d4a843 80%,
+      transparent 100%
+    );
+  }
+}
+
+/* ================================================================
+   6. Manual Theme Override
+   data-theme 属性 > 系统偏好 > 默认 Light
+   ================================================================ */
+:root[data-theme="light"] {
+  --bg:                 #faf6f0;
+  --bg-surface:         #ffffff;
+  --bg-surface-hover:   #f5f0e5;
+  --bg-overlay:         rgba(0, 0, 0, 0.4);
+  --text-primary:       #2c2c2c;
+  --text-secondary:     #78716c;
+  --text-tertiary:      #a8a098;
+  --text-inverse:       #ffffff;
+  --border:             #e7e0d5;
+  --border-light:       #f0ebe0;
+  --accent-gold:        #b8860b;
+  --accent-gold-dark:   #7a5c10;
+  --accent-gold-light:  #d4a843;
+  --accent-gold-bg:     rgba(184, 134, 11, 0.08);
+  --accent-red:         #c44536;
+  --accent-red-light:   #e0554a;
+  --accent-red-bg:      rgba(196, 69, 54, 0.08);
+  --accent-green:       #5b8c5a;
+  --accent-green-light: #6b9b6a;
+  --accent-green-bg:    rgba(91, 140, 90, 0.08);
+  --shadow-sm:          0 1px 2px rgba(120, 100, 80, 0.06);
+  --shadow-md:          0 4px 12px rgba(120, 100, 80, 0.10);
+  --shadow-lg:          0 8px 24px rgba(120, 100, 80, 0.14);
+  --shadow-xl:          0 16px 40px rgba(120, 100, 80, 0.18);
+  --shadow-glow-gold:   0 0 12px rgba(184, 134, 11, 0.20);
+  --shadow-glow-red:    0 0 8px rgba(196, 69, 54, 0.15);
+  --card-lacquer-gradient: radial-gradient(ellipse at 50% -10%, rgba(184, 134, 11, 0.06) 0%, transparent 50%);
+  --decorative-line: linear-gradient(90deg, transparent 0%, #b8860b 20%, #d4a843 50%, #b8860b 80%, transparent 100%);
+}
+
+:root[data-theme="dark"] {
+  --bg:                 #1a1a1f;
+  --bg-surface:         #25252b;
+  --bg-surface-hover:   #2e2e35;
+  --bg-overlay:         rgba(0, 0, 0, 0.6);
+  --text-primary:       #e8e0d5;
+  --text-secondary:     #a0988c;
+  --text-tertiary:      #6b6560;
+  --text-inverse:       #1a1a1f;
+  --border:             #333338;
+  --border-light:       #2a2a30;
+  --accent-gold:        #d4a843;
+  --accent-gold-dark:   #b8860b;
+  --accent-gold-light:  #e8c560;
+  --accent-gold-bg:     rgba(212, 168, 67, 0.10);
+  --accent-red:         #e0554a;
+  --accent-red-light:   #f0706a;
+  --accent-red-bg:      rgba(224, 85, 74, 0.10);
+  --accent-green:       #6b9b6a;
+  --accent-green-light: #7fad7e;
+  --accent-green-bg:    rgba(107, 155, 106, 0.10);
+  --shadow-sm:          0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-md:          0 4px 12px rgba(0, 0, 0, 0.30);
+  --shadow-lg:          0 8px 24px rgba(0, 0, 0, 0.40);
+  --shadow-xl:          0 16px 40px rgba(0, 0, 0, 0.50);
+  --shadow-glow-gold:   0 0 16px rgba(212, 168, 67, 0.25);
+  --shadow-glow-red:    0 0 12px rgba(224, 85, 74, 0.20);
+  --card-lacquer-gradient: radial-gradient(ellipse at 50% -10%, rgba(212, 168, 67, 0.08) 0%, transparent 50%);
+  --decorative-line: linear-gradient(90deg, transparent 0%, #d4a843 20%, #e8c560 50%, #d4a843 80%, transparent 100%);
+}
+
+/* ================================================================
+   7. Typography
+   标题：毛笔书法体 Ma Shan Zheng（竹简/印章意象）
+   正文：系统字体栈（阅读效率优先）
+   ================================================================ */
+:root {
+  /* --- Font Families --- */
+  --font-display: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', '楷体', serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, 'PingFang SC',
+                  'Noto Sans SC', 'Microsoft YaHei', 'Hiragino Sans GB',
+                  sans-serif;
+  --font-mono:    'SF Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+
+  /* --- Type Scale (mobile-first, base 16px) --- */
+  --text-xs:   0.75rem;   /* 12px — 辅助标注、时间戳 */
+  --text-sm:   0.875rem;  /* 14px — 标签、次要信息 */
+  --text-base: 1rem;      /* 16px — 正文、表单 */
+  --text-lg:   1.125rem;  /* 18px — 强调正文 */
+  --text-xl:   1.25rem;   /* 20px — 卡片标题 */
+  --text-2xl:  1.5rem;    /* 24px — 区块标题 */
+  --text-3xl:  1.875rem;  /* 30px — 页面标题 */
+  --text-4xl:  2.25rem;   /* 36px — 武将名 / Hero */
+
+  /* --- Line Heights --- */
+  --leading-tight:  1.25;  /* 标题 */
+  --leading-normal: 1.5;   /* 正文 */
+  --leading-relaxed: 1.75; /* 长文本 */
+
+  /* --- Font Weights (system font) --- */
+  --font-light:    300;
+  --font-normal:   400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+
+  /* --- Text Rendering --- */
+  --text-wrap-heading: balance;   /* 标题换行均衡 */
+  --text-wrap-body:    pretty;    /* 正文换行美观（防孤行） */
+  --font-nums:         tabular-nums; /* 数字等宽对齐 */
+}
+
+/* ================================================================
+   8. Spacing (基于 4px 网格，竹简纵向节奏)
+   ================================================================ */
+:root {
+  --space-1:  0.25rem;  /* 4px  — 极紧凑间距 */
+  --space-2:  0.5rem;   /* 8px  — 图标间距、内联 */
+  --space-3:  0.75rem;  /* 12px — 组件内 padding */
+  --space-4:  1rem;     /* 16px — 标准 padding */
+  --space-6:  1.5rem;   /* 24px — 区块间距 */
+  --space-8:  2rem;     /* 32px — 大区块间距 */
+  --space-12: 3rem;     /* 48px — 页面级间距 */
+}
+
+/* ================================================================
+   9. Border Radius
+   印章方中带圆（small）、漆器圆润光泽（medium/large）
+   ================================================================ */
+:root {
+  --radius-sm:   4px;   /* 标签、徽章、小按钮 */
+  --radius-md:   8px;   /* 卡片、输入框、按钮 */
+  --radius-lg:   12px;  /* 面板、弹窗 */
+  --radius-full: 9999px; /* 胶囊、头像 */
+}
+
+/* ================================================================
+   10. Animation & Motion
+   克制原则：仅 transform + opacity，尊重 prefers-reduced-motion
+   ================================================================ */
+:root {
+  /* --- Durations --- */
+  --duration-instant: 100ms;
+  --duration-fast:    150ms;
+  --duration-normal:  200ms;
+  --duration-slow:    300ms;
+  --duration-page:    400ms;
+
+  /* --- Easing Curves --- */
+  /* 强减速：物理沉降感，用于 hover/active/toggle */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  /* 入场：陡峭起始 + 柔和沉降，用于页面切换、卡牌选中 */
+  --ease-enter:  cubic-bezier(0.22, 1, 0.36, 1);
+  /* 对称缓动：连续动画、循环 */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* 水墨扩散：慢起缓收，模拟墨在纸上洇开 */
+  --ease-ink:    cubic-bezier(0.25, 0.1, 0.1, 1);
+
+  /* --- Transition Presets (properties always listed explicitly in components) --- */
+  --transition-color:  color, background-color, border-color,
+                       var(--duration-fast) var(--ease-out);
+  --transition-transform: transform var(--duration-normal) var(--ease-out);
+  --transition-opacity:   opacity var(--duration-fast) var(--ease-out);
+}
+
+/* ================================================================
+   11. Reduced Motion — 无障碍退化
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast:    0ms;
+    --duration-normal:  0ms;
+    --duration-slow:    0ms;
+    --duration-page:    0ms;
+
+    --transition-base:   none;
+    --transition-smooth: none;
+    --transition-color:  none;
+  }
+}
+
+/* ================================================================
+   12. Z-Index Scale
+   ================================================================ */
+:root {
+  --z-base:           0;
+  --z-dropdown:       100;
+  --z-sticky:         200;
+  --z-modal-backdrop: 300;
+  --z-modal:          400;
+  --z-toast:          500;
+  --z-tooltip:        600;
+}
+
+/* ================================================================
+   13. Layout (移动端优先)
+   ================================================================ */
+:root {
+  --max-width:       480px;  /* 手机竖屏最大宽度 */
+  --content-padding: 1rem;   /* 内容区水平 padding (16px) */
+  --border-thin:     1px;
+  --border-medium:   2px;    /* 金色装饰线用 */
+
+  /* --- Safe Area (iOS notch / Android gesture bar) --- */
+  --safe-area-top:    env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left:   env(safe-area-inset-left, 0px);
+  --safe-area-right:  env(safe-area-inset-right, 0px);
+
+  /* --- Touch --- */
+  --tap-highlight: transparent;  /* 自定义选中高亮色，替代系统默认灰 */
+}
+
+/* ================================================================
+   14. Native Control Theming
+   ================================================================ */
+/* Light mode: browser form controls match light theme */
+:root {
+  color-scheme: light;
+}
+
+/* Dark mode: browser form controls match dark theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* ================================================================
+   15. Signature Effect Utilities
+   材质技法的可复用 CSS 类 — 宣纸 / 墨洇 / 印章 / 编绳节点
+   ================================================================ */
+
+/* --- 15.1 宣纸纹理 (Rice Paper Texture) ---
+   在背景色上叠加极淡的纤维噪点。
+   通过 SVG filter 生成，纯 CSS 无需外部资源。
+   用法: <div class="card texture-rice-paper">...</div>
+   或直接作为页面背景: #app.texture-rice-paper */
+.texture-rice-paper {
+  position: relative;
+}
+.texture-rice-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  /* SVG noise filter — 模拟纸纤维纹理 */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  opacity: 0.6;
+  border-radius: inherit;
+}
+/* 确保纹理层上方的内容可见 */
+.texture-rice-paper > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- 15.2 墨色渗透边框 (Ink Bleed Border) ---
+   模拟墨在宣纸上洇开的毛边投影。
+   用法: <div class="card border-ink">...</div> */
+.border-ink {
+  box-shadow:
+    inset 0 0 6px rgba(44, 44, 44, 0.06),
+    inset 0 0 2px rgba(44, 44, 44, 0.04);
+}
+/* Dark 模式自动适配 */
+@media (prefers-color-scheme: dark) {
+  .border-ink {
+    box-shadow:
+      inset 0 0 6px rgba(200, 190, 170, 0.06),
+      inset 0 0 2px rgba(200, 190, 170, 0.04);
+  }
+}
+:root[data-theme="light"] .border-ink {
+  box-shadow:
+    inset 0 0 6px rgba(44, 44, 44, 0.06),
+    inset 0 0 2px rgba(44, 44, 44, 0.04);
+}
+:root[data-theme="dark"] .border-ink {
+  box-shadow:
+    inset 0 0 6px rgba(200, 190, 170, 0.06),
+    inset 0 0 2px rgba(200, 190, 170, 0.04);
+}
+
+/* --- 15.3 印章效果 (Seal Stamp) ---
+   方形朱红印记，方中带圆微旋转。用于身份/状态标记。
+   用法: <span class="seal-stamp">主公</span> */
+.seal-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid var(--accent-red);
+  color: var(--accent-red);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  border-radius: var(--radius-sm);
+  user-select: none;
+  position: relative;
+  /* 微旋转 — 手工印章的自然偏移 */
+  transform: rotate(-2deg);
+}
+/* 内框 — 印章常见的双线边框 */
+.seal-stamp::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid var(--accent-red);
+  border-radius: 2px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* 可选: 金色印章（如玉玺） */
+.seal-stamp--gold {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+.seal-stamp--gold::after {
+  border-color: var(--accent-gold);
+}
+
+/* --- 15.4 竹简编绳节点 (Bamboo Cord Node) ---
+   在金色装饰线上叠加菱形节点，模拟竹简的绳编连接点。
+   用法: <hr class="decorative-line decorative-line--knotted"> */
+.decorative-line--knotted::before {
+  content: '◆';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 6px;
+  color: var(--accent-gold);
+  line-height: 1;
+}
+/* 装饰线需要 relative 定位以支持绝对定位伪元素 */
+.decorative-line--knotted {
+  position: relative;
+}
+
+/* --- 15.5 水墨晕染色 (Ink Wash Hover) ---
+   悬浮时从中心向外扩散暖光，模拟墨在纸上洇开。
+   用法: <div class="card ink-wash-hover">...</div> */
+.ink-wash-hover {
+  transition:
+    box-shadow var(--duration-normal) var(--ease-ink),
+    transform var(--duration-normal) var(--ease-enter);
+}
+.ink-wash-hover:hover {
+  box-shadow: var(--shadow-glow-gold);
+}
+/* reduced-motion 退化 */
+@media (prefers-reduced-motion: reduce) {
+  .ink-wash-hover {
+    transition: none;
+  }
+}
