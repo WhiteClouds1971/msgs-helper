@@ -16,7 +16,7 @@ function setTheme(mode) {
 }
 
 // Color tokens
-const bgTokens = ['--bg', '--bg-surface', '--bg-surface-hover'];
+const bgTokens = ['--bg', '--bg-surface', '--bg-surface-hover', '--bg-overlay'];
 const textTokens = ['--text-primary', '--text-secondary', '--text-tertiary', '--text-inverse'];
 const goldTokens = ['--accent-gold', '--accent-gold-dark', '--accent-gold-light', '--accent-gold-bg'];
 const redTokens = ['--accent-red', '--accent-red-light', '--accent-red-bg'];
@@ -124,7 +124,7 @@ onMounted(() => {
       <!-- 背景色 -->
       <h3 class="subsection-title">背景 (Background)</h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in bgTokens" :key="token" :style="{ background: `var(--${token})` }">
+        <div class="swatch" v-for="token in bgTokens" :key="token" :style="{ background: `var(${token})` }">
           <span class="swatch-label" :class="{ 'swatch-label--dark': isDarkBg(token) }">{{ token }}</span>
         </div>
       </div>
@@ -132,7 +132,7 @@ onMounted(() => {
       <!-- 文字色 -->
       <h3 class="subsection-title">文字 (Text)</h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in textTokens" :key="token" :style="{ background: `var(--${token})` }">
+        <div class="swatch" v-for="token in textTokens" :key="token" :style="{ background: `var(${token})` }">
           <span class="swatch-label swatch-label--dark">{{ token }}</span>
         </div>
       </div>
@@ -140,7 +140,7 @@ onMounted(() => {
       <!-- 金色系 -->
       <h3 class="subsection-title">金色 (Gold)</h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in goldTokens" :key="token" :style="{ background: `var(--${token})` }">
+        <div class="swatch" v-for="token in goldTokens" :key="token" :style="{ background: `var(${token})` }">
           <span class="swatch-label" :class="{ 'swatch-label--dark': isGoldDark(token) }">{{ token }}</span>
         </div>
       </div>
@@ -148,7 +148,7 @@ onMounted(() => {
       <!-- 红色系 -->
       <h3 class="subsection-title">朱砂 (Vermillion)</h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in redTokens" :key="token" :style="{ background: `var(--${token})` }">
+        <div class="swatch" v-for="token in redTokens" :key="token" :style="{ background: `var(${token})` }">
           <span class="swatch-label" :class="{ 'swatch-label--dark': isRedDark(token) }">{{ token }}</span>
         </div>
       </div>
@@ -156,7 +156,7 @@ onMounted(() => {
       <!-- 绿色系 -->
       <h3 class="subsection-title">铜绿 (Patina)</h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in greenTokens" :key="token" :style="{ background: `var(--${token})` }">
+        <div class="swatch" v-for="token in greenTokens" :key="token" :style="{ background: `var(${token})` }">
           <span class="swatch-label" :class="{ 'swatch-label--dark': isGreenDark(token) }">{{ token }}</span>
         </div>
       </div>
@@ -164,7 +164,7 @@ onMounted(() => {
       <!-- 边框色 -->
       <h3 class="subsection-title">边框 (Border)</h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in borderTokens" :key="token" :style="{ background: `var(--${token})` }">
+        <div class="swatch" v-for="token in borderTokens" :key="token" :style="{ background: `var(${token})` }">
           <span class="swatch-label swatch-label--dark">{{ token }}</span>
         </div>
       </div>
@@ -189,7 +189,7 @@ onMounted(() => {
         <div class="type-row" v-for="item in typeScale" :key="item.token">
           <span class="type-token">{{ item.token }}</span>
           <span class="type-size">{{ item.size }}</span>
-          <span :style="{ fontSize: `var(--${item.token})` }" class="type-sample">面杀辅助工具</span>
+          <span :style="{ fontSize: `var(${item.token})` }" class="type-sample">面杀辅助工具</span>
         </div>
       </div>
     </section>
@@ -204,14 +204,14 @@ onMounted(() => {
         <div class="spacing-row" v-for="item in spacingScale" :key="item.token">
           <span class="spacing-token">{{ item.token }}</span>
           <span class="spacing-value">{{ item.value }}</span>
-          <div class="spacing-bar" :style="{ width: `var(--${item.token})` }"></div>
+          <div class="spacing-bar" :style="{ width: `var(${item.token})` }"></div>
         </div>
       </div>
 
       <!-- 阴影层级 -->
       <h3 class="subsection-title">阴影层级 (Shadows)</h3>
       <div class="shadow-grid">
-        <div class="shadow-card" v-for="item in shadowTokens" :key="item.token" :style="{ boxShadow: `var(--${item.token})` }">
+        <div class="shadow-card" v-for="item in shadowTokens" :key="item.token" :style="{ boxShadow: `var(${item.token})` }">
           <span class="shadow-label">{{ item.token }}</span>
         </div>
       </div>
@@ -777,7 +777,7 @@ onMounted(() => {
 }
 
 .anim-line.is-revealed {
-  animation: line-draw 500ms cubic-bezier(0.25, 0.1, 0.1, 1) forwards;
+  animation: line-draw 500ms var(--ease-ink) forwards;
 }
 
 @keyframes line-draw {
