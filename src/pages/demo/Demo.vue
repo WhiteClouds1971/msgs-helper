@@ -49,6 +49,30 @@ const typeScale = [
   { token: '--text-4xl', size: '36px' },
 ];
 
+// Spacing scale
+const spacingScale = [
+  { token: '--space-1', value: '4px' },
+  { token: '--space-2', value: '8px' },
+  { token: '--space-3', value: '12px' },
+  { token: '--space-4', value: '16px' },
+  { token: '--space-6', value: '24px' },
+  { token: '--space-8', value: '32px' },
+  { token: '--space-12', value: '48px' },
+];
+
+// Shadow tokens
+const shadowTokens = [
+  { token: '--shadow-sm' },
+  { token: '--shadow-md' },
+  { token: '--shadow-lg' },
+  { token: '--shadow-xl' },
+  { token: '--shadow-glow-gold' },
+  { token: '--shadow-glow-red' },
+];
+
+// Card select state for component demo
+const cardSelected = ref(false);
+
 onMounted(() => {
   const saved = localStorage.getItem('theme-preference') || 'system';
   setTheme(saved);
@@ -153,6 +177,74 @@ onMounted(() => {
           <span class="type-size">{{ item.size }}</span>
           <span :style="{ fontSize: `var(--${item.token})` }" class="type-sample">面杀辅助工具</span>
         </div>
+      </div>
+    </section>
+
+    <!-- ===== Spacing & Shadows ===== -->
+    <section class="demo-section">
+      <h2 class="section-title">📐 间距 & 阴影 (Spacing & Shadows)</h2>
+
+      <!-- 间距 Scale -->
+      <h3 class="subsection-title">间距阶梯 (Spacing Scale)</h3>
+      <div class="spacing-scale">
+        <div class="spacing-row" v-for="item in spacingScale" :key="item.token">
+          <span class="spacing-token">{{ item.token }}</span>
+          <span class="spacing-value">{{ item.value }}</span>
+          <div class="spacing-bar" :style="{ width: `var(--${item.token})` }"></div>
+        </div>
+      </div>
+
+      <!-- 阴影层级 -->
+      <h3 class="subsection-title">阴影层级 (Shadows)</h3>
+      <div class="shadow-grid">
+        <div class="shadow-card" v-for="item in shadowTokens" :key="item.token" :style="{ boxShadow: `var(--${item.token})` }">
+          <span class="shadow-label">{{ item.token }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Components ===== -->
+    <section class="demo-section">
+      <h2 class="section-title">🧩 组件 (Components)</h2>
+
+      <!-- 卡片 -->
+      <h3 class="subsection-title">卡片 (Cards)</h3>
+      <div class="component-row">
+        <div class="card-demo">
+          <h4>默认卡片</h4>
+          <p>竹简意象，纵向堆叠</p>
+        </div>
+        <div class="card-demo card-demo--accent">
+          <h4>金色描边</h4>
+          <p>漆器光感渐变底</p>
+        </div>
+        <div :class="['card-demo', 'card-demo--clickable', { 'is-selected': cardSelected }]" @click="cardSelected = !cardSelected">
+          <h4>可选中（点击切换）</h4>
+          <p>{{ cardSelected ? '✨ 已选中' : '点击选中' }}</p>
+        </div>
+      </div>
+
+      <!-- 按钮 -->
+      <h3 class="subsection-title">按钮 (Buttons)</h3>
+      <div class="btn-matrix">
+        <div class="btn-col">
+          <span class="btn-col-label">Primary</span>
+          <button class="btn-demo btn-demo--primary">默认</button>
+          <button class="btn-demo btn-demo--primary" disabled>禁用</button>
+        </div>
+        <div class="btn-col">
+          <span class="btn-col-label">Ghost</span>
+          <button class="btn-demo btn-demo--ghost">默认</button>
+          <button class="btn-demo btn-demo--ghost" disabled>禁用</button>
+        </div>
+      </div>
+
+      <!-- 徽章 -->
+      <h3 class="subsection-title">徽章 (Badges)</h3>
+      <div class="badge-row">
+        <span class="badge-demo badge-demo--gold">金色标记</span>
+        <span class="badge-demo badge-demo--red">朱砂警示</span>
+        <span class="badge-demo badge-demo--green">铜绿通过</span>
       </div>
     </section>
   </div>
@@ -333,5 +425,224 @@ onMounted(() => {
   font-family: var(--font-body);
   color: var(--text-primary);
   line-height: var(--leading-tight);
+}
+
+/* === Spacing Scale === */
+.spacing-scale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.spacing-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.spacing-token {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  min-width: 90px;
+}
+
+.spacing-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  min-width: 36px;
+}
+
+.spacing-bar {
+  height: 12px;
+  background: var(--accent-gold);
+  border-radius: var(--radius-sm);
+  opacity: 0.6;
+  min-width: 0;
+}
+
+/* === Shadows === */
+.shadow-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.shadow-card {
+  width: 120px;
+  height: 80px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  text-align: center;
+}
+
+.shadow-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-secondary);
+}
+
+/* === Components === */
+.component-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Card Demo */
+.card-demo {
+  background: var(--bg-surface);
+  border: var(--border-thin) solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-normal) var(--ease-enter),
+              box-shadow var(--duration-normal) var(--ease-enter),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.card-demo h4 {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-1);
+}
+
+.card-demo p {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.card-demo--accent {
+  border-color: var(--accent-gold);
+  background:
+    var(--card-lacquer-gradient),
+    var(--bg-surface);
+}
+
+.card-demo--clickable {
+  cursor: pointer;
+  user-select: none;
+  min-height: 44px;
+}
+
+.card-demo--clickable.is-selected {
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-glow-gold);
+  transform: scale(1.02);
+}
+
+/* Button Demo */
+.btn-matrix {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.btn-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.btn-col-label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-1);
+}
+
+.btn-demo {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  min-height: 44px;
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out),
+              background-color var(--duration-fast) var(--ease-out);
+}
+
+.btn-demo:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-demo:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-demo--primary {
+  background: var(--accent-gold-dark);
+  color: var(--text-inverse);
+}
+
+.btn-demo--primary:active:not(:disabled) {
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.btn-demo--ghost {
+  background: transparent;
+  color: var(--accent-gold);
+  border: var(--border-thin) solid var(--accent-gold);
+}
+
+.btn-demo--ghost:active:not(:disabled) {
+  background: var(--accent-gold-bg);
+}
+
+/* Badge Demo */
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.badge-demo {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+.badge-demo--gold {
+  color: var(--accent-gold);
+  background: var(--accent-gold-bg);
+}
+
+.badge-demo--red {
+  color: var(--accent-red);
+  background: var(--accent-red-bg);
+}
+
+.badge-demo--green {
+  color: var(--accent-green);
+  background: var(--accent-green-bg);
+}
+
+/* reduced-motion 退化 */
+@media (prefers-reduced-motion: reduce) {
+  .card-demo,
+  .card-demo--clickable,
+  .btn-demo {
+    transition: none;
+  }
 }
 </style>
