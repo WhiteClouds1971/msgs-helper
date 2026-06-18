@@ -73,6 +73,20 @@ const shadowTokens = [
 // Card select state for component demo
 const cardSelected = ref(false);
 
+// Animation trigger state
+const animCardSelected = ref(false);
+const lineRevealed = ref(false);
+
+function triggerLineDraw() {
+  lineRevealed.value = false;
+  // 用 double rAF 确保 class 移除后再添加，触发动画重播
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      lineRevealed.value = true;
+    });
+  });
+}
+
 onMounted(() => {
   const saved = localStorage.getItem('theme-preference') || 'system';
   setTheme(saved);
@@ -246,6 +260,65 @@ onMounted(() => {
         <span class="badge-demo badge-demo--red">朱砂警示</span>
         <span class="badge-demo badge-demo--green">铜绿通过</span>
       </div>
+    </section>
+
+    <!-- ===== Signature Effects ===== -->
+    <section class="demo-section">
+      <h2 class="section-title">✨ 签名效果 (Signature Effects)</h2>
+
+      <!-- 宣纸纹理 -->
+      <h3 class="subsection-title">宣纸纹理 .texture-rice-paper</h3>
+      <div class="card-demo texture-rice-paper effect-card--tall">
+        <h4>宣纸肌理面板</h4>
+        <p>SVG 噪点叠加，模拟纸纤维</p>
+      </div>
+
+      <!-- 墨洇边框 -->
+      <h3 class="subsection-title">墨洇边框 .border-ink</h3>
+      <div class="card-demo border-ink">
+        <h4>手札笔记</h4>
+        <p>墨色渗透毛边投影</p>
+      </div>
+
+      <!-- 印章 -->
+      <h3 class="subsection-title">印章 .seal-stamp</h3>
+      <div class="effect-row">
+        <span class="seal-stamp">主公</span>
+        <span class="seal-stamp seal-stamp--gold">天子</span>
+      </div>
+
+      <!-- 编绳节点 -->
+      <h3 class="subsection-title">编绳节点 .decorative-line--knotted</h3>
+      <hr class="decorative-line decorative-line--knotted" />
+
+      <!-- 水墨晕染 -->
+      <h3 class="subsection-title">水墨晕染 .ink-wash-hover</h3>
+      <div class="card-demo ink-wash-hover effect-card--tall">
+        <h4>悬浮此卡片</h4>
+        <p>金色辉光从中心扩散</p>
+      </div>
+    </section>
+
+    <!-- ===== Animation Triggers ===== -->
+    <section class="demo-section">
+      <h2 class="section-title">🎬 动效触发 (Animations)</h2>
+
+      <!-- 卡牌选中 -->
+      <h3 class="subsection-title">卡牌选中 (Card Selection) — 200ms</h3>
+      <div :class="['card-demo', 'card-demo--accent', 'anim-card', { 'is-selected': animCardSelected }]">
+        <h4>动效演示卡牌</h4>
+        <p>{{ animCardSelected ? '✨ 选中态 — scale(1.02) + 金色辉光' : '未选中 — 点击按钮切换' }}</p>
+      </div>
+      <button class="anim-trigger-btn" @click="animCardSelected = !animCardSelected">
+        {{ animCardSelected ? '取消选中' : '选中卡牌' }}
+      </button>
+
+      <!-- 装饰线入场 -->
+      <h3 class="subsection-title">装饰线入场 (Line Draw) — 500ms</h3>
+      <hr :class="['decorative-line', 'anim-line', { 'is-revealed': lineRevealed }]" />
+      <button class="anim-trigger-btn" @click="triggerLineDraw">
+        {{ lineRevealed ? '重置并重播' : '绘制装饰线' }}
+      </button>
     </section>
   </div>
 </template>
@@ -643,6 +716,80 @@ onMounted(() => {
   .card-demo--clickable,
   .btn-demo {
     transition: none;
+  }
+}
+
+/* === Signature Effects === */
+.effect-card--tall {
+  min-height: 80px;
+}
+
+.effect-row {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+/* === Animation Triggers === */
+.anim-card {
+  margin-bottom: var(--space-3);
+}
+
+.anim-trigger-btn {
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent-gold-dark);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  min-height: 44px;
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.anim-trigger-btn:active {
+  transform: scale(0.97);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+/* Decorative Line Animation */
+.decorative-line {
+  height: var(--border-medium);
+  background: var(--decorative-line);
+  border: none;
+  margin: var(--space-6) 0;
+  transform-origin: center;
+}
+
+.anim-line {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.anim-line.is-revealed {
+  animation: line-draw 500ms cubic-bezier(0.25, 0.1, 0.1, 1) forwards;
+}
+
+@keyframes line-draw {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* reduced-motion 退化 */
+@media (prefers-reduced-motion: reduce) {
+  .anim-line.is-revealed {
+    animation: none;
+    transform: scaleX(1);
+    opacity: 1;
   }
 }
 </style>
