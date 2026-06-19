@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import path from 'path';
 
 import { defineConfig } from 'vite';
@@ -15,6 +16,11 @@ export default defineConfig(() => {
     server: {
       port: 9456,
       host: '0.0.0.0',
+    },
+    test: {
+      environment: 'happy-dom',
+      globals: true,
+      css: true,
     },
   };
 });
