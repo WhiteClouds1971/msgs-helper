@@ -27,7 +27,6 @@ const imageUrl = computed(() => {
   const src = props.menu.image.src
   if (!src) return ''
   const filename = src.replace(/\\/g, '/').split('/').pop()
-  // Match by filename across all glob-imported images
   for (const [path, url] of Object.entries(imageModules)) {
     if (path.endsWith('/' + filename) || path.endsWith(filename)) {
       return url
@@ -108,8 +107,10 @@ function onImageError() {
   position: absolute;
   top: 0;
   left: 0;
-  width: calc(100vw - var(--space-8) * 2);
-  aspect-ratio: 3 / 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-surface);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -121,7 +122,6 @@ function onImageError() {
 
   &--front {
     box-shadow: var(--shadow-glow-gold), var(--shadow-lg);
-    /* 性能提示：提示浏览器该卡片即将参与动画（滑动/旋转） */
     will-change: transform;
   }
 
@@ -146,7 +146,8 @@ function onImageError() {
 .home-card__image {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -186,6 +187,7 @@ function onImageError() {
 
 /* --- 诏书标签 --- */
 .home-card__label {
+  flex-shrink: 0;
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 

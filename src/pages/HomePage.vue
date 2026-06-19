@@ -135,12 +135,9 @@ function onCardClick(menu) {
 
 .home-page {
   position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100dvh;
   background: var(--bg);
   overflow: hidden;
-  display: flex;
-  align-items: center;
 
   /* 墨洇效果：径向渐变 + 模糊 + 暖黑遮罩 */
   &::before {
@@ -162,16 +159,12 @@ function onCardClick(menu) {
    卡片堆叠区
    ================================================================ */
 .card-stack {
-  position: relative;
+  position: absolute;
+  inset: var(--space-8);
   z-index: 1;
-  isolation: isolate;
-  width: 100%;
-  padding: var(--space-8) var(--space-8);
+  overflow: hidden;
   /* 保留纵向触摸滚动，横向手势由 JS 接管 */
   touch-action: pan-y;
-  /* 性能提示：提示浏览器即将动画，隔离重排 */
-  will-change: transform;
-  contain: layout style;
 }
 
 /* ================================================================
