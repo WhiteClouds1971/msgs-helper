@@ -529,5 +529,5 @@
   --sword-blade-length: 180px;    /* 剑身长度 */
   --sword-blade-height: 28px;     /* 剑身高度 */
   --card-offset-x: 70px;          /* 卡片水平偏移量 */
-  --card-visible-count: 6;        /* 可见卡片数量 */
+  --card-visible-count: 3;        /* 可见卡片数量 */
 }

@@ -8,7 +8,10 @@ defineEmits(['select'])
 </script>
 
 <template>
-  <button class="fan-menu-item" @click="$emit('select')">
+  <button
+    class="fan-menu-item"
+    @click="$emit('select')"
+  >
     <span class="fan-menu-item__icon">{{ icon }}</span>
     <span class="fan-menu-item__label">{{ label }}</span>
   </button>

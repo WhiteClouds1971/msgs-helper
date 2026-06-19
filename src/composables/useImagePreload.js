@@ -1,6 +1,6 @@
 /**
  * 图片预加载 composable
- * 渲染可见 6 张 + 后台预加载后续 8 张
+ * 渲染可见 3 张 + 后台预加载后续 8 张
  */
 import { reactive } from 'vue'
 

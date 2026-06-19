@@ -74,10 +74,13 @@ function onImageError() {
         }"
         @load="onImageLoad"
         @error="onImageError"
-      />
+      >
 
       <!-- 加载失败提示 -->
-      <div v-if="imageState === 'error'" class="home-card__error-overlay">
+      <div
+        v-if="imageState === 'error'"
+        class="home-card__error-overlay"
+      >
         <span>图片加载失败</span>
       </div>
     </div>
@@ -97,7 +100,7 @@ function onImageError() {
       <div
         class="decorative-line--knotted"
         :style="{ '--line-color': menu.themeColor }"
-      ></div>
+      />
     </div>
   </div>
 </template>

@@ -119,52 +119,108 @@ onMounted(() => {
 
     <!-- ===== Color Palette ===== -->
     <section class="demo-section">
-      <h2 class="section-title">🎨 色彩 (Colors)</h2>
+      <h2 class="section-title">
+        🎨 色彩 (Colors)
+      </h2>
 
       <!-- 背景色 -->
-      <h3 class="subsection-title">背景 (Background)</h3>
+      <h3 class="subsection-title">
+        背景 (Background)
+      </h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in bgTokens" :key="token" :style="{ background: `var(${token})` }">
-          <span class="swatch-label" :class="{ 'swatch-label--dark': isDarkBg(token) }">{{ token }}</span>
+        <div
+          v-for="token in bgTokens"
+          :key="token"
+          class="swatch"
+          :style="{ background: `var(${token})` }"
+        >
+          <span
+            class="swatch-label"
+            :class="{ 'swatch-label--dark': isDarkBg(token) }"
+          >{{ token }}</span>
         </div>
       </div>
 
       <!-- 文字色 -->
-      <h3 class="subsection-title">文字 (Text)</h3>
+      <h3 class="subsection-title">
+        文字 (Text)
+      </h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in textTokens" :key="token" :style="{ background: `var(${token})` }">
+        <div
+          v-for="token in textTokens"
+          :key="token"
+          class="swatch"
+          :style="{ background: `var(${token})` }"
+        >
           <span class="swatch-label swatch-label--dark">{{ token }}</span>
         </div>
       </div>
 
       <!-- 金色系 -->
-      <h3 class="subsection-title">金色 (Gold)</h3>
+      <h3 class="subsection-title">
+        金色 (Gold)
+      </h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in goldTokens" :key="token" :style="{ background: `var(${token})` }">
-          <span class="swatch-label" :class="{ 'swatch-label--dark': isGoldDark(token) }">{{ token }}</span>
+        <div
+          v-for="token in goldTokens"
+          :key="token"
+          class="swatch"
+          :style="{ background: `var(${token})` }"
+        >
+          <span
+            class="swatch-label"
+            :class="{ 'swatch-label--dark': isGoldDark(token) }"
+          >{{ token }}</span>
         </div>
       </div>
 
       <!-- 红色系 -->
-      <h3 class="subsection-title">朱砂 (Vermillion)</h3>
+      <h3 class="subsection-title">
+        朱砂 (Vermillion)
+      </h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in redTokens" :key="token" :style="{ background: `var(${token})` }">
-          <span class="swatch-label" :class="{ 'swatch-label--dark': isRedDark(token) }">{{ token }}</span>
+        <div
+          v-for="token in redTokens"
+          :key="token"
+          class="swatch"
+          :style="{ background: `var(${token})` }"
+        >
+          <span
+            class="swatch-label"
+            :class="{ 'swatch-label--dark': isRedDark(token) }"
+          >{{ token }}</span>
         </div>
       </div>
 
       <!-- 绿色系 -->
-      <h3 class="subsection-title">铜绿 (Patina)</h3>
+      <h3 class="subsection-title">
+        铜绿 (Patina)
+      </h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in greenTokens" :key="token" :style="{ background: `var(${token})` }">
-          <span class="swatch-label" :class="{ 'swatch-label--dark': isGreenDark(token) }">{{ token }}</span>
+        <div
+          v-for="token in greenTokens"
+          :key="token"
+          class="swatch"
+          :style="{ background: `var(${token})` }"
+        >
+          <span
+            class="swatch-label"
+            :class="{ 'swatch-label--dark': isGreenDark(token) }"
+          >{{ token }}</span>
         </div>
       </div>
 
       <!-- 边框色 -->
-      <h3 class="subsection-title">边框 (Border)</h3>
+      <h3 class="subsection-title">
+        边框 (Border)
+      </h3>
       <div class="swatch-group">
-        <div class="swatch" v-for="token in borderTokens" :key="token" :style="{ background: `var(${token})` }">
+        <div
+          v-for="token in borderTokens"
+          :key="token"
+          class="swatch"
+          :style="{ background: `var(${token})` }"
+        >
           <span class="swatch-label swatch-label--dark">{{ token }}</span>
         </div>
       </div>
@@ -172,46 +228,81 @@ onMounted(() => {
 
     <!-- ===== Typography ===== -->
     <section class="demo-section">
-      <h2 class="section-title">🔤 字体 (Typography)</h2>
+      <h2 class="section-title">
+        🔤 字体 (Typography)
+      </h2>
 
       <!-- 字体族对比 -->
-      <h3 class="subsection-title">书法体 vs 正文字体</h3>
+      <h3 class="subsection-title">
+        书法体 vs 正文字体
+      </h3>
       <div class="type-compare">
-        <p class="type-display">天地玄黄 宇宙洪荒</p>
+        <p class="type-display">
+          天地玄黄 宇宙洪荒
+        </p>
         <span class="type-label">var(--font-display) · Ma Shan Zheng</span>
-        <p class="type-body">天地玄黄 宇宙洪荒</p>
+        <p class="type-body">
+          天地玄黄 宇宙洪荒
+        </p>
         <span class="type-label">var(--font-body) · PingFang SC</span>
       </div>
 
       <!-- 字号阶梯 -->
-      <h3 class="subsection-title">字号阶梯 (Type Scale)</h3>
+      <h3 class="subsection-title">
+        字号阶梯 (Type Scale)
+      </h3>
       <div class="type-scale">
-        <div class="type-row" v-for="item in typeScale" :key="item.token">
+        <div
+          v-for="item in typeScale"
+          :key="item.token"
+          class="type-row"
+        >
           <span class="type-token">{{ item.token }}</span>
           <span class="type-size">{{ item.size }}</span>
-          <span :style="{ fontSize: `var(${item.token})` }" class="type-sample">面杀辅助工具</span>
+          <span
+            :style="{ fontSize: `var(${item.token})` }"
+            class="type-sample"
+          >面杀辅助工具</span>
         </div>
       </div>
     </section>
 
     <!-- ===== Spacing & Shadows ===== -->
     <section class="demo-section">
-      <h2 class="section-title">📐 间距 & 阴影 (Spacing & Shadows)</h2>
+      <h2 class="section-title">
+        📐 间距 & 阴影 (Spacing & Shadows)
+      </h2>
 
       <!-- 间距 Scale -->
-      <h3 class="subsection-title">间距阶梯 (Spacing Scale)</h3>
+      <h3 class="subsection-title">
+        间距阶梯 (Spacing Scale)
+      </h3>
       <div class="spacing-scale">
-        <div class="spacing-row" v-for="item in spacingScale" :key="item.token">
+        <div
+          v-for="item in spacingScale"
+          :key="item.token"
+          class="spacing-row"
+        >
           <span class="spacing-token">{{ item.token }}</span>
           <span class="spacing-value">{{ item.value }}</span>
-          <div class="spacing-bar" :style="{ width: `var(${item.token})` }"></div>
+          <div
+            class="spacing-bar"
+            :style="{ width: `var(${item.token})` }"
+          />
         </div>
       </div>
 
       <!-- 阴影层级 -->
-      <h3 class="subsection-title">阴影层级 (Shadows)</h3>
+      <h3 class="subsection-title">
+        阴影层级 (Shadows)
+      </h3>
       <div class="shadow-grid">
-        <div class="shadow-card" v-for="item in shadowTokens" :key="item.token" :style="{ boxShadow: `var(${item.token})` }">
+        <div
+          v-for="item in shadowTokens"
+          :key="item.token"
+          class="shadow-card"
+          :style="{ boxShadow: `var(${item.token})` }"
+        >
           <span class="shadow-label">{{ item.token }}</span>
         </div>
       </div>
@@ -219,10 +310,14 @@ onMounted(() => {
 
     <!-- ===== Components ===== -->
     <section class="demo-section">
-      <h2 class="section-title">🧩 组件 (Components)</h2>
+      <h2 class="section-title">
+        🧩 组件 (Components)
+      </h2>
 
       <!-- 卡片 -->
-      <h3 class="subsection-title">卡片 (Cards)</h3>
+      <h3 class="subsection-title">
+        卡片 (Cards)
+      </h3>
       <div class="component-row">
         <div class="card-demo">
           <h4>默认卡片</h4>
@@ -232,29 +327,50 @@ onMounted(() => {
           <h4>金色描边</h4>
           <p>漆器光感渐变底</p>
         </div>
-        <div :class="['card-demo', 'card-demo--clickable', { 'is-selected': cardSelected }]" @click="cardSelected = !cardSelected">
+        <div
+          :class="['card-demo', 'card-demo--clickable', { 'is-selected': cardSelected }]"
+          @click="cardSelected = !cardSelected"
+        >
           <h4>可选中（点击切换）</h4>
           <p>{{ cardSelected ? '✨ 已选中' : '点击选中' }}</p>
         </div>
       </div>
 
       <!-- 按钮 -->
-      <h3 class="subsection-title">按钮 (Buttons)</h3>
+      <h3 class="subsection-title">
+        按钮 (Buttons)
+      </h3>
       <div class="btn-matrix">
         <div class="btn-col">
           <span class="btn-col-label">Primary</span>
-          <button class="btn-demo btn-demo--primary">默认</button>
-          <button class="btn-demo btn-demo--primary" disabled>禁用</button>
+          <button class="btn-demo btn-demo--primary">
+            默认
+          </button>
+          <button
+            class="btn-demo btn-demo--primary"
+            disabled
+          >
+            禁用
+          </button>
         </div>
         <div class="btn-col">
           <span class="btn-col-label">Ghost</span>
-          <button class="btn-demo btn-demo--ghost">默认</button>
-          <button class="btn-demo btn-demo--ghost" disabled>禁用</button>
+          <button class="btn-demo btn-demo--ghost">
+            默认
+          </button>
+          <button
+            class="btn-demo btn-demo--ghost"
+            disabled
+          >
+            禁用
+          </button>
         </div>
       </div>
 
       <!-- 徽章 -->
-      <h3 class="subsection-title">徽章 (Badges)</h3>
+      <h3 class="subsection-title">
+        徽章 (Badges)
+      </h3>
       <div class="badge-row">
         <span class="badge-demo badge-demo--gold">金色标记</span>
         <span class="badge-demo badge-demo--red">朱砂警示</span>
@@ -264,35 +380,47 @@ onMounted(() => {
 
     <!-- ===== Signature Effects ===== -->
     <section class="demo-section">
-      <h2 class="section-title">✨ 签名效果 (Signature Effects)</h2>
+      <h2 class="section-title">
+        ✨ 签名效果 (Signature Effects)
+      </h2>
 
       <!-- 宣纸纹理 -->
-      <h3 class="subsection-title">宣纸纹理 .texture-rice-paper</h3>
+      <h3 class="subsection-title">
+        宣纸纹理 .texture-rice-paper
+      </h3>
       <div class="card-demo texture-rice-paper effect-card--tall">
         <h4>宣纸肌理面板</h4>
         <p>SVG 噪点叠加，模拟纸纤维</p>
       </div>
 
       <!-- 墨洇边框 -->
-      <h3 class="subsection-title">墨洇边框 .border-ink</h3>
+      <h3 class="subsection-title">
+        墨洇边框 .border-ink
+      </h3>
       <div class="card-demo border-ink">
         <h4>手札笔记</h4>
         <p>墨色渗透毛边投影</p>
       </div>
 
       <!-- 印章 -->
-      <h3 class="subsection-title">印章 .seal-stamp</h3>
+      <h3 class="subsection-title">
+        印章 .seal-stamp
+      </h3>
       <div class="effect-row">
         <span class="seal-stamp">主公</span>
         <span class="seal-stamp seal-stamp--gold">天子</span>
       </div>
 
       <!-- 编绳节点 -->
-      <h3 class="subsection-title">编绳节点 .decorative-line--knotted</h3>
-      <hr class="decorative-line decorative-line--knotted" />
+      <h3 class="subsection-title">
+        编绳节点 .decorative-line--knotted
+      </h3>
+      <hr class="decorative-line decorative-line--knotted">
 
       <!-- 水墨晕染 -->
-      <h3 class="subsection-title">水墨晕染 .ink-wash-hover</h3>
+      <h3 class="subsection-title">
+        水墨晕染 .ink-wash-hover
+      </h3>
       <div class="card-demo ink-wash-hover effect-card--tall">
         <h4>悬浮此卡片</h4>
         <p>金色辉光从中心扩散</p>
@@ -301,22 +429,34 @@ onMounted(() => {
 
     <!-- ===== Animation Triggers ===== -->
     <section class="demo-section">
-      <h2 class="section-title">🎬 动效触发 (Animations)</h2>
+      <h2 class="section-title">
+        🎬 动效触发 (Animations)
+      </h2>
 
       <!-- 卡牌选中 -->
-      <h3 class="subsection-title">卡牌选中 (Card Selection) — 200ms</h3>
+      <h3 class="subsection-title">
+        卡牌选中 (Card Selection) — 200ms
+      </h3>
       <div :class="['card-demo', 'card-demo--accent', 'anim-card', { 'is-selected': animCardSelected }]">
         <h4>动效演示卡牌</h4>
         <p>{{ animCardSelected ? '✨ 选中态 — scale(1.02) + 金色辉光' : '未选中 — 点击按钮切换' }}</p>
       </div>
-      <button class="anim-trigger-btn" @click="animCardSelected = !animCardSelected">
+      <button
+        class="anim-trigger-btn"
+        @click="animCardSelected = !animCardSelected"
+      >
         {{ animCardSelected ? '取消选中' : '选中卡牌' }}
       </button>
 
       <!-- 装饰线入场 -->
-      <h3 class="subsection-title">装饰线入场 (Line Draw) — 500ms</h3>
-      <hr :class="['decorative-line', 'anim-line', { 'is-revealed': lineRevealed }]" />
-      <button class="anim-trigger-btn" @click="triggerLineDraw">
+      <h3 class="subsection-title">
+        装饰线入场 (Line Draw) — 500ms
+      </h3>
+      <hr :class="['decorative-line', 'anim-line', { 'is-revealed': lineRevealed }]">
+      <button
+        class="anim-trigger-btn"
+        @click="triggerLineDraw"
+      >
         {{ lineRevealed ? '重置并重播' : '绘制装饰线' }}
       </button>
     </section>

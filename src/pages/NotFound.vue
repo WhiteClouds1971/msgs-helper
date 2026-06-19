@@ -6,11 +6,18 @@
   <div class="not-found">
     <span class="not-found__seal seal-stamp">未寻得</span>
 
-    <h1 class="not-found__title">此间无物</h1>
+    <h1 class="not-found__title">
+      此间无物
+    </h1>
 
-    <p class="not-found__verse">曲径通幽处，禅房花木深</p>
+    <p class="not-found__verse">
+      曲径通幽处，禅房花木深
+    </p>
 
-    <router-link to="/" class="not-found__cta">
+    <router-link
+      to="/"
+      class="not-found__cta"
+    >
       返回主页
     </router-link>
   </div>

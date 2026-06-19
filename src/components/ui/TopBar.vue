@@ -11,7 +11,11 @@ const route = useRoute()
 
 <template>
   <header class="top-bar">
-    <router-link to="/" class="top-bar__back" aria-label="返回首页">
+    <router-link
+      to="/"
+      class="top-bar__back"
+      aria-label="返回首页"
+    >
       ←
     </router-link>
     <span class="top-bar__title">{{ title || route.meta?.title || '' }}</span>

@@ -34,6 +34,13 @@ body,
   margin: 0 auto;
 }
 
+/* 横屏：取消 max-width 限制，让卡片填满视口 */
+@media (orientation: landscape) {
+  #app {
+    max-width: none;
+  }
+}
+
 /* 链接重置 */
 a {
   color: inherit;

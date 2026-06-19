@@ -46,12 +46,22 @@ const icons = [
   <div class="preview">
     <h2>AI 手绘国风图标 — 预览</h2>
 
-    <div v-for="icon in icons" :key="icon.name" class="icon-card">
+    <div
+      v-for="icon in icons"
+      :key="icon.name"
+      class="icon-card"
+    >
       <h3>{{ icon.name }}</h3>
-      <p class="desc">{{ icon.desc }}</p>
+      <p class="desc">
+        {{ icon.desc }}
+      </p>
 
       <div class="icon-grid">
-        <div v-for="color in colors" :key="color.label" class="color-row">
+        <div
+          v-for="color in colors"
+          :key="color.label"
+          class="color-row"
+        >
           <span class="color-label">{{ color.label }}</span>
           <span
             v-for="size in sizes"

@@ -27,7 +27,7 @@ onMounted(() => {
 const visibleCards = computed(() => {
   const total = menuStore.orderedMenus.length
   const cards = []
-  for (let i = 0; i < Math.min(6, total); i++) {
+  for (let i = 0; i < Math.min(3, total); i++) {
     const idx = (currentIndex.value + i) % total
     cards.push({
       menu: menuStore.orderedMenus[idx],
@@ -47,10 +47,20 @@ const canSwipeRight = computed(() => {
   return currentIndex.value > 0
 })
 
+/** 卡片偏移比例（占自身宽度的百分比）
+ *  card-stack 左右 inset = 1/10 vw → 卡片宽 80vw，右侧 margin 10vw
+ *  偏移 12.5% 正好填满右侧 margin，不留多余空白
+ *  第1张 0%     — 完整展示
+ *  第2张 8.75%  — 右侧留白区内占 7/10
+ *  第3张 12.5%  — 占满剩余 3/10，右边缘对齐视口 */
+const CARD_OFFSET_PCT = [0, 8.75, 12.5]
+
 function getCardStyle(offset) {
   return {
-    transform: `translateX(calc(var(--card-offset-x) * ${offset}))`,
-    zIndex: 6 - offset,
+    transform: offset < CARD_OFFSET_PCT.length
+      ? `translateX(${CARD_OFFSET_PCT[offset]}%)`
+      : 'translateX(0)',
+    zIndex: 3 - offset,
   }
 }
 
@@ -118,10 +128,16 @@ function onCardClick(menu) {
       />
 
       <!-- 边界提示 -->
-      <div v-if="!canSwipeLeft && visibleCards.length > 0" class="stack-hint stack-hint--right">
+      <div
+        v-if="!canSwipeLeft && visibleCards.length > 0"
+        class="stack-hint stack-hint--right"
+      >
         已是最后一页
       </div>
-      <div v-if="!canSwipeRight && currentIndex > 0" class="stack-hint stack-hint--left">
+      <div
+        v-if="!canSwipeRight && currentIndex > 0"
+        class="stack-hint stack-hint--left"
+      >
         已是第一页
       </div>
     </div>
@@ -160,9 +176,8 @@ function onCardClick(menu) {
    ================================================================ */
 .card-stack {
   position: absolute;
-  inset: var(--space-8);
+  inset: calc(100dvh / 10) calc(100vw / 10);
   z-index: 1;
-  overflow: hidden;
   border-radius: var(--radius-lg);
   /* 保留纵向触摸滚动，横向手势由 JS 接管 */
   touch-action: pan-y;
