@@ -16,14 +16,24 @@ const imageState = ref('loading')
 /** 首屏前 2 张卡片使用 eager，其余延迟加载 */
 const imgLoading = computed(() => (props.offset < 2 ? undefined : 'lazy'))
 
+// Eagerly import all menu images so Vite can hash them in production
+const imageModules = import.meta.glob('@/assets/images/menus/*.{gif,png,jpg,jpeg,webp}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+
 const imageUrl = computed(() => {
-  try {
-    const normalized = props.menu.image.src.replace(/\\/g, '/')
-    const filename = normalized.split('/').pop()
-    return new URL(`../assets/images/menus/${filename}`, import.meta.url).href
-  } catch {
-    return ''
+  const src = props.menu.image.src
+  if (!src) return ''
+  const filename = src.replace(/\\/g, '/').split('/').pop()
+  // Match by filename across all glob-imported images
+  for (const [path, url] of Object.entries(imageModules)) {
+    if (path.endsWith('/' + filename) || path.endsWith(filename)) {
+      return url
+    }
   }
+  return ''
 })
 
 function onImageLoad() {
