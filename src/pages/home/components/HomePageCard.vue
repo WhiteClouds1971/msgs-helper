@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
+import SplashScreen from '@/components/ui/SplashScreen.vue'
 
 const props = defineProps({
   menu: { type: Object, required: true },
@@ -9,7 +10,7 @@ const props = defineProps({
   style: { type: Object, default: () => ({}) },
 })
 
-defineEmits(['click'])
+const emit = defineEmits(['click', 'image-resolved'])
 
 const imageState = ref('loading')
 
@@ -37,10 +38,12 @@ const imageUrl = computed(() => {
 
 function onImageLoad() {
   imageState.value = 'loaded'
+  emit('image-resolved')
 }
 
 function onImageError() {
   imageState.value = 'error'
+  emit('image-resolved')
 }
 </script>
 
@@ -53,9 +56,17 @@ function onImageError() {
   >
     <!-- 图片区域 -->
     <div class="home-card__image">
-      <!-- 占位色块（始终在底层） -->
-      <div class="home-card__placeholder">
-        <span class="home-card__placeholder-text">{{ menu.name }}</span>
+      <!-- 加载态：占位背景色跟随卡片主题色 -->
+      <div
+        v-show="imageState !== 'loaded'"
+        class="home-card__placeholder"
+        :style="{ backgroundColor: menu.themeColor + '18' }"
+      >
+        <SplashScreen
+          :size="48"
+          :show-line="true"
+          subtitle="受命于天 既寿永昌"
+        />
       </div>
 
       <!-- 图片（加载成功后覆盖在占位色块上层） -->
@@ -182,12 +193,7 @@ function onImageError() {
   justify-content: center;
 }
 
-.home-card__placeholder-text {
-  color: var(--text-primary);
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  opacity: 0.6;
-}
+/* SplashScreen 自带所有视觉，placeholder 仅做居中容器 */
 
 .home-card__img {
   position: absolute;

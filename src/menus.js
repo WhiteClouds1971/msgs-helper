@@ -39,7 +39,7 @@ const menus = [
     orientation: 'vertical',
   },
   {
-    name: '高殿置酒',
+    name: '高殿置酒 SP曹操',
     route: '/tool/gao-dian-zhi-jiu',
     image: {
       src: 'src/assets/images/menus/高殿置酒-SP曹操-静态.webp',

@@ -1,13 +1,19 @@
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMenuOrderStore } from '@/stores/menuOrder'
+import { useAppShell } from '@/composables/useAppShell'
 import HomePageCard from '@/pages/home/components/HomePageCard.vue'
+import InkWashBackground from '@/components/InkWashBackground/Index.vue'
 
 const router = useRouter()
 const menuStore = useMenuOrderStore()
+const { markReady } = useAppShell()
 
 const rotatingCardName = ref(null)
+
+/* ---- 触摸坐标（透传给动态背景） ---- */
+const touchPos = reactive({ x: 0, y: 0, active: false })
 
 /* ================================================================
    卡片扇形展开参数
@@ -115,19 +121,25 @@ function clampIdx(v) { return Math.max(0, Math.min(totalCards.value - 1, v)) }
 
 function onTouchStart(e) {
   const x = e.touches[0].clientX
+  const y = e.touches[0].clientY
   gateX = x
   touchStartX = x
-  touchStartY = e.touches[0].clientY
+  touchStartY = y
   lastX = x
   lastT = performance.now()
   touchStartTime = lastT
   velocity = 0
   hasSwitched = false
+
+  touchPos.x = x
+  touchPos.y = y
+  touchPos.active = true
 }
 
 function onTouchMove(e) {
   const now = performance.now()
   const x = e.touches[0].clientX
+  const y = e.touches[0].clientY
   const dt = now - lastT
 
   if (dt > 0) {
@@ -136,6 +148,9 @@ function onTouchMove(e) {
   }
   lastX = x
   lastT = now
+
+  touchPos.x = x
+  touchPos.y = y
 
   const isFlick = (now - touchStartTime) < FLICK_MS
   const step = Math.max(MIN_STEP, BASE_STEP - velocity * 35)
@@ -171,6 +186,8 @@ function onTouchMove(e) {
 }
 
 function onTouchEnd(e) {
+  touchPos.active = false
+
   const dx = Math.abs(e.changedTouches[0].clientX - touchStartX)
   const dy = Math.abs(e.changedTouches[0].clientY - touchStartY)
   if (dx < 10 && dy < 10) {
@@ -196,10 +213,34 @@ function onCardClick(menu) {
     }, 250)
   }
 }
+
+/* ---- 首屏过渡：检测可见卡片全部就绪 → markReady ---- */
+const splashResolved = ref(new Set())
+let splashDone = false
+
+function onCardImageResolved(menuName) {
+  if (splashDone) return
+  splashResolved.value.add(menuName)
+
+  // 用 nextTick 等当前帧可见卡片列表稳定
+  nextTick(() => {
+    if (splashDone) return
+    const visibleNames = visibleCards.value.map((c) => c.menu.name)
+    if (visibleNames.length === 0) return
+
+    const allResolved = visibleNames.every((n) => splashResolved.value.has(n))
+    if (allResolved) {
+      splashDone = true
+      markReady()
+    }
+  })
+}
 </script>
 
 <template>
   <div class="home-page texture-rice-paper">
+    <InkWashBackground :touch-pos="touchPos" />
+
     <div
       class="card-stack"
       :class="{ 'card-stack--resetting': isResetting }"
@@ -213,6 +254,7 @@ function onCardClick(menu) {
         :is-rotating="card.menu.name === rotatingCardName"
         :style="getCardStyle(card.relPos, card.isFront)"
         @click="onCardClick(card.menu)"
+        @image-resolved="onCardImageResolved(card.menu.name)"
       />
     </div>
 
@@ -276,7 +318,7 @@ function onCardClick(menu) {
 .card-stack {
   position: absolute;
   inset: calc(100dvh / 10) calc(100vw / 10);
-  z-index: 1;
+  z-index: 2; /* 高于动态背景 canvas (z-index: 1) */
   border-radius: var(--radius-lg);
   touch-action: pan-y;
 }
@@ -299,7 +341,7 @@ function onCardClick(menu) {
   align-items: center;
   justify-content: center;
   font-size: var(--text-sm);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   z-index: 10;
   pointer-events: none;
   user-select: none;

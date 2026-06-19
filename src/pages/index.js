@@ -14,19 +14,6 @@ export default [
   {
     name: 'Demo',
     path: '/demo',
-    children: [
-      {
-        name: 'Them',
-        path: '/them',
-        component: () => import('@/pages/demo/Demo.vue'),
-        meta: { title: '主题展示' },
-      },
-      {
-        name: 'Icon',
-        path: '/icon',
-        component: () => import('@/pages/demo/IconPreview.vue'),
-        meta: { title: '图标预览' },
-      },
-    ],
+    children: [],
   },
 ];

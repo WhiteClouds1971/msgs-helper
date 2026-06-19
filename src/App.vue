@@ -1,11 +1,34 @@
 <script setup>
+import SplashScreen from '@/components/ui/SplashScreen.vue'
+import { useAppShell } from '@/composables/useAppShell'
+
 // 默认浅色主题
 if (!document.documentElement.dataset.theme) {
   document.documentElement.dataset.theme = 'light'
 }
+
+const { isReady } = useAppShell()
 </script>
 
 <template>
+  <!-- ================================================================
+      首屏加载：全屏 SplashScreen 覆盖，白底无干扰
+      ================================================================ -->
+  <Transition name="splash-fade">
+    <div
+      v-if="!isReady"
+      class="app-splash"
+    >
+      <SplashScreen
+        subtitle="受命于天 既寿永昌"
+        :show-line="true"
+      />
+    </div>
+  </Transition>
+
+  <!-- ================================================================
+      应用主体
+      ================================================================ -->
   <router-view v-slot="{ Component, route }">
     <Transition
       name="page-fade"
@@ -20,10 +43,33 @@ if (!document.documentElement.dataset.theme) {
 </template>
 
 <style>
-/* 页面过渡 */
+/* ================================================================
+   首屏 Splash → 应用 过渡
+   ================================================================ */
+.app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.splash-fade-leave-active {
+  transition: opacity var(--duration-slow) var(--ease-ink);
+}
+.splash-fade-leave-to {
+  opacity: 0;
+}
+
+/* ================================================================
+   页面过渡
+   ================================================================ */
 .page-fade-enter-active {
-  transition: opacity var(--duration-slow) var(--ease-enter),
-              transform var(--duration-slow) var(--ease-enter);
+  transition:
+    opacity var(--duration-slow) var(--ease-enter),
+    transform var(--duration-slow) var(--ease-enter);
 }
 .page-fade-leave-active {
   transition: opacity var(--duration-fast) var(--ease-enter);
@@ -37,6 +83,7 @@ if (!document.documentElement.dataset.theme) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .splash-fade-leave-active,
   .page-fade-enter-active,
   .page-fade-leave-active {
     transition: none;
