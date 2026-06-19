@@ -13,6 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@vueuse/core": "^14.3.0",
     "pinia": "^3.0.3",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
@@ -23,13 +24,13 @@
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "@vitejs/plugin-vue": "^5.1.4",
+    "@vue/test-utils": "^2.4.0",
     "eslint": "^9.0.0",
     "eslint-plugin-vue": "^9.0.0",
     "happy-dom": "^14.0.0",
     "less": "^4.2.0",
     "prettier": "^3.3.3",
     "vite": "^6.0.0",
-    "vitest": "^1.6.0",
-    "@vue/test-utils": "^2.4.0"
+    "vitest": "^1.6.0"
   }
 }

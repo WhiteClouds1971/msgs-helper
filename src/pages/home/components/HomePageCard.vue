@@ -13,8 +13,8 @@ defineEmits(['click'])
 
 const imageState = ref('loading')
 
-/** 首屏前 2 张卡片使用 eager，其余延迟加载 */
-const imgLoading = computed(() => (props.offset < 2 ? undefined : 'lazy'))
+/** 可见卡片（距中心 ≤2 步）使用 eager，其余延迟加载 */
+const imgLoading = computed(() => (Math.abs(props.offset) < 3 ? undefined : 'lazy'))
 
 // Eagerly import all menu images so Vite can hash them in production
 const imageModules = import.meta.glob('@/assets/images/menus/*.{gif,png,jpg,jpeg,webp}', {
@@ -117,15 +117,31 @@ function onImageError() {
   background: var(--bg-surface);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition:
-    transform var(--duration-slow) var(--ease-enter),
-    box-shadow var(--duration-slow) var(--ease-enter);
+    transform var(--duration-fast) var(--ease-enter),
+    box-shadow var(--duration-fast) var(--ease-enter),
+    opacity var(--duration-fast) var(--ease-enter),
+    filter var(--duration-fast) var(--ease-enter);
 
   &--front {
-    box-shadow: var(--shadow-glow-gold), var(--shadow-lg);
+    /* 四周包围式立体阴影 — 五层零偏移同心扩散，模拟卡片悬浮半空
+       自内而外：轮廓锁边 → 近距辉光 → 中距抬离 → 远距悬浮 → 环境气氛
+       Light 模式用暖棕 rgba(120,100,80,x)，Dark 模式用纯黑 rgba(0,0,0,x) */
+    box-shadow:
+      0 0 2px rgba(120, 100, 80, 0.18),    /* L1：紧贴轮廓，锁死边缘 */
+      0 0 10px rgba(120, 100, 80, 0.12),   /* L2：内圈辉光，初步抬离 */
+      0 0 28px rgba(120, 100, 80, 0.08),   /* L3：中圈扩散，拉开层级 */
+      0 0 56px rgba(120, 100, 80, 0.05),   /* L4：外圈悬浮，纵深感 */
+      0 0 96px rgba(120, 100, 80, 0.03),   /* L5：环境光晕，融入背景 */
+      var(--shadow-glow-gold);              /* 金辉描边 */
     will-change: transform;
+  }
+
+  /* 非前置卡片：裁切 blur 滤镜向外扩散的边溢，避免在前置卡片四周漏出虚边 */
+  &:not(&--front) {
+    clip-path: inset(0);
   }
 
   &.rotating {
@@ -238,6 +254,17 @@ function onImageError() {
     color: var(--line-color, var(--accent-gold));
     line-height: 1;
   }
+}
+
+/* --- 暗色模式：前置卡片四周阴影改为纯黑基调 --- */
+[data-theme="dark"] .home-card--front {
+  box-shadow:
+    0 0 2px rgba(0, 0, 0, 0.35),
+    0 0 10px rgba(0, 0, 0, 0.25),
+    0 0 28px rgba(0, 0, 0, 0.18),
+    0 0 56px rgba(0, 0, 0, 0.10),
+    0 0 96px rgba(0, 0, 0, 0.05),
+    var(--shadow-glow-gold);
 }
 
 /* --- 无障碍 --- */
