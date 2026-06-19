@@ -119,11 +119,15 @@ function onImageError() {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
+  /*
+    淡入淡出时序：位移先到位(50ms)，再交叉过渡透明度/模糊/阴影(250ms)
+    旧前卡逐渐变淡变糊，新前卡逐渐变清晰，视觉连贯不跳变
+  */
   transition:
-    transform var(--duration-fast) var(--ease-enter),
-    box-shadow var(--duration-fast) var(--ease-enter),
-    opacity var(--duration-fast) var(--ease-enter),
-    filter var(--duration-fast) var(--ease-enter);
+    transform 50ms var(--ease-out),
+    box-shadow 250ms var(--ease-in-out),
+    opacity 250ms var(--ease-in-out),
+    filter 250ms var(--ease-in-out);
 
   &--front {
     /* 四周包围式立体阴影 — 五层零偏移同心扩散，模拟卡片悬浮半空

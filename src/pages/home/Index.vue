@@ -64,31 +64,78 @@ function getCardStyle(relPos, isFront) {
 }
 
 /* ================================================================
-   手势
+   手势：gate 累积模式，每满 step px 切一张
+   step 动态缩小：手速越快 → step 越小 → 同样距离切更多卡片
+   碰壁时 gate 不推进，反向立刻响应
    ================================================================ */
-const PX_PER_CARD = 30
+const BASE_STEP = 55      // 慢速时的基准步长（px）
+const MIN_STEP = 25       // 最快时的步长下限
 
-let startX = 0
-let startY = 0
-let startIdx = 0
+let gateX = 0
+let touchStartX = 0
+let touchStartY = 0
+let lastX = 0
+let lastT = 0
+let velocity = 0          // 平滑速度（px/ms）
+let hasSwitched = false   // 本次手势是否已触发过首次切换
 
 function clampIdx(v) { return Math.max(0, Math.min(totalCards.value - 1, v)) }
 
 function onTouchStart(e) {
-  startX = e.touches[0].clientX
-  startY = e.touches[0].clientY
-  startIdx = currentIndex.value
+  const x = e.touches[0].clientX
+  gateX = x
+  touchStartX = x
+  touchStartY = e.touches[0].clientY
+  lastX = x
+  lastT = performance.now()
+  velocity = 0
+  hasSwitched = false
 }
 
 function onTouchMove(e) {
-  const dx = e.touches[0].clientX - startX
-  currentIndex.value = clampIdx(startIdx - Math.round(dx / PX_PER_CARD))
+  const now = performance.now()
+  const x = e.touches[0].clientX
+  const dt = now - lastT
+
+  if (dt > 0) {
+    const iv = Math.abs(x - lastX) / dt
+    velocity = velocity * 0.7 + iv * 0.3
+  }
+  lastX = x
+  lastT = now
+
+  const step = Math.max(MIN_STEP, BASE_STEP - velocity * 30)
+  const absDx = Math.abs(x - gateX)
+
+  // ── 首切：10px 即触发，gate 复位到当前位置 ──
+  if (!hasSwitched) {
+    if (absDx < 10) return
+    hasSwitched = true
+    const dir = x - gateX > 0 ? 1 : -1
+    const newIdx = clampIdx(currentIndex.value - dir)
+    if (newIdx !== currentIndex.value) {
+      currentIndex.value = newIdx
+    }
+    gateX = x
+    return
+  }
+
+  // ── 后续：标准 floor gate 累积 ──
+  if (absDx < 5) return
+
+  const dir = x - gateX > 0 ? 1 : -1
+  const rawSteps = Math.floor(absDx / step)
+  if (rawSteps === 0) return
+
+  const newIdx = clampIdx(currentIndex.value - dir * rawSteps)
+  const actual = Math.abs(newIdx - currentIndex.value)
+  gateX += dir * actual * step
+  currentIndex.value = newIdx
 }
 
 function onTouchEnd(e) {
-  // 短距离 → 视为点击，手动转发到最前卡片
-  const dx = Math.abs(e.changedTouches[0].clientX - startX)
-  const dy = Math.abs(e.changedTouches[0].clientY - startY)
+  const dx = Math.abs(e.changedTouches[0].clientX - touchStartX)
+  const dy = Math.abs(e.changedTouches[0].clientY - touchStartY)
   if (dx < 10 && dy < 10) {
     const front = visibleCards.value.find(c => c.relPos === 0)
     if (front) onCardClick(front.menu)
