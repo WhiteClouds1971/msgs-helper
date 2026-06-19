@@ -163,6 +163,7 @@ function onCardClick(menu) {
   inset: var(--space-8);
   z-index: 1;
   overflow: hidden;
+  border-radius: var(--radius-lg);
   /* 保留纵向触摸滚动，横向手势由 JS 接管 */
   touch-action: pan-y;
 }
