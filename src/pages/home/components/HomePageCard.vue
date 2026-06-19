@@ -13,8 +13,8 @@ defineEmits(['click'])
 
 const imageState = ref('loading')
 
-/** 可见卡片（距中心 ≤2 步）使用 eager，其余延迟加载 */
-const imgLoading = computed(() => (Math.abs(props.offset) < 3 ? undefined : 'lazy'))
+/** ±5 范围内全部 eager 预加载 */
+const imgLoading = computed(() => (Math.abs(props.offset) <= 5 ? undefined : 'lazy'))
 
 // Eagerly import all menu images so Vite can hash them in production
 const imageModules = import.meta.glob('@/assets/images/menus/*.{gif,png,jpg,jpeg,webp}', {
@@ -54,10 +54,7 @@ function onImageError() {
     <!-- 图片区域 -->
     <div class="home-card__image">
       <!-- 占位色块（始终在底层） -->
-      <div
-        class="home-card__placeholder"
-        :style="{ backgroundColor: menu.themeColor + '1A' }"
-      >
+      <div class="home-card__placeholder">
         <span class="home-card__placeholder-text">{{ menu.name }}</span>
       </div>
 
@@ -88,14 +85,16 @@ function onImageError() {
     <!-- 诏书标签 -->
     <div class="home-card__label">
       <div class="edict-label">
-        <span class="seal-stamp">谕</span>
-        <span class="edict-package">{{ menu.packageName }}</span>
-        <span class="edict-sep">·</span>
-        <span
-          class="edict-title"
-          :style="{ color: menu.themeColor }"
-        >{{ menu.name }}</span>
-        <span class="seal-stamp">旨</span>
+        <span class="seal-stamp">签</span>
+        <span class="edict-center">
+          <span class="edict-package">{{ menu.packageName }}</span>
+          <span class="edict-sep">·</span>
+          <span
+            class="edict-title"
+            :style="{ color: menu.themeColor }"
+          >{{ menu.name }}</span>
+        </span>
+        <span class="seal-stamp">题</span>
       </div>
       <div
         class="decorative-line--knotted"
@@ -120,14 +119,15 @@ function onImageError() {
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   /*
-    淡入淡出时序：位移先到位(50ms)，再交叉过渡透明度/模糊/阴影(250ms)
-    旧前卡逐渐变淡变糊，新前卡逐渐变清晰，视觉连贯不跳变
+    两段式动画：
+      ① 切换瞬间：全部卡片统一弱化为背景（0ms，card-stack--resetting 切断过渡）
+      ② 淡入阶段：前置卡片从背景态渐显（300ms），背景卡片保持弱化
   */
   transition:
-    transform 50ms var(--ease-out),
-    box-shadow 250ms var(--ease-in-out),
-    opacity 250ms var(--ease-in-out),
-    filter 250ms var(--ease-in-out);
+    transform 80ms var(--ease-out),
+    box-shadow 150ms var(--ease-in-out),
+    opacity 150ms var(--ease-in-out),
+    filter 150ms var(--ease-in-out);
 
   &--front {
     /* 四周包围式立体阴影 — 五层零偏移同心扩散，模拟卡片悬浮半空
@@ -230,10 +230,18 @@ function onImageError() {
   font-size: var(--text-sm);
 }
 
+.edict-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  gap: 2px;
+}
+
 .edict-title {
   font-family: var(--font-display);
   font-size: var(--text-lg);
-  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;

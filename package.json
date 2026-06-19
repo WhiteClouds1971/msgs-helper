@@ -31,6 +31,8 @@
     "less": "^4.2.0",
     "prettier": "^3.3.3",
     "vite": "^6.0.0",
+    "vite-plugin-image-optimizer": "^2.0.3",
+    "vite-plugin-imagemin": "^0.6.1",
     "vitest": "^1.6.0"
   }
 }

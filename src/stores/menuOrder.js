@@ -33,7 +33,8 @@ function rebuildFromNames(names, allMenus) {
  */
 export const useMenuOrderStore = defineStore('menuOrder', () => {
   const saved = loadOrder()
-  const order = ref(saved ? rebuildFromNames(saved, menus) : [...menus])
+  const rebuilt = saved ? rebuildFromNames(saved, menus) : null
+  const order = ref(rebuilt && rebuilt.length > 0 ? rebuilt : [...menus])
 
   const orderedMenus = computed(() => order.value)
 

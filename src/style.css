@@ -26,6 +26,8 @@ body,
   /* 触控优化 */
   touch-action: manipulation;
   -webkit-tap-highlight-color: var(--tap-highlight);
+  /* 禁用下拉回弹 */
+  overscroll-behavior: none;
 }
 
 /* 移动端居中容器 */

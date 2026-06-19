@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMenuOrderStore } from '@/stores/menuOrder'
 import HomePageCard from '@/pages/home/components/HomePageCard.vue'
@@ -12,8 +12,6 @@ const rotatingCardName = ref(null)
 /* ================================================================
    卡片扇形展开参数
    ================================================================ */
-const MAX_LEFT = 2
-const MAX_RIGHT = 2
 const OFFSET_BY_DIST = [0, 8.75, 12.5]
 
 function relOffsetPct(relPos) {
@@ -35,18 +33,39 @@ function relZIndex(relPos) {
 const currentIndex = ref(0)
 const totalCards = computed(() => menuStore.orderedMenus.length)
 
-const canSwipeLeft = computed(() => currentIndex.value < totalCards.value - 1)
+// 切换时：先全部弱化 → 再淡入新前置卡片
+const isResetting = ref(false)
 
-// 仅渲染可见范围卡片，高效按需创建/销毁，不浪费 DOM 资源
+watch(currentIndex, () => {
+  isResetting.value = true
+  // 双 RAF：确保浏览器先绘制重置帧（全部弱化），再触发淡入
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        isResetting.value = false
+      })
+    })
+  })
+})
+
+// 菜单数量变化时，防止 currentIndex 越界
+watch(totalCards, (n) => {
+  if (n > 0 && currentIndex.value >= n) currentIndex.value = n - 1
+})
+
+const MAX_LEFT = 5
+const MAX_RIGHT = 5
+
 const visibleCards = computed(() => {
   const total = totalCards.value
+  if (total === 0) return []
   const ci = currentIndex.value
   const cards = []
 
   for (let d = Math.min(MAX_LEFT, ci); d > 0; d--) {
     cards.push({ menu: menuStore.orderedMenus[ci - d], relPos: -d, isFront: false })
   }
-  cards.push({ menu: menuStore.orderedMenus[ci], relPos: 0, isFront: true })
+  cards.push({ menu: menuStore.orderedMenus[ci], relPos: 0, isFront: !isResetting.value })
   for (let d = 1; d <= MAX_RIGHT && ci + d < total; d++) {
     cards.push({ menu: menuStore.orderedMenus[ci + d], relPos: d, isFront: false })
   }
@@ -55,11 +74,21 @@ const visibleCards = computed(() => {
 })
 
 function getCardStyle(relPos, isFront) {
+  // 切换瞬间：全部弱化为背景态
+  if (isResetting.value) {
+    return {
+      transform: `translateX(${relOffsetPct(relPos)}%)`,
+      zIndex: relZIndex(relPos),
+      opacity: 0.55,
+      filter: 'blur(1.5px) brightness(0.85)',
+    }
+  }
+  // 正常态：前置凸显，背景弱化；显式值确保过渡可插值
   return {
     transform: `translateX(${relOffsetPct(relPos)}%)`,
     zIndex: relZIndex(relPos),
-    opacity: isFront ? undefined : 0.55,
-    filter: isFront ? undefined : 'blur(1.5px) brightness(0.85)',
+    opacity: isFront ? 1 : 0.55,
+    filter: isFront ? 'blur(0px) brightness(1)' : 'blur(1.5px) brightness(0.85)',
   }
 }
 
@@ -68,8 +97,8 @@ function getCardStyle(relPos, isFront) {
    step 动态缩小：手速越快 → step 越小 → 同样距离切更多卡片
    碰壁时 gate 不推进，反向立刻响应
    ================================================================ */
-const BASE_STEP = 55      // 慢速时的基准步长（px）
-const MIN_STEP = 25       // 最快时的步长下限
+const BASE_STEP = 40      // 慢速时的基准步长（px）
+const MIN_STEP = 18       // 最快时的步长下限
 
 let gateX = 0
 let touchStartX = 0
@@ -77,7 +106,10 @@ let touchStartY = 0
 let lastX = 0
 let lastT = 0
 let velocity = 0          // 平滑速度（px/ms）
-let hasSwitched = false   // 本次手势是否已触发过首次切换
+let hasSwitched = false
+let touchStartTime = 0    // touchstart 时间戳
+
+const FLICK_MS = 180      // 短于此时间的手势只切一张
 
 function clampIdx(v) { return Math.max(0, Math.min(totalCards.value - 1, v)) }
 
@@ -88,6 +120,7 @@ function onTouchStart(e) {
   touchStartY = e.touches[0].clientY
   lastX = x
   lastT = performance.now()
+  touchStartTime = lastT
   velocity = 0
   hasSwitched = false
 }
@@ -104,10 +137,11 @@ function onTouchMove(e) {
   lastX = x
   lastT = now
 
-  const step = Math.max(MIN_STEP, BASE_STEP - velocity * 30)
+  const isFlick = (now - touchStartTime) < FLICK_MS
+  const step = Math.max(MIN_STEP, BASE_STEP - velocity * 35)
   const absDx = Math.abs(x - gateX)
 
-  // ── 首切：10px 即触发，gate 复位到当前位置 ──
+  // ── 首切：10px 即触发 ──
   if (!hasSwitched) {
     if (absDx < 10) return
     hasSwitched = true
@@ -120,7 +154,10 @@ function onTouchMove(e) {
     return
   }
 
-  // ── 后续：标准 floor gate 累积 ──
+  // ── 快速轻划（< 180ms）：最多一张，跳过后续累积 ──
+  if (isFlick) return
+
+  // ── 持续拖拽（≥ 180ms）：标准 gate 多张切换 ──
   if (absDx < 5) return
 
   const dir = x - gateX > 0 ? 1 : -1
@@ -163,7 +200,10 @@ function onCardClick(menu) {
 
 <template>
   <div class="home-page texture-rice-paper">
-    <div class="card-stack">
+    <div
+      class="card-stack"
+      :class="{ 'card-stack--resetting': isResetting }"
+    >
       <HomePageCard
         v-for="card in visibleCards"
         :key="card.menu.name"
@@ -174,7 +214,6 @@ function onCardClick(menu) {
         :style="getCardStyle(card.relPos, card.isFront)"
         @click="onCardClick(card.menu)"
       />
-
     </div>
 
     <!-- 触摸蒙层：覆盖卡片区域，永存 DOM，touch 序列不断 -->
@@ -186,16 +225,10 @@ function onCardClick(menu) {
     />
 
     <div
-      v-if="!canSwipeLeft && visibleCards.length > 0"
-      class="boundary-hint"
+      v-if="currentIndex === 0"
+      class="swipe-hint"
     >
-      已是最后一页
-    </div>
-    <div
-      v-if="currentIndex === 0 && totalCards > 1"
-      class="boundary-hint"
-    >
-      已是第一页
+      左右拖动快速切换菜单
     </div>
   </div>
 </template>
@@ -245,23 +278,31 @@ function onCardClick(menu) {
   inset: calc(100dvh / 10) calc(100vw / 10);
   z-index: 1;
   border-radius: var(--radius-lg);
-  /* 保留纵向触摸滚动，横向手势由 JS 接管 */
   touch-action: pan-y;
 }
 
+/* 切换瞬间：关闭所有过渡，卡片立刻统一弱化 */
+.card-stack--resetting :deep(.home-card) {
+  transition-duration: 0ms !important;
+}
+
 /* ================================================================
-   边界提示 — 位于卡片下方留白居中
+   滑动提示 — 卡片下方留白居中
    ================================================================ */
-.boundary-hint {
+.swipe-hint {
   position: absolute;
-  bottom: calc(100dvh / 20);
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100dvh / 10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: var(--text-sm);
   color: var(--text-secondary);
   z-index: 10;
   pointer-events: none;
-  white-space: nowrap;
+  user-select: none;
 }
 
 /* ================================================================
