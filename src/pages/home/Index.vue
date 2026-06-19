@@ -185,11 +185,21 @@ function onTouchMove(e) {
   currentIndex.value = newIdx
 }
 
+const cardStackRef = ref(null)
+
 function onTouchEnd(e) {
   touchPos.active = false
 
-  const dx = Math.abs(e.changedTouches[0].clientX - touchStartX)
-  const dy = Math.abs(e.changedTouches[0].clientY - touchStartY)
+  // 只在卡片堆叠区域内响应 tap
+  const stack = cardStackRef.value
+  if (!stack) return
+  const rect = stack.getBoundingClientRect()
+  const x = e.changedTouches[0].clientX
+  const y = e.changedTouches[0].clientY
+  if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return
+
+  const dx = Math.abs(x - touchStartX)
+  const dy = Math.abs(y - touchStartY)
   if (dx < 10 && dy < 10) {
     const front = visibleCards.value.find(c => c.relPos === 0)
     if (front) onCardClick(front.menu)
@@ -242,6 +252,7 @@ function onCardImageResolved(menuName) {
     <InkWashBackground :touch-pos="touchPos" />
 
     <div
+      ref="cardStackRef"
       class="card-stack"
       :class="{ 'card-stack--resetting': isResetting }"
     >

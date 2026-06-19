@@ -9,8 +9,13 @@ const route = useRoute()
 const router = useRouter()
 const store = useQingGangJianStore()
 
-// ── Visibility: hidden on home page ──
-const isVisible = computed(() => route.path !== '/')
+// ── Visibility: 404 页面隐藏，其余全路由可见 ──
+const isHomePage = computed(() => route.path === '/')
+const isVisible = computed(() => route.name !== 'NotFound')
+
+// 主页强制：左下角 + 收拢成球；工具页恢复用户偏好
+const effectiveSide = computed(() => isHomePage.value ? 'left' : store.side)
+const effectiveExpanded = computed(() => isHomePage.value ? false : store.isExpanded)
 
 // ── Current menu name: lookup from menus by route path ──
 const currentMenuName = computed(() => {
@@ -44,16 +49,22 @@ const swordWidth = ref(270) // fallback, measured on mount
 
 let longPressTimer = null
 
-// ── Default position computed from side and viewport ──
+// ── Default position ──
 function computeDefaultLeft() {
+  if (isHomePage.value) return 16 // 主页固定左下角
   const w = swordWidth.value
-  return store.side === 'left' ? 16 : window.innerWidth - w - 16
+  return effectiveSide.value === 'left' ? 16 : window.innerWidth - w - 16
 }
 
 function snapToDefault() {
   swordLeft.value = computeDefaultLeft()
-  swordBottom.value = 120
+  swordBottom.value = isHomePage.value ? 16 : 120
 }
+
+// 进出主页时重新定位
+watch(isHomePage, () => {
+  if (!isDragging.value) snapToDefault()
+})
 
 // ── FanMenu state ──
 const showFanMenu = ref(false)
@@ -133,18 +144,22 @@ function handleDragEnd() {
   const rect = pommelRef.value.getBoundingClientRect()
   const pommelCenterX = rect.left + rect.width / 2
 
-  store.setSide(pommelCenterX < window.innerWidth / 2 ? 'left' : 'right')
+  // 主页拖拽不保存位置偏好
+  if (!isHomePage.value) {
+    store.setSide(pommelCenterX < window.innerWidth / 2 ? 'left' : 'right')
+  }
   snapToDefault()
 }
 
 function onFanMenuSelect(action) {
   showFanMenu.value = false
-  if (action === 'voice') store.toggleExpand()
+  // 主页不响应展开/收起
+  if (action === 'voice' && !isHomePage.value) store.toggleExpand()
 }
 
-// ── React to side changes (when not dragging) ──
+// ── React to side changes (when not dragging, not on home) ──
 watch(() => store.side, () => {
-  if (!isDragging.value) snapToDefault()
+  if (!isDragging.value && !isHomePage.value) snapToDefault()
 })
 
 // ── Resize / mount: measure & position ──
@@ -178,9 +193,9 @@ const swordStyle = computed(() => ({
     ref="swordRef"
     class="sword"
     :class="{
-      'sword--left': store.side === 'left',
-      'sword--right': store.side === 'right',
-      'is-expanded': store.isExpanded,
+      'sword--left': effectiveSide === 'left',
+      'sword--right': effectiveSide === 'right',
+      'is-expanded': effectiveExpanded,
       'is-dragging': isDragging,
     }"
     :style="swordStyle"

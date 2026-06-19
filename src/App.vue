@@ -1,5 +1,6 @@
 <script setup>
 import SplashScreen from '@/components/ui/SplashScreen.vue'
+import QingGangJian from '@/components/QingGangJian/Index.vue'
 import { useAppShell } from '@/composables/useAppShell'
 
 // 默认浅色主题
@@ -40,6 +41,9 @@ const { isReady } = useAppShell()
       />
     </Transition>
   </router-view>
+
+  <!-- 青釭剑悬浮球：全路由可见，splash 结束后显示 -->
+  <QingGangJian v-if="isReady" />
 </template>
 
 <style>
