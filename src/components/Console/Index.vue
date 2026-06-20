@@ -10,7 +10,7 @@ const { isOpen, close } = useConsole()
 // Grid 布局参数
 // 单位方格 = 正方形，边长 = 容器宽度 / COLS
 // ═══════════════════════════════════════════════════════════════════
-const COLS = 4
+const COLS = 6
 const GAP_PX = 8 // var(--space-2)
 
 const unitSize = ref('80px')
@@ -128,7 +128,7 @@ const visibleZones = computed(() =>
    ================================================================ */
 .console-zone__grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   grid-auto-rows: var(--unit-size);
   gap: var(--space-2);
 }
