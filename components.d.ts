@@ -11,9 +11,9 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    Index: typeof import('./src/components/InkWashBackground/Index.vue')['default']
+    Index: typeof import('./src/components/Console/Index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    ThemeToggle: typeof import('./src/components/ui/ThemeToggle.vue')['default']
+    ThemeToggle: typeof import('./src/components/Console/components/ThemeToggle.vue')['default']
   }
 }

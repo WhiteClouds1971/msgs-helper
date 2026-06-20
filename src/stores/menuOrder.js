@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import menus from '@/menus'
+import menus from '@/constants/menus'
 
 const STORAGE_KEY = 'msgs-menu-order-v1'
 

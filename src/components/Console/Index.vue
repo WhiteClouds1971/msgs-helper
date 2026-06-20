@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useConsole } from '@/composables/useConsole'
 import Drawer from '@/components/ui/Drawer/Index.vue'
-import { consoleItems } from './consoleItems'
+import { consoleItems } from '@/constants/consoleItems'
 
 const { isOpen, close } = useConsole()
 
