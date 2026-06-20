@@ -4,13 +4,14 @@ import App from './App.vue';
 import router from '@/router/index.js';
 import pinia from '@/stores/index.js';
 import { checkVersion } from '@/composables/useVersionCheck';
+import { preventBrowserDefaults } from '@/composables/preventBrowserDefaults';
 
 import './style.css';
 
 // 首屏加载前校验版本：版本不一致时清空 localStorage，确保 stores 读到干净数据
 checkVersion();
 
-createApp(App).use(router).use(pinia).mount('#app');
+// 禁用浏览器内置默认行为（缩放、回弹、长按菜单、文本选择）
+preventBrowserDefaults();
 
-// iOS Safari 禁用缩放 & 下拉回弹（meta/CSS 均无效，必须 JS）
-document.addEventListener('touchmove', (e) => { e.preventDefault() }, { passive: false })
+createApp(App).use(router).use(pinia).mount('#app');

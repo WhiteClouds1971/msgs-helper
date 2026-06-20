@@ -4,11 +4,17 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import imagemin from 'vite-plugin-imagemin';
+import Components from 'unplugin-vue-components/vite';
+import RekaResolver from 'reka-ui/resolver';
 
 export default defineConfig(() => {
   return {
     plugins: [
       vue(),
+      Components({
+        dts: true,
+        resolvers: [RekaResolver()],
+      }),
       imagemin({
         gifsicle: { optimizationLevel: 3 },
         mozjpeg: { quality: 80 },

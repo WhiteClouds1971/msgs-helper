@@ -1,5 +1,8 @@
 <script setup>
-// 404 页面 — 纯静态，无需额外逻辑
+import { usePageReady } from '@/composables/usePageReady'
+
+// 自动模式：页面无图片，即刻解除 Splash
+usePageReady()
 </script>
 
 <template>

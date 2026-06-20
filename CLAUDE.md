@@ -38,25 +38,22 @@ msgs-helper/
 │   │   └── images/menus/            # 菜单卡片图片
 │   ├── components/
 │   │   ├── ui/                      # 无业务耦合的 UI 组件
-│   │   │   ├── SplashScreen.vue
+│   │   │   ├── SplashScreen/             # 启动画面
 │   │   │   └── ThemeToggle.vue
 │   │   ├── InkWashBackground/       # 墨洇动态背景
 │   │   └── QingGangJian/            # 青釭剑悬浮球
-│   │       ├── Index.vue
-│   │       ├── FanMenu.vue
-│   │       └── FanMenuItem.vue
 │   ├── composables/                 # 组合式函数
-│   │   ├── useAppShell.js           # 首屏 Splash → App 过渡
+│   │   ├── useAppShell.js           # 首屏 Splash → App 过渡（代际管理）
+│   │   ├── usePageReady.js          # 页面资源就绪检测（自动/手动）
 │   │   └── useImagePreload.js       # 图片预加载
 │   ├── constants/
 │   │   └── packageEnum.js           # 包名枚举
 │   ├── pages/
 │   │   ├── index.js                 # 路由配置
 │   │   ├── 404.vue
-│   │   └── home/
-│   │       ├── Index.vue            # 主页（卡片堆叠）
+│   │   ├── demo/
+│   │   └── home/                    # 主页（卡片堆叠）
 │   │       └── components/
-│   │           └── HomePageCard.vue
 │   ├── router/
 │   │   ├── index.js
 │   │   └── routes.js

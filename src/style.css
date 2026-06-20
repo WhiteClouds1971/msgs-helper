@@ -29,6 +29,10 @@ body,
   -webkit-tap-highlight-color: var(--tap-highlight);
   /* 禁用下拉回弹 */
   overscroll-behavior: none;
+  /* 禁用浏览器长按默认行为 */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* 移动端居中容器 */

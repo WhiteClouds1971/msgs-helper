@@ -1,6 +1,9 @@
 <script setup>
-import SplashScreen from '@/components/ui/SplashScreen.vue'
-import QingGangJian from '@/components/QingGangJian/Index.vue'
+import { watch } from 'vue'
+import { useRoute } from 'vue-router'
+import SplashScreen from '@/components/ui/SplashScreen/Index.vue'
+import JadeSeal from '@/components/JadeSeal/Index.vue'
+import Console from '@/components/Console/Index.vue'
 import { useAppShell } from '@/composables/useAppShell'
 
 // 默认浅色主题
@@ -8,7 +11,16 @@ if (!document.documentElement.dataset.theme) {
   document.documentElement.dataset.theme = 'light'
 }
 
-const { isReady } = useAppShell()
+const route = useRoute()
+const { isReady, resetReady } = useAppShell()
+
+// 路由切换 → 拉起 SplashScreen，由目标页面负责解除
+watch(
+  () => route.fullPath,
+  () => {
+    resetReady()
+  },
+)
 </script>
 
 <template>
@@ -42,8 +54,11 @@ const { isReady } = useAppShell()
     </Transition>
   </router-view>
 
-  <!-- 青釭剑悬浮球：全路由可见，splash 结束后显示 -->
-  <!-- <QingGangJian v-if="isReady" /> -->
+  <!-- 玉玺悬浮按钮：全路由可见，splash 结束后显示 -->
+  <JadeSeal v-if="isReady" />
+
+  <!-- 控制台面板：从底部弹出，全路由可用 -->
+  <Console />
 </template>
 
 <style>

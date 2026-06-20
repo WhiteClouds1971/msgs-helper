@@ -1,12 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue'
-import SplashScreen from '@/components/ui/SplashScreen.vue'
+import SplashScreen from '@/components/ui/SplashScreen/Index.vue'
 
 const props = defineProps({
   menu: { type: Object, required: true },
   isFront: { type: Boolean, default: false },
   offset: { type: Number, default: 0 },
-  isRotating: { type: Boolean, default: false },
   style: { type: Object, default: () => ({}) },
 })
 
@@ -50,7 +49,7 @@ function onImageError() {
 <template>
   <div
     class="home-card"
-    :class="{ 'home-card--front': isFront, rotating: isRotating }"
+    :class="{ 'home-card--front': isFront }"
     :style="style"
     @click="$emit('click')"
   >
@@ -159,21 +158,6 @@ function onImageError() {
     clip-path: inset(0);
   }
 
-  &.rotating {
-    animation: rotate-hint 0.5s var(--ease-enter) forwards;
-  }
-}
-
-@keyframes rotate-hint {
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(90deg);
-  }
-  100% {
-    transform: rotate(90deg) scale(1.5);
-  }
 }
 
 /* --- 图片区 --- */
