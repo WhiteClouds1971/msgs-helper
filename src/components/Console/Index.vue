@@ -148,6 +148,7 @@ const visibleZones = computed(() =>
    Console Zone Cell — 控件容器
    磨砂托盘：半透明底色 + 大圆角 + ::before 承载模糊
    模糊放伪元素避免 backdrop-filter 在 grid item 上建层叠上下文偏移
+   shadow-md 投影 + ::after 顶边高光线 强化立体感
    ================================================================ */
 .console-zone__cell {
   min-width: 0;
@@ -155,6 +156,7 @@ const visibleZones = computed(() =>
   border-radius: var(--radius-lg);
   padding: var(--space-3);
   isolation: isolate;
+  box-shadow: var(--shadow-md);
 }
 
 .console-zone__cell::before {
@@ -166,5 +168,15 @@ const visibleZones = computed(() =>
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   z-index: -1;
+}
+
+/* 顶边高光 — 模拟光线掠过磨砂玻璃表面 */
+.console-zone__cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  pointer-events: none;
 }
 </style>
