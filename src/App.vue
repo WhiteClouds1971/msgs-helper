@@ -6,11 +6,6 @@ import JadeSeal from '@/components/JadeSeal/Index.vue'
 import Console from '@/components/Console/Index.vue'
 import { useAppShell } from '@/composables/useAppShell'
 
-// 默认浅色主题
-if (!document.documentElement.dataset.theme) {
-  document.documentElement.dataset.theme = 'light'
-}
-
 const route = useRoute()
 const { isReady, resetReady } = useAppShell()
 

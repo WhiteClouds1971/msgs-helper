@@ -1,16 +1,9 @@
 <script setup>
-import { ref } from 'vue'
+import { useTheme } from '@/composables/useTheme'
 import taiYang from '@/assets/icons/tai_yang.svg?raw'
 import yueLiang from '@/assets/icons/yue_liang.svg?raw'
 
-const isDark = ref(document.documentElement.dataset.theme === 'dark')
-
-function toggle() {
-  isDark.value = !isDark.value
-  const theme = isDark.value ? 'dark' : 'light'
-  document.documentElement.setAttribute('data-theme', theme)
-  localStorage.setItem('theme-preference', theme)
-}
+const { isDark, toggle } = useTheme()
 </script>
 
 <template>

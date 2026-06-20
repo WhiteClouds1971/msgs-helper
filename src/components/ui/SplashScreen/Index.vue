@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import yuXiSrc from '@/assets/icons/yu_xi.svg'
-import yuXiBorderSrc from '@/assets/icons/yu_xi_bian_kuang.svg'
+import yuXiRaw from '@/assets/icons/yu_xi.svg?raw'
+import yuXiBorderRaw from '@/assets/icons/yu_xi_bian_kuang.svg?raw'
 
 const props = defineProps({
   size: { type: Number, default: 80 },
@@ -21,12 +21,11 @@ const borderSize = computed(() => props.size * 1.2 + 12)
         Stage
         ================================================================ -->
     <div class="splash-screen__stage">
-      <!-- 边框（静止常驻，底层） -->
-      <img
-        :src="yuXiBorderSrc"
+      <!-- 边框（静止常驻，底层）-- 内联 SVG，currentColor 受 CSS color 控制 -->
+      <span
         class="splash-screen__border"
-        alt=""
-      >
+        v-html="yuXiBorderRaw"
+      />
 
       <!--
         朱砂墨迹 — inline SVG，缩放 96% 内缩使 stroke 完全落入边框内部
@@ -52,12 +51,11 @@ const borderSize = computed(() => props.size * 1.2 + 12)
         </g>
       </svg>
 
-      <!-- 传国玉玺（静止居中） -->
-      <img
-        :src="yuXiSrc"
+      <!-- 传国玉玺（静止居中）-- 内联 SVG，currentColor 受 CSS color 控制 -->
+      <span
         class="splash-screen__seal"
-        alt=""
-      >
+        v-html="yuXiRaw"
+      />
     </div>
 
     <!-- 装饰线 -->
@@ -95,14 +93,19 @@ const borderSize = computed(() => props.size * 1.2 + 12)
   height: var(--s-border);
 }
 
-/* ── 边框（静止，底层） ── */
+/* ── 边框（静止，底层）── 亮色墨线、暗色金线 */
 .splash-screen__border {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  color: var(--text-primary);
   user-select: none;
   pointer-events: none;
+
+  :deep(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 /* ── 朱砂墨迹 overlay ── */
@@ -137,11 +140,18 @@ const borderSize = computed(() => props.size * 1.2 + 12)
   left: 50%;
   width: var(--s-seal);
   height: var(--s-seal);
+  color: var(--text-primary);
   transform: translate(-50%, -50%) rotate(-1.5deg);
   z-index: 1;
-  filter: drop-shadow(0 2px 6px rgba(120, 100, 80, 0.18));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
   user-select: none;
   pointer-events: none;
+
+  :deep(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 /* ── 装饰线 ── */
@@ -187,5 +197,18 @@ const borderSize = computed(() => props.size * 1.2 + 12)
   .splash-screen__seal {
     transform: translate(-50%, -50%);
   }
+}
+</style>
+
+<!-- 暗色主题覆盖（非 scoped，需通过 data-theme 选择器绕过 scoping） -->
+<style lang="less">
+/* 暗色：玉玺呈亮金鎏金印文，边框描金 */
+[data-theme="dark"] .splash-screen__seal {
+  color: var(--accent-gold-light);
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5));
+}
+
+[data-theme="dark"] .splash-screen__border {
+  color: var(--accent-gold-light);
 }
 </style>
