@@ -91,8 +91,11 @@ function toggle() {
   background: linear-gradient(
     to right,
     #fef7e0 0%,
-    #f5f0e5 38%,
-    #2a2a38 62%,
+    #f4e4c8 22%,
+    #e0ceaa 42%,
+    #b0a090 58%,
+    #6b6068 72%,
+    #35303e 86%,
     #16162a 100%
   );
   box-shadow:
