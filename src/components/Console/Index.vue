@@ -56,7 +56,7 @@ function cellStyle(item) {
 // ═══════════════════════════════════════════════════════════════════
 
 const zones = [
-  { code: 'appearance', label: '外观' },
+  { code: 'features', label: '功能' },
 ]
 
 const itemsByZone = computed(() => {

@@ -2,7 +2,7 @@ import { defineAsyncComponent } from 'vue'
 
 /** 控制台区域标识 — 决定条目渲染到哪个布局区块 */
 export const Zone = Object.freeze({
-  APPEARANCE: 'appearance',
+  FEATURES: 'features',
 })
 
 /**
@@ -20,7 +20,7 @@ export const Zone = Object.freeze({
 export const consoleItems = [
   {
     id: 'theme-toggle',
-    zone: Zone.APPEARANCE,
+    zone: Zone.FEATURES,
     colSpan: 2,
     component: defineAsyncComponent(() => import('@/components/Console/components/ThemeToggle.vue')),
   },
