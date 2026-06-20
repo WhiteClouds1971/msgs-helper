@@ -22,7 +22,7 @@ export const consoleItems = [
     id: 'theme-toggle',
     zone: Zone.APPEARANCE,
     fullWidth: true,
-    rowSpan: 1,
+    rowSpan: 2,
     component: defineAsyncComponent(() => import('@/components/Console/components/ThemeToggle.vue')),
   },
 ]

@@ -1,11 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import taiYang from '@/assets/icons/tai_yang.svg?raw'
 import yueLiang from '@/assets/icons/yue_liang.svg?raw'
 
 const isDark = ref(document.documentElement.dataset.theme === 'dark')
-
-const label = computed(() => (isDark.value ? '深色模式' : '浅色模式'))
 
 function toggle() {
   isDark.value = !isDark.value
@@ -21,25 +19,20 @@ function toggle() {
     :class="{ 'console-theme-toggle--dark': isDark }"
     role="switch"
     :aria-checked="isDark"
-    :aria-label="`主题切换，当前${label}`"
+    aria-label="主题切换"
     @click="toggle"
   >
-    <span class="console-theme-toggle__label">{{ label }}</span>
-
     <span class="console-theme-toggle__track">
-      <!-- 昼：左侧暖光区域 -->
       <span class="console-theme-toggle__day">
         <span class="console-theme-toggle__day-glow" />
         <span class="console-theme-toggle__track-icon" v-html="taiYang" />
       </span>
 
-      <!-- 夜：右侧星空区域 -->
       <span class="console-theme-toggle__night">
         <span class="console-theme-toggle__star" v-for="i in 4" :key="i" />
         <span class="console-theme-toggle__track-icon" v-html="yueLiang" />
       </span>
 
-      <!-- 滑块 -->
       <span class="console-theme-toggle__thumb">
         <span
           class="console-theme-toggle__thumb-inner"
@@ -59,22 +52,13 @@ function toggle() {
 .console-theme-toggle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
-  min-height: 44px;
-  padding: var(--space-2) 0;
+  height: 100%;
   border: none;
   background: transparent;
   cursor: pointer;
   user-select: none;
-}
-
-/* --- Label ------------------------------------------------------ */
-.console-theme-toggle__label {
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  color: var(--text-primary);
-  line-height: var(--leading-normal);
 }
 
 /* ================================================================
