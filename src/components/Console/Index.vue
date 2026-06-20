@@ -45,7 +45,6 @@ function cellStyle(item) {
 
   if (item.rowSpan > 1) {
     s.gridRow = `span ${item.rowSpan}`
-    s.height = `calc(${item.rowSpan} * var(--unit-size) + ${(item.rowSpan - 1) * GAP_PX}px)`
   }
 
   return s
@@ -125,11 +124,12 @@ const visibleZones = computed(() =>
 
 /* ================================================================
    Console Zone Grid — 单位方格网格
-   N 列固定；全宽项高度自适应，方块项 aspect-ratio:1 保正方形
+   列宽 = 行高 = var(--unit-size)，每个单元格为严格正方形
    ================================================================ */
 .console-zone__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: var(--unit-size);
   gap: var(--space-2);
 }
 
