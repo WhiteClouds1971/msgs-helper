@@ -21,7 +21,7 @@ export const consoleItems = [
   {
     id: 'theme-toggle',
     zone: Zone.FEATURES,
-    colSpan: 1,
+    colSpan: 2,
     component: defineAsyncComponent(() => import('@/components/Console/components/ThemeToggle.vue')),
   },
 ]
