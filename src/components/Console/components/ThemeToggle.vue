@@ -46,7 +46,7 @@ function toggle() {
 <style scoped lang="less">
 /* ================================================================
    Console ThemeToggle — 昼夜滑动开关
-   灵感：日升月落、墨洇纸背
+   全 em 单位，随容器 font-size 自适应缩放
    ================================================================ */
 
 .console-theme-toggle {
@@ -62,15 +62,14 @@ function toggle() {
 }
 
 /* ================================================================
-   Track — 昼夜渐变轨道
-   暖金宣纸 → 冷墨夜空
+   Track
    ================================================================ */
 .console-theme-toggle__track {
   position: relative;
   display: flex;
   align-items: center;
-  width: 104px;
-  height: 36px;
+  width: 100%;
+  height: 2.2em;
   border-radius: var(--radius-full);
   background: linear-gradient(
     to right,
@@ -85,7 +84,6 @@ function toggle() {
   box-shadow:
     inset 0 1px 2px rgba(0, 0, 0, 0.06),
     0 1px 2px rgba(0, 0, 0, 0.04);
-  flex-shrink: 0;
   overflow: hidden;
   transition: box-shadow var(--duration-slow) var(--ease-out);
 }
@@ -97,9 +95,10 @@ function toggle() {
 }
 
 /* ================================================================
-   Day Side — 暖光区
+   Day / Night halves
    ================================================================ */
-.console-theme-toggle__day {
+.console-theme-toggle__day,
+.console-theme-toggle__night {
   position: relative;
   display: flex;
   align-items: center;
@@ -114,8 +113,8 @@ function toggle() {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 40px;
-  height: 40px;
+  width: 2.4em;
+  height: 2.4em;
   border-radius: 50%;
   background: radial-gradient(
     circle,
@@ -132,23 +131,12 @@ function toggle() {
 }
 
 /* ================================================================
-   Night Side — 星空区
+   Stars — 百分比定位，自适应 track 宽度
    ================================================================ */
-.console-theme-toggle__night {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50%;
-  height: 100%;
-  z-index: 0;
-}
-
-/* 星点 — 随机散布的小亮圆 */
 .console-theme-toggle__star {
   position: absolute;
-  width: 2px;
-  height: 2px;
+  width: 0.12em;
+  height: 0.12em;
   border-radius: 50%;
   background: #fff;
   opacity: 0;
@@ -156,27 +144,10 @@ function toggle() {
   pointer-events: none;
 }
 
-/* 用 CSS 变量伪装随机位置（编译时展开为静态值） */
-.console-theme-toggle__star:nth-child(1) {
-  top: 8px;
-  left: 14px;
-}
-.console-theme-toggle__star:nth-child(2) {
-  top: 14px;
-  left: 32px;
-  width: 1.5px;
-  height: 1.5px;
-}
-.console-theme-toggle__star:nth-child(3) {
-  top: 8px;
-  left: 22px;
-  width: 1.5px;
-  height: 1.5px;
-}
-.console-theme-toggle__star:nth-child(4) {
-  top: 20px;
-  left: 10px;
-}
+.console-theme-toggle__star:nth-child(1) { top: 22%; left: 28%; }
+.console-theme-toggle__star:nth-child(2) { top: 40%; left: 65%; width: 0.09em; height: 0.09em; }
+.console-theme-toggle__star:nth-child(3) { top: 22%; left: 44%; width: 0.09em; height: 0.09em; }
+.console-theme-toggle__star:nth-child(4) { top: 56%; left: 20%; }
 
 .console-theme-toggle--dark .console-theme-toggle__star {
   opacity: 0.7;
@@ -193,14 +164,14 @@ function toggle() {
 }
 
 /* ================================================================
-   Track Icons — 两端日月图标
+   Track Icons
    ================================================================ */
 .console-theme-toggle__track-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 1em;
+  height: 1em;
   z-index: 1;
   transition: color var(--duration-slow) var(--ease-out);
 
@@ -210,7 +181,6 @@ function toggle() {
   }
 }
 
-/* 日：暖金色 */
 .console-theme-toggle__day .console-theme-toggle__track-icon {
   color: #d4a843;
 }
@@ -219,7 +189,6 @@ function toggle() {
   color: #8b7332;
 }
 
-/* 月：冷银白 */
 .console-theme-toggle__night .console-theme-toggle__track-icon {
   color: #8899aa;
 }
@@ -229,48 +198,45 @@ function toggle() {
 }
 
 /* ================================================================
-   Thumb — 滑动圆块
-   墨洇沉降般地滑到对侧
+   Thumb — left/right 定位，无需 translateX
    ================================================================ */
 .console-theme-toggle__thumb {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 30px;
-  height: 30px;
+  top: 0.2em;
+  left: 0.2em;
+  width: 1.8em;
+  height: 1.8em;
   border-radius: 50%;
   background: var(--bg-surface);
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.12),
     0 0 0 1px rgba(0, 0, 0, 0.04);
   z-index: 2;
-  transition: transform 450ms cubic-bezier(0.34, 1.3, 0.64, 1);
+  transition:
+    left var(--duration-slow) var(--ease-out),
+    right var(--duration-slow) var(--ease-out),
+    box-shadow var(--duration-slow) var(--ease-out);
 }
 
-/* Dark 态：滑到右侧 */
 .console-theme-toggle--dark .console-theme-toggle__thumb {
-  transform: translateX(68px);
+  left: auto;
+  right: 0.2em;
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 /* ================================================================
-   Thumb Inner — 滑块内的微光
-   轻触时光点微闪
+   Thumb Inner — 光点
    ================================================================ */
 .console-theme-toggle__thumb-inner {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 10px;
-  height: 10px;
+  width: 0.55em;
+  height: 0.55em;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    #f0c060 0%,
-    transparent 80%
-  );
+  background: radial-gradient(circle, #f0c060 0%, transparent 80%);
   transform: translate(-50%, -50%);
   transition:
     width var(--duration-slow) var(--ease-out),
@@ -279,13 +245,9 @@ function toggle() {
 }
 
 .console-theme-toggle__thumb-inner.is-dark {
-  width: 8px;
-  height: 8px;
-  background: radial-gradient(
-    circle,
-    #b8c8e8 0%,
-    transparent 80%
-  );
+  width: 0.45em;
+  height: 0.45em;
+  background: radial-gradient(circle, #b8c8e8 0%, transparent 80%);
 }
 
 /* ================================================================
