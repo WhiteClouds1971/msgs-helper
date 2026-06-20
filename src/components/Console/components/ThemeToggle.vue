@@ -27,17 +27,33 @@ function toggle() {
     <span class="console-theme-toggle__label">{{ label }}</span>
 
     <span class="console-theme-toggle__track">
-      <span class="console-theme-toggle__icon" v-html="taiYang" />
-      <span class="console-theme-toggle__thumb" />
-      <span class="console-theme-toggle__icon" v-html="yueLiang" />
+      <!-- 昼：左侧暖光区域 -->
+      <span class="console-theme-toggle__day">
+        <span class="console-theme-toggle__day-glow" />
+        <span class="console-theme-toggle__track-icon" v-html="taiYang" />
+      </span>
+
+      <!-- 夜：右侧星空区域 -->
+      <span class="console-theme-toggle__night">
+        <span class="console-theme-toggle__star" v-for="i in 4" :key="i" />
+        <span class="console-theme-toggle__track-icon" v-html="yueLiang" />
+      </span>
+
+      <!-- 滑块 -->
+      <span class="console-theme-toggle__thumb">
+        <span
+          class="console-theme-toggle__thumb-inner"
+          :class="{ 'is-dark': isDark }"
+        />
+      </span>
     </span>
   </button>
 </template>
 
 <style scoped lang="less">
 /* ================================================================
-   Console ThemeToggle — 滑动开关
-   漆器面板内的主题切换控件
+   Console ThemeToggle — 昼夜滑动开关
+   灵感：日升月落、墨洇纸背
    ================================================================ */
 
 .console-theme-toggle {
@@ -61,68 +77,240 @@ function toggle() {
   line-height: var(--leading-normal);
 }
 
-/* --- Track（滑动轨道）------------------------------------------- */
+/* ================================================================
+   Track — 昼夜渐变轨道
+   暖金宣纸 → 冷墨夜空
+   ================================================================ */
 .console-theme-toggle__track {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 56px;
-  height: 30px;
-  padding: 0 5px;
+  width: 104px;
+  height: 36px;
   border-radius: var(--radius-full);
-  background: var(--bg-surface-hover);
-  border: var(--border-thin) solid var(--border);
+  background: linear-gradient(
+    to right,
+    #fef7e0 0%,
+    #f5f0e5 38%,
+    #2a2a38 62%,
+    #16162a 100%
+  );
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
-  transition: background-color var(--duration-fast) var(--ease-out);
+  overflow: hidden;
+  transition: box-shadow var(--duration-slow) var(--ease-out);
 }
 
-/* --- Icons（两端图标）------------------------------------------- */
-.console-theme-toggle__icon {
+.console-theme-toggle--dark .console-theme-toggle__track {
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.12),
+    0 0 8px rgba(212, 168, 67, 0.15);
+}
+
+/* ================================================================
+   Day Side — 暖光区
+   ================================================================ */
+.console-theme-toggle__day {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  color: var(--text-tertiary);
+  width: 50%;
+  height: 100%;
   z-index: 0;
+}
 
-  svg {
+/* 暖光晕 */
+.console-theme-toggle__day-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 200, 80, 0.25) 0%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  transition: opacity var(--duration-slow) var(--ease-out);
+  pointer-events: none;
+}
+
+.console-theme-toggle--dark .console-theme-toggle__day-glow {
+  opacity: 0.3;
+}
+
+/* ================================================================
+   Night Side — 星空区
+   ================================================================ */
+.console-theme-toggle__night {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* 星点 — 随机散布的小亮圆 */
+.console-theme-toggle__star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-ink);
+  pointer-events: none;
+}
+
+/* 用 CSS 变量伪装随机位置（编译时展开为静态值） */
+.console-theme-toggle__star:nth-child(1) {
+  top: 8px;
+  left: 14px;
+}
+.console-theme-toggle__star:nth-child(2) {
+  top: 14px;
+  left: 32px;
+  width: 1.5px;
+  height: 1.5px;
+}
+.console-theme-toggle__star:nth-child(3) {
+  top: 8px;
+  left: 22px;
+  width: 1.5px;
+  height: 1.5px;
+}
+.console-theme-toggle__star:nth-child(4) {
+  top: 20px;
+  left: 10px;
+}
+
+.console-theme-toggle--dark .console-theme-toggle__star {
+  opacity: 0.7;
+  animation: star-twinkle 2s var(--ease-in-out) infinite;
+}
+
+.console-theme-toggle__star:nth-child(2) { animation-delay: 0.6s; }
+.console-theme-toggle__star:nth-child(3) { animation-delay: 1.3s; }
+.console-theme-toggle__star:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.85; }
+}
+
+/* ================================================================
+   Track Icons — 两端日月图标
+   ================================================================ */
+.console-theme-toggle__track-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  z-index: 1;
+  transition: color var(--duration-slow) var(--ease-out);
+
+  :deep(svg) {
     width: 100%;
     height: 100%;
   }
 }
 
-/* --- Thumb（滑动圆块）------------------------------------------- */
+/* 日：暖金色 */
+.console-theme-toggle__day .console-theme-toggle__track-icon {
+  color: #d4a843;
+}
+
+.console-theme-toggle--dark .console-theme-toggle__day .console-theme-toggle__track-icon {
+  color: #8b7332;
+}
+
+/* 月：冷银白 */
+.console-theme-toggle__night .console-theme-toggle__track-icon {
+  color: #8899aa;
+}
+
+.console-theme-toggle--dark .console-theme-toggle__night .console-theme-toggle__track-icon {
+  color: #c8d6e5;
+}
+
+/* ================================================================
+   Thumb — 滑动圆块
+   墨洇沉降般地滑到对侧
+   ================================================================ */
 .console-theme-toggle__thumb {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--bg-surface);
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--duration-fast) var(--ease-out);
-  z-index: 1;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  z-index: 2;
+  transition: transform 450ms cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 
-/* Dark 态：thumb 滑到右侧 */
+/* Dark 态：滑到右侧 */
 .console-theme-toggle--dark .console-theme-toggle__thumb {
-  transform: translateX(26px);
+  transform: translateX(68px);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
-/* Dark 态：track 泛出金色 */
-.console-theme-toggle--dark .console-theme-toggle__track {
-  background: var(--accent-gold-bg);
-  border-color: var(--accent-gold);
+/* ================================================================
+   Thumb Inner — 滑块内的微光
+   轻触时光点微闪
+   ================================================================ */
+.console-theme-toggle__thumb-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #f0c060 0%,
+    transparent 80%
+  );
+  transform: translate(-50%, -50%);
+  transition:
+    width var(--duration-slow) var(--ease-out),
+    height var(--duration-slow) var(--ease-out),
+    background var(--duration-slow) var(--ease-out);
 }
 
-/* --- Reduced Motion --------------------------------------------- */
+.console-theme-toggle__thumb-inner.is-dark {
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(
+    circle,
+    #b8c8e8 0%,
+    transparent 80%
+  );
+}
+
+/* ================================================================
+   Reduced Motion
+   ================================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .console-theme-toggle__thumb,
-  .console-theme-toggle__track {
+  .console-theme-toggle__thumb {
     transition: none;
+  }
+
+  .console-theme-toggle__star {
+    animation: none;
   }
 }
 </style>
