@@ -146,12 +146,13 @@ const visibleZones = computed(() =>
 
 /* ================================================================
    Console Zone Cell — 控件容器
-   用背景色 + 圆角区分每个控件的范围，grid gap 提供间距
+   磨砂托盘：半透明底色 + 大圆角 + 模糊
    ================================================================ */
 .console-zone__cell {
   min-width: 0;
-  background: var(--bg);
-  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
   padding: var(--space-3);
 }
 </style>
