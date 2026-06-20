@@ -39,14 +39,16 @@ onUnmounted(() => observers.forEach(o => o.disconnect()))
 
 /** 根据条目的布局属性计算 grid 放置样式 */
 function cellStyle(item) {
-  const style = {}
+  const s = {}
   if (item.fullWidth) {
-    style.gridColumn = '1 / -1'
+    s.gridColumn = '1 / -1'
+    if (item.rowSpan > 1) {
+      s.height = `calc(${item.rowSpan} * var(--unit-size) + ${(item.rowSpan - 1) * GAP_PX}px)`
+    }
+  } else {
+    s.aspectRatio = '1'
   }
-  if (item.rowSpan && item.rowSpan > 1) {
-    style.gridRow = `span ${item.rowSpan}`
-  }
-  return style
+  return s
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -134,24 +136,19 @@ const visibleZones = computed(() =>
 
 /* ================================================================
    Console Zone Grid — 单位方格网格
-   N 列固定，单位尺寸由容器宽 / N 计算得出（正方形）
+   N 列固定；全宽项高度自适应，方块项 aspect-ratio:1 保正方形
    ================================================================ */
 .console-zone__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-2);
-  grid-auto-rows: var(--unit-size);
 }
 
 /* ================================================================
-   Console Zone Cell — 网格单元格
-   每个控件包裹一层，兼作网格项 + 视觉容器
+   Console Zone Cell — 纯网格占位
+   不设视觉样式，控件本身负责外观
    ================================================================ */
 .console-zone__cell {
   min-width: 0;
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  border: var(--border-thin) solid var(--border-light);
-  /* 内边距由子组件自行决定，cell 只提供舞台 */
 }
 </style>
