@@ -145,10 +145,13 @@ const visibleZones = computed(() =>
 }
 
 /* ================================================================
-   Console Zone Cell — 纯网格占位
-   不设视觉样式，控件本身负责外观
+   Console Zone Cell — 控件容器
+   用背景色 + 圆角区分每个控件的范围，grid gap 提供间距
    ================================================================ */
 .console-zone__cell {
   min-width: 0;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
 }
 </style>
