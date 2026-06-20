@@ -55,21 +55,19 @@ function cellStyle(item) {
 // Zone 编排
 // ═══════════════════════════════════════════════════════════════════
 
-const zones = [
-  { code: 'features', label: '功能' },
-]
+const zoneCodes = ['features']
 
 const itemsByZone = computed(() => {
   const map = {}
-  for (const zone of zones) {
-    const items = consoleItems.filter(item => item.zone === zone.code)
-    if (items.length) map[zone.code] = items
+  for (const code of zoneCodes) {
+    const items = consoleItems.filter(item => item.zone === code)
+    if (items.length) map[code] = items
   }
   return map
 })
 
 const visibleZones = computed(() =>
-  zones.filter(z => itemsByZone.value[z.code]),
+  zoneCodes.filter(c => itemsByZone.value[c]),
 )
 </script>
 
@@ -83,18 +81,17 @@ const visibleZones = computed(() =>
   >
     <div class="console-body">
       <section
-        v-for="zone in visibleZones"
-        :key="zone.code"
+        v-for="code in visibleZones"
+        :key="code"
         class="console-zone"
       >
-        <h3 class="console-zone__title">{{ zone.label }}</h3>
         <div
           class="console-zone__grid"
           :ref="(el) => observeGrid(el)"
           :style="{ '--unit-size': unitSize }"
         >
           <div
-            v-for="item in itemsByZone[zone.code]"
+            v-for="item in itemsByZone[code]"
             :key="item.id"
             class="console-zone__cell"
             :style="cellStyle(item)"
@@ -124,14 +121,6 @@ const visibleZones = computed(() =>
     padding-top: var(--space-3);
     border-top: var(--border-thin) solid var(--border-light);
   }
-}
-
-.console-zone__title {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  color: var(--text-primary);
-  line-height: var(--leading-tight);
 }
 
 /* ================================================================
