@@ -11,8 +11,8 @@ export const Zone = Object.freeze({
  * 字段：
  *   id        — 唯一标识
  *   zone      — 目标布局区块（Zone.XXX）
- *   fullWidth — 是否占整行（grid-column: 1 / -1）
- *   rowSpan   — 高度占几个单位方格（默认 1）
+ *   colSpan   — 宽度占几列（默认 4 = 满行）
+ *   rowSpan   — 高度占几个单位方格（默认 1 = 自动高度）
  *   component — 异步组件加载函数
  *
  * Index.vue 自动按 zone 分组 + 网格布局渲染，无需改动模板。
@@ -21,8 +21,7 @@ export const consoleItems = [
   {
     id: 'theme-toggle',
     zone: Zone.APPEARANCE,
-    fullWidth: true,
-    rowSpan: 2,
+    colSpan: 2,
     component: defineAsyncComponent(() => import('@/components/Console/components/ThemeToggle.vue')),
   },
 ]

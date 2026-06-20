@@ -37,17 +37,17 @@ function observeGrid(el) {
 
 onUnmounted(() => observers.forEach(o => o.disconnect()))
 
-/** 根据条目的布局属性计算 grid 放置样式 */
+/** 根据条目的 colSpan / rowSpan 计算 grid 放置样式 */
 function cellStyle(item) {
   const s = {}
-  if (item.fullWidth) {
-    s.gridColumn = '1 / -1'
-    if (item.rowSpan > 1) {
-      s.height = `calc(${item.rowSpan} * var(--unit-size) + ${(item.rowSpan - 1) * GAP_PX}px)`
-    }
-  } else {
-    s.aspectRatio = '1'
+  const span = item.colSpan || COLS
+  s.gridColumn = span >= COLS ? '1 / -1' : `span ${span}`
+
+  if (item.rowSpan > 1) {
+    s.gridRow = `span ${item.rowSpan}`
+    s.height = `calc(${item.rowSpan} * var(--unit-size) + ${(item.rowSpan - 1) * GAP_PX}px)`
   }
+
   return s
 }
 
