@@ -1,34 +1,71 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onUnmounted } from 'vue'
 import { useConsole } from '@/composables/useConsole'
 import Drawer from '@/components/ui/Drawer/Index.vue'
 import { consoleItems } from '@/constants/consoleItems'
 
 const { isOpen, close } = useConsole()
 
-/**
- * 布局区块定义 — 控制控制台的结构划分
- *
- * 扩展只需在此追加 { code, label }，Index.vue 模板自动渲染新 section。
- * code 与 consoleItems 中的 zone 字段对应。
- */
+// ═══════════════════════════════════════════════════════════════════
+// Grid 布局参数
+// 单位方格 = 正方形，边长 = 容器宽度 / COLS
+// ═══════════════════════════════════════════════════════════════════
+const COLS = 4
+const GAP_PX = 8 // var(--space-2)
+
+const unitSize = ref('80px')
+let observers = []
+
+function calcUnitSize(el) {
+  const width = el.clientWidth
+  if (!width) return null
+  const colW = (width - GAP_PX * (COLS - 1)) / COLS
+  return `${colW}px`
+}
+
+function observeGrid(el) {
+  if (!el) return
+  const size = calcUnitSize(el)
+  if (size) unitSize.value = size
+  const obs = new ResizeObserver(([entry]) => {
+    const s = calcUnitSize(entry.target)
+    if (s) unitSize.value = s
+  })
+  obs.observe(el)
+  observers.push(obs)
+}
+
+onUnmounted(() => observers.forEach(o => o.disconnect()))
+
+/** 根据条目的布局属性计算 grid 放置样式 */
+function cellStyle(item) {
+  const style = {}
+  if (item.fullWidth) {
+    style.gridColumn = '1 / -1'
+  }
+  if (item.rowSpan && item.rowSpan > 1) {
+    style.gridRow = `span ${item.rowSpan}`
+  }
+  return style
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Zone 编排
+// ═══════════════════════════════════════════════════════════════════
+
 const zones = [
   { code: 'appearance', label: '外观' },
 ]
 
-/** 按 zone 将条目分组，空 zone 不渲染 */
 const itemsByZone = computed(() => {
   const map = {}
   for (const zone of zones) {
     const items = consoleItems.filter(item => item.zone === zone.code)
-    if (items.length) {
-      map[zone.code] = items
-    }
+    if (items.length) map[zone.code] = items
   }
   return map
 })
 
-/** 过滤掉无数据条目的 zone，避免渲染空 section */
 const visibleZones = computed(() =>
   zones.filter(z => itemsByZone.value[z.code]),
 )
@@ -49,12 +86,19 @@ const visibleZones = computed(() =>
         class="console-zone"
       >
         <h3 class="console-zone__title">{{ zone.label }}</h3>
-        <div class="console-zone__items">
-          <component
-            :is="item.component"
+        <div
+          class="console-zone__grid"
+          :ref="(el) => observeGrid(el)"
+          :style="{ '--unit-size': unitSize }"
+        >
+          <div
             v-for="item in itemsByZone[zone.code]"
             :key="item.id"
-          />
+            class="console-zone__cell"
+            :style="cellStyle(item)"
+          >
+            <component :is="item.component" />
+          </div>
         </div>
       </section>
     </div>
@@ -71,10 +115,8 @@ const visibleZones = computed(() =>
 
 /* ================================================================
    Console Zone — 功能区块
-   灵感：竹简上的独立篇章，以装饰线分隔
    ================================================================ */
 .console-zone {
-  /* 区块间用金色装饰线 + 节距分隔 */
   &:not(:first-child) {
     margin-top: var(--space-4);
     padding-top: var(--space-3);
@@ -91,15 +133,25 @@ const visibleZones = computed(() =>
 }
 
 /* ================================================================
-   Console Zone Items — 控件容器
-   只提供垂直堆叠 + 分隔线，不假设控件内部布局
+   Console Zone Grid — 单位方格网格
+   N 列固定，单位尺寸由容器宽 / N 计算得出（正方形）
    ================================================================ */
-.console-zone__items {
-  display: flex;
-  flex-direction: column;
+.console-zone__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  grid-auto-rows: var(--unit-size);
+}
 
-  > * + * {
-    border-top: var(--border-thin) solid var(--border-light);
-  }
+/* ================================================================
+   Console Zone Cell — 网格单元格
+   每个控件包裹一层，兼作网格项 + 视觉容器
+   ================================================================ */
+.console-zone__cell {
+  min-width: 0;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: var(--border-thin) solid var(--border-light);
+  /* 内边距由子组件自行决定，cell 只提供舞台 */
 }
 </style>
