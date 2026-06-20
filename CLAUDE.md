@@ -77,40 +77,12 @@ msgs-helper/
     └── superpowers/specs/
 ```
 
-## Console 控制台架构
+## Console 控制台
 
-控制台采用 **数据驱动网格布局**，三层分工：
+`consoleItems.js` → `Index.vue` → `components/*.vue`，数据驱动网格布局。
 
-```
-consoleItems.js（数据）  →  Index.vue（编排）  →  components/*.vue（功能）
-   定义条目 zone/colSpan/       按 zone 分组、网格渲染        只管交互，不关心位置
-   rowSpan/component
-```
-
-### 网格系统
-
-| 参数 | 值 |
-|------|-----|
-| 列数 | 4 |
-| 单位 | 严格正方形，边长 = `(容器宽 - 3×8px) / 4`，ResizeObserver 实时计算 |
-| 间距 | `var(--space-2)` = 8px |
-| 单元格 | 磨砂玻璃效果（94% 底色 + blur 6px + shadow + 顶边高光） |
-
-### consoleItems 字段
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `id` | `string` | 唯一标识 |
-| `zone` | `Zone` | 目标布局区块 |
-| `colSpan` | `number` | 占几列宽（默认 4 = 满行） |
-| `rowSpan` | `number` | 占几行高（默认 1） |
-| `component` | `AsyncComponent` | `defineAsyncComponent(() => import(...))` |
-
-### 扩展方式
-
-加新功能只需两步，Index.vue 不动：
-1. `consoleItems.js` 加条目 `{ id, zone, colSpan?, rowSpan?, component }`
-2. `Console/components/` 下写组件
+- 6 列正方形网格，`colSpan` / `rowSpan` 控制占位，ResizeObserver 计算单位尺寸
+- 加控件：`consoleItems.js` 追加条目，`Console/components/` 写组件，Index.vue 不动
 
 ## 常用命令
 
