@@ -146,13 +146,25 @@ const visibleZones = computed(() =>
 
 /* ================================================================
    Console Zone Cell — 控件容器
-   磨砂托盘：半透明底色 + 大圆角 + 模糊
+   磨砂托盘：半透明底色 + 大圆角 + ::before 承载模糊
+   模糊放伪元素避免 backdrop-filter 在 grid item 上建层叠上下文偏移
    ================================================================ */
 .console-zone__cell {
   min-width: 0;
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  position: relative;
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
   padding: var(--space-3);
+  isolation: isolate;
+}
+
+.console-zone__cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: -1;
 }
 </style>
