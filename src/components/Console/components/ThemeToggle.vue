@@ -198,7 +198,7 @@ function toggle() {
 }
 
 /* ================================================================
-   Thumb — left/right 定位，无需 translateX
+   Thumb — left calc 定位，两端均可过渡
    ================================================================ */
 .console-theme-toggle__thumb {
   position: absolute;
@@ -213,14 +213,12 @@ function toggle() {
     0 0 0 1px rgba(0, 0, 0, 0.04);
   z-index: 2;
   transition:
-    left var(--duration-slow) var(--ease-out),
-    right var(--duration-slow) var(--ease-out),
+    left 400ms cubic-bezier(0.25, 0.1, 0.1, 1),
     box-shadow var(--duration-slow) var(--ease-out);
 }
 
 .console-theme-toggle--dark .console-theme-toggle__thumb {
-  left: auto;
-  right: 0.2em;
+  left: calc(100% - 1.8em - 0.2em);
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(0, 0, 0, 0.06);
