@@ -43,7 +43,7 @@ const { isReady } = useAppShell()
   </router-view>
 
   <!-- 青釭剑悬浮球：全路由可见，splash 结束后显示 -->
-  <QingGangJian v-if="isReady" />
+  <!-- <QingGangJian v-if="isReady" /> -->
 </template>
 
 <style>

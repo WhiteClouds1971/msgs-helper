@@ -14,6 +14,7 @@ export default [
   {
     name: 'Demo',
     path: '/demo',
-    children: [],
+    component: () => import('@/pages/demo/Index.vue'),
+    meta: { title: 'Demo' },
   },
 ];
