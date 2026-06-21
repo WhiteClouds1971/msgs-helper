@@ -58,7 +58,8 @@ msgs-helper/
 │   │   └── useImagePreload.js       # 图片预加载
 │   ├── constants/
 │   │   ├── menus.js                 # 工具注册表（单一事实源）
-│   │   └── consoleItems.js          # 控制台条目注册表（Zone + 网格参数）
+│   │   ├── consoleItems.js          # 控制台条目注册表（Zone + 网格参数）
+│   │   └── storageKeys.js           # localStorage Key 枚举（单一事实源）
 │   ├── pages/
 │   │   ├── index.js                 # 路由配置
 │   │   ├── 404.vue
@@ -70,8 +71,8 @@ msgs-helper/
 │   │   └── routes.js
 │   ├── stores/
 │   │   ├── index.js
-│   │   ├── menuOrder.js
-│   │   └── qingGangJian.js
+│   │   ├── localStorage.js          # 统一缓存 store（load/reset/pageData）
+│   │   └── menuOrder.js
 │   └── utils/
 └── docs/
     └── superpowers/specs/
@@ -83,6 +84,46 @@ msgs-helper/
 
 - 6 列正方形网格，`colSpan` / `rowSpan` 控制占位，ResizeObserver 计算单位尺寸
 - 加控件：`consoleItems.js` 追加条目，`Console/components/` 写组件，Index.vue 不动
+
+## 数据持久化
+
+`useLocalStorage`（`src/stores/localStorage.js`）统一管理所有 localStorage 读写。三类数据：
+
+| 类别 | key 来源 | 示例 |
+|------|----------|------|
+| 系统 | `StorageKeys` 枚举（固定 key） | 主题、菜单排序 |
+| 控件 | `StorageKeys` 枚举（固定 key） | 控制台开关 |
+| 页面 | `route.fullPath`（动态 key） | 表单内容、工具计算结果 |
+
+### 新增持久化数据的步骤
+
+1. `storageKeys.js` 加 key
+2. 组件 setup 中调用 `store.load(key, defaults)` 加载
+3. 读写 `store.cache[key]` 或 `store.pageData`（页面数据语法糖）
+4. 重置用 `store.reset(key, defaults)`
+
+```js
+import { useLocalStorage } from '@/stores/localStorage'
+import { StorageKeys } from '@/constants/storageKeys'
+
+const store = useLocalStorage()
+
+// 系统/控件
+store.load(StorageKeys.CONSOLE, { isOpen: false })
+store.cache[StorageKeys.CONSOLE].isOpen  // 读写
+
+// 页面
+store.load(route.fullPath, { selected: null })
+store.pageData.selected                   // 语法糖，等同 cache[route.fullPath].selected
+store.reset(route.fullPath, { selected: null })
+```
+
+### 不持久化的数据
+
+以下保持内存状态，不纳入 `useLocalStorage`：
+- `useAppShell` — Splash 过渡（路由切换即重置）
+- `useImagePreload` — 图片加载状态
+- 组件内瞬时手势/动画状态
 
 ## 常用命令
 
