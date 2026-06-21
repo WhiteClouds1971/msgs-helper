@@ -87,43 +87,12 @@ msgs-helper/
 
 ## 数据持久化
 
-`useLocalStorage`（`src/stores/localStorage.js`）统一管理所有 localStorage 读写。三类数据：
+`useLocalStorage`（`src/stores/localStorage.js`）统一管理 localStorage。Key 注册在 `src/constants/storageKeys.js`（单一事实源）。
 
-| 类别 | key 来源 | 示例 |
-|------|----------|------|
-| 系统 | `StorageKeys` 枚举（固定 key） | 主题、菜单排序 |
-| 控件 | `StorageKeys` 枚举（固定 key） | 控制台开关 |
-| 页面 | `route.fullPath`（动态 key） | 表单内容、工具计算结果 |
-
-### 新增持久化数据的步骤
-
-1. `storageKeys.js` 加 key
-2. 组件 setup 中调用 `store.load(key, defaults)` 加载
-3. 读写 `store.cache[key]` 或 `store.pageData`（页面数据语法糖）
-4. 重置用 `store.reset(key, defaults)`
-
-```js
-import { useLocalStorage } from '@/stores/localStorage'
-import { StorageKeys } from '@/constants/storageKeys'
-
-const store = useLocalStorage()
-
-// 系统/控件
-store.load(StorageKeys.CONSOLE, { isOpen: false })
-store.cache[StorageKeys.CONSOLE].isOpen  // 读写
-
-// 页面
-store.load(route.fullPath, { selected: null })
-store.pageData.selected                   // 语法糖，等同 cache[route.fullPath].selected
-store.reset(route.fullPath, { selected: null })
-```
-
-### 不持久化的数据
-
-以下保持内存状态，不纳入 `useLocalStorage`：
-- `useAppShell` — Splash 过渡（路由切换即重置）
-- `useImagePreload` — 图片加载状态
-- 组件内瞬时手势/动画状态
+- **系统/控件**：固定 key（`StorageKeys.XXX`），`store.load(key, defaults)` → `store.cache[key]` 读写
+- **页面**：动态 key（`route.fullPath`），`store.load(fullPath, defaults)` → `store.pageData` 读写（语法糖）
+- **重置**：`store.reset(key, defaults)` → 删缓存 + 还原默认值
+- **不持久化**：`useAppShell`、`useImagePreload`、瞬时手势/动画状态
 
 ## 常用命令
 
