@@ -92,7 +92,6 @@ msgs-helper/
 - **系统/控件**：固定 key（`StorageKeys.XXX`），`store.load(key, defaults)` → `store.cache[key]` 读写
 - **页面**：动态 key（`route.fullPath`），`store.load(fullPath, defaults)` → `store.pageData` 读写（语法糖）
 - **重置**：`store.reset(key, defaults)` → 删缓存 + 还原默认值
-- **不持久化**：`useAppShell`、`useImagePreload`、瞬时手势/动画状态
 
 ## 常用命令
 
