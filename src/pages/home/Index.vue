@@ -18,6 +18,8 @@
     return names.map((n) => map.get(n)).filter(Boolean)
   }
 
+  const orderedMenus = ref([])
+
   ls.load(route.fullPath, { order: menus.map((m) => m.name) })
 
   orderedMenus.value = rebuild(ls.pageData.order ?? [], menus)
@@ -64,7 +66,6 @@
    状态
    ================================================================ */
   const currentIndex = ref(0);
-  const orderedMenus = ref([])
   const totalCards = computed(() => orderedMenus.value.length);
 
   // 切换时：先全部弱化 → 再淡入新前置卡片
