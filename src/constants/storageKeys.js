@@ -6,5 +6,10 @@
  */
 export const StorageKeys = Object.freeze({
   THEME: 'msgs-theme',
-  // 后续按需追加...
+
+  /** 教学导览次数 — 对象，key 对应 TourKeys，值为已教学次数 */
+  TOUR: 'msgs-tour',
+
+  /** 应用版本号 */
+  APP_VERSION: 'msgs-app-version',
 })

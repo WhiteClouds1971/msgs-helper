@@ -34,6 +34,8 @@ msgs-helper/
 │   ├── assets/
 │   │   ├── css/design-tokens.css    # Design Token 定义
 │   │   ├── icons/                   # SVG 图标
+│   │   │   ├── arrow-left.svg       # 左箭头（导览）
+│   │   │   ├── arrow-right.svg      # 右箭头（导览）
 │   │   │   ├── yin_zhang.svg        # 印章
 │   │   │   ├── yu_xi.svg            # 玉玺
 │   │   │   ├── tai_yang.svg         # 太阳（主题切换）
@@ -59,7 +61,9 @@ msgs-helper/
 │   ├── constants/
 │   │   ├── menus.js                 # 工具注册表（单一事实源）
 │   │   ├── consoleItems.js          # 控制台条目注册表（Zone + 网格参数）
-│   │   └── storageKeys.js           # localStorage Key 枚举（单一事实源）
+│   │   ├── storageKeys.js           # localStorage Key 枚举（单一事实源）
+│   │   ├── tourKeys.js              # 导览 Key 枚举（单一事实源）
+│   │   └── tourSteps.js             # 导览步骤注册表（单一事实源）
 │   ├── pages/
 │   │   ├── index.js                 # 路由配置
 │   │   ├── 404.vue
@@ -125,6 +129,30 @@ msgs-helper/
 
 **命名**：组件与页面目录用大驼峰（`SplashScreen/`），入口文件命名为 `Index.vue`。  
 **升级**：组件被其他通用组件引用时 → 提升到 `ui/`。
+
+## 教学导览 (Tour)
+
+基于 Driver.js，`tourSteps.js` → `useTour.js` → 组件。
+
+| 文件 | 职责 |
+|------|------|
+| `src/constants/tourSteps.js` | 步骤注册表，按 tour name 分组（单一事实源） |
+| `src/constants/tourKeys.js` | Tour Key 枚举（单一事实源），禁止在别处写字符串字面量 |
+| `src/composables/useTour.js` | Driver 封装：`start(key)`/`stop()`、进度点、箭头导航、`onEnter` 脚本 |
+| `src/assets/css/tour-theme.css` | 全局换肤，全部 `var(--token)` |
+
+**Step 字段：** `element`（必填，CSS 选择器）、`popover`（`title`/`description` 必填，`side`/`align` 可选）、`onEnter`（可选，进入时执行）、`onLeave`（可选，离开时执行）。
+
+**Tour 级钩子（`{ steps, ...hooks }` 格式，均可选）：**
+
+| 钩子 | 触发时机 | 参数 |
+|------|----------|------|
+| `onBeforeStart` | 教学开始前 | 无 |
+| `onBoundaryArrow` | 点击已禁用的 ◀/▶ 箭头 | `('left'\|'right')` |
+
+向下兼容纯 `steps[]` 数组格式。
+
+**使用：** `tourSteps.js` + `tourKeys.js` 追加 key，组件中 `start(TourKeys.XXX)`。禁止写字符串字面量。
 
 ## 版本号管理
 

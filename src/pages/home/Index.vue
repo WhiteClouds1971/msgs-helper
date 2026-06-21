@@ -2,6 +2,8 @@
   import { ref, computed, watch, nextTick, reactive } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
   import { usePageReady } from '@/composables/usePageReady';
+  import { useTour } from '@/composables/useTour';
+import { TourKeys } from '@/constants/tourKeys';
   import menus from '@/constants/menus';
   import { useLocalStorage } from '@/stores/localStorage';
   import HomePageCard from '@/pages/home/components/HomePageCard.vue';
@@ -11,6 +13,7 @@
   const route = useRoute();
   const { markReady } = usePageReady({ auto: false });
   const ls = useLocalStorage();
+  const { start: startTour } = useTour();
 
   /* ---- 菜单排序（页面数据） ---- */
   function rebuild(names, source) {
@@ -276,6 +279,7 @@
       if (allResolved) {
         splashDone = true;
         markReady();
+        startTour(TourKeys.HOME, { mode: 'auto' });
       }
     });
   }
@@ -286,6 +290,7 @@
     <InkWashBackground :touch-pos="touchPos" />
 
     <div
+      id="card-stack"
       ref="cardStackRef"
       class="card-stack"
       :class="{ 'card-stack--resetting': isResetting }"

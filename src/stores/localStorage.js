@@ -22,8 +22,9 @@ export const useLocalStorage = defineStore('localStorage', () => {
     { deep: true }
   )
 
-  /** 按指定 key 从 localStorage 加载数据 */
+  /** 按指定 key 从 localStorage 加载数据（已在 cache 中则跳过） */
   function load(key, defaults = {}) {
+    if (key in cache) return
     try {
       const raw = localStorage.getItem(key)
       cache[key] = raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults }

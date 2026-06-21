@@ -30,4 +30,10 @@ export const consoleItems = [
     colSpan: 2,
     component: defineAsyncComponent(() => import('@/components/Console/components/ThemeToggle.vue')),
   },
+  {
+    id: 'tour-hint',
+    zone: Zone.FEATURES,
+    colSpan: 1,
+    component: defineAsyncComponent(() => import('@/components/Console/components/TourHint.vue')),
+  },
 ]

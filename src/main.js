@@ -1,4 +1,5 @@
 import '@/assets/css/design-tokens.css';
+import '@/assets/css/tour-theme.css';
 import { initTheme } from '@/composables/useTheme';
 import { createApp } from 'vue';
 import App from './App.vue';

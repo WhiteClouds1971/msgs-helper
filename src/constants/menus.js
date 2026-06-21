@@ -5,6 +5,8 @@
  * 菜单顺序即为默认排序。
  */
 
+import { TourKeys } from '@/constants/tourKeys'
+
 /** 签题分类枚举 */
 export const PackageName = Object.freeze({
   TOOL: '工具',
@@ -36,6 +38,7 @@ const menus = [
     },
     themeColor: ThemeColor.ROSE,
     packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
     orientation: 'vertical',
   },
   {
@@ -49,6 +52,7 @@ const menus = [
     },
     themeColor: ThemeColor.CRIMSON,
     packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
     orientation: 'vertical',
   },
   {
@@ -62,6 +66,7 @@ const menus = [
     },
     themeColor: ThemeColor.STEEL_BLUE,
     packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
     orientation: 'vertical',
   },
   {
@@ -75,6 +80,7 @@ const menus = [
     },
     themeColor: ThemeColor.FOREST,
     packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
     orientation: 'vertical',
   },
   {
@@ -88,6 +94,7 @@ const menus = [
     },
     themeColor: ThemeColor.ORCHID,
     packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
     orientation: 'vertical',
   },
   {
@@ -101,6 +108,7 @@ const menus = [
     },
     themeColor: ThemeColor.JADE,
     packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
     orientation: 'vertical',
   },
   {
@@ -114,6 +122,7 @@ const menus = [
     },
     themeColor: ThemeColor.EMBER,
     packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
     orientation: 'horizontal',
   },
 ];
