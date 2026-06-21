@@ -4,6 +4,10 @@ import { StorageKeys } from '@/constants/storageKeys'
 
 const THEME_KEY = StorageKeys.THEME
 
+function getSystemPref() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme)
 }
@@ -13,7 +17,7 @@ function applyTheme(theme) {
  * 不依赖 Pinia，直接用原生 localStorage。
  */
 export function initTheme() {
-  let theme = 'light'
+  let theme = getSystemPref()
   try {
     const raw = localStorage.getItem(THEME_KEY)
     if (raw) {
@@ -23,18 +27,13 @@ export function initTheme() {
       }
     }
   } catch {}
-  // 无缓存时跟随系统偏好
-  if (theme === 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    theme = 'dark'
-  }
   applyTheme(theme)
-  return theme
 }
 
 export function useTheme() {
   const store = useLocalStorage()
 
-  store.load(THEME_KEY, { mode: initTheme() })
+  store.load(THEME_KEY, { mode: getSystemPref() })
 
   const current = computed(() => store.cache[THEME_KEY].mode)
   const isDark = computed(() => current.value === 'dark')
