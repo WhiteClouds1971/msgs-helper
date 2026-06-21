@@ -20,9 +20,11 @@
 
   ls.load(route.fullPath, { order: menus.map((m) => m.name) })
 
-  const orderedMenus = computed(() =>
-    rebuild(ls.pageData.order ?? [], menus)
-  )
+  orderedMenus.value = rebuild(ls.pageData.order ?? [], menus)
+
+  watch(() => ls.pageData.order, (order) => {
+    orderedMenus.value = rebuild(order ?? [], menus)
+  })
 
   function recordAccess(name) {
     const order = ls.pageData.order
@@ -62,7 +64,8 @@
    状态
    ================================================================ */
   const currentIndex = ref(0);
-  const totalCards = computed(() => orderedMenus.length);
+  const orderedMenus = ref([])
+  const totalCards = computed(() => orderedMenus.value.length);
 
   // 切换时：先全部弱化 → 再淡入新前置卡片
   const isResetting = ref(false);
@@ -95,19 +98,19 @@
 
     for (let d = Math.min(MAX_LEFT, ci); d > 0; d--) {
       cards.push({
-        menu: orderedMenus[ci - d],
+        menu: orderedMenus.value[ci - d],
         relPos: -d,
         isFront: false,
       });
     }
     cards.push({
-      menu: orderedMenus[ci],
+      menu: orderedMenus.value[ci],
       relPos: 0,
       isFront: !isResetting.value,
     });
     for (let d = 1; d <= MAX_RIGHT && ci + d < total; d++) {
       cards.push({
-        menu: orderedMenus[ci + d],
+        menu: orderedMenus.value[ci + d],
         relPos: d,
         isFront: false,
       });
