@@ -1,49 +1,54 @@
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import { useLocalStorage } from '@/stores/localStorage'
+import { StorageKeys } from '@/constants/storageKeys'
 
-const STORAGE_KEY = 'theme-preference'
-
-function readTheme() {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved === 'light' || saved === 'dark') return saved
-  if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark'
-  return 'light'
-}
+const THEME_KEY = StorageKeys.THEME
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme)
 }
 
-function persist(theme) {
-  localStorage.setItem(STORAGE_KEY, theme)
-}
-
-// 单例状态（初始值由 initTheme() 在入口设置）
-const current = ref('light')
-
-// 衍生：模板用布尔值
-const isDark = computed(() => current.value === 'dark')
-
-/** 入口调用：读取缓存/系统偏好，设置 data-theme，返回初始值 */
+/**
+ * 入口调用：在 Vue 挂载前执行，读 localStorage 设 data-theme，防止闪烁。
+ * 不依赖 Pinia，直接用原生 localStorage。
+ */
 export function initTheme() {
-  const theme = readTheme()
+  let theme = 'light'
+  try {
+    const raw = localStorage.getItem(THEME_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed.mode === 'light' || parsed.mode === 'dark') {
+        theme = parsed.mode
+      }
+    }
+  } catch {}
+  // 无缓存时跟随系统偏好
+  if (theme === 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    theme = 'dark'
+  }
   applyTheme(theme)
-  current.value = theme
   return theme
 }
 
 export function useTheme() {
+  const store = useLocalStorage()
+
+  store.load(THEME_KEY, { mode: initTheme() })
+
+  const current = computed(() => store.cache[THEME_KEY].mode)
+  const isDark = computed(() => current.value === 'dark')
+
   function toggle() {
-    const next = current.value === 'dark' ? 'light' : 'dark'
-    current.value = next
+    const next = isDark.value ? 'light' : 'dark'
+    store.cache[THEME_KEY].mode = next
     applyTheme(next)
-    persist(next)
   }
 
   function setTheme(theme) {
     if (theme !== 'light' && theme !== 'dark') return
-    current.value = theme
+    store.cache[THEME_KEY].mode = theme
     applyTheme(theme)
-    persist(theme)
   }
 
   return { current, isDark, toggle, setTheme }
