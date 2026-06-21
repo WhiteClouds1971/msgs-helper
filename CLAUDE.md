@@ -141,7 +141,7 @@ msgs-helper/
 | `src/composables/useTour.js` | Driver 封装：`start(key)`/`stop()`、进度点、箭头导航、`onEnter` 脚本 |
 | `src/assets/css/tour-theme.css` | 全局换肤，全部 `var(--token)` |
 
-**Step 字段：** `element`（必填，CSS 选择器）、`popover`（`title`/`description` 必填，`side`/`align` 可选）、`onEnter`（可选，进入时执行）、`onLeave`（可选，离开时执行）。
+**Step 字段：** `element`（必填，目标元素 ID，如 `#card-stack`）、`popover`（`title`/`description` 必填，`side`/`align` 可选）、`onEnter`（可选，进入时执行）、`onLeave`（可选，离开时执行）。
 
 **Tour 级钩子（`{ steps, ...hooks }` 格式，均可选）：**
 

@@ -4,7 +4,7 @@
  * 每个导览是一个 { steps, ...hooks } 对象（向下兼容纯 steps[] 数组）。
  *
  * Step 字段：
- *   element  — CSS 选择器（目标元素）
+ *   element  — 目标元素 ID，如 `#card-stack`
  *   popover  — { title, description, side?, align? }
  *   onEnter  — 进入步骤时执行的脚本（可选）
  *   onLeave  — 离开步骤时执行的脚本（可选）
