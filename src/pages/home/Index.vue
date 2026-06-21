@@ -1,14 +1,36 @@
 <script setup>
   import { ref, computed, watch, nextTick, reactive } from 'vue';
-  import { useRouter } from 'vue-router';
-  import { useMenuOrderStore } from '@/stores/menuOrder';
+  import { useRouter, useRoute } from 'vue-router';
   import { usePageReady } from '@/composables/usePageReady';
+  import menus from '@/constants/menus';
+  import { useLocalStorage } from '@/stores/localStorage';
   import HomePageCard from '@/pages/home/components/HomePageCard.vue';
   import InkWashBackground from '@/components/InkWashBackground/Index.vue';
 
   const router = useRouter();
-  const menuStore = useMenuOrderStore();
+  const route = useRoute();
   const { markReady } = usePageReady({ auto: false });
+  const ls = useLocalStorage();
+
+  /* ---- 菜单排序（页面数据） ---- */
+  function rebuild(names, source) {
+    const map = new Map(source.map((m) => [m.name, m]))
+    return names.map((n) => map.get(n)).filter(Boolean)
+  }
+
+  ls.load(route.fullPath, { order: menus.map((m) => m.name) })
+
+  const orderedMenus = computed(() =>
+    rebuild(ls.pageData.order ?? [], menus)
+  )
+
+  function recordAccess(name) {
+    const order = ls.pageData.order
+    const idx = order.findIndex((n) => n === name)
+    if (idx <= 0) return
+    order.splice(idx, 1)
+    order.unshift(name)
+  }
 
   /* ---- 触摸坐标（透传给动态背景） ---- */
   const touchPos = reactive({ x: 0, y: 0, active: false });
@@ -40,7 +62,7 @@
    状态
    ================================================================ */
   const currentIndex = ref(0);
-  const totalCards = computed(() => menuStore.orderedMenus.length);
+  const totalCards = computed(() => orderedMenus.length);
 
   // 切换时：先全部弱化 → 再淡入新前置卡片
   const isResetting = ref(false);
@@ -73,19 +95,19 @@
 
     for (let d = Math.min(MAX_LEFT, ci); d > 0; d--) {
       cards.push({
-        menu: menuStore.orderedMenus[ci - d],
+        menu: orderedMenus[ci - d],
         relPos: -d,
         isFront: false,
       });
     }
     cards.push({
-      menu: menuStore.orderedMenus[ci],
+      menu: orderedMenus[ci],
       relPos: 0,
       isFront: !isResetting.value,
     });
     for (let d = 1; d <= MAX_RIGHT && ci + d < total; d++) {
       cards.push({
-        menu: menuStore.orderedMenus[ci + d],
+        menu: orderedMenus[ci + d],
         relPos: d,
         isFront: false,
       });
@@ -228,7 +250,7 @@
 
   /* ---- 卡片点击 → 导航 ---- */
   function onCardClick(menu) {
-    menuStore.recordAccess(menu.name);
+    recordAccess(menu.name);
     router.push(menu.route);
   }
 

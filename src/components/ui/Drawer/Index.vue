@@ -32,6 +32,8 @@ defineProps({
     default: 'down',
     validator: v => ['up', 'down', 'left', 'right'].includes(v),
   },
+  /** 最小高度（CSS 值），抽屉至少为此高度 */
+  minHeight: { type: String, default: '' },
   /** 最大高度（CSS 值），默认 85dvh */
   maxHeight: { type: String, default: '85dvh' },
   /** 固定高度（CSS 值），设置后抽屉不再自适应内容 */
@@ -69,6 +71,7 @@ defineSlots()
         class="drawer-content"
         :style="{
           '--drawer-max-height': maxHeight,
+          minHeight: minHeight || undefined,
           height: height || undefined,
         }"
       >

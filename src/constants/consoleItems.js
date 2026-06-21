@@ -19,6 +19,12 @@ export const Zone = Object.freeze({
  */
 export const consoleItems = [
   {
+    id: 'go-home',
+    zone: Zone.FEATURES,
+    colSpan: 1,
+    component: defineAsyncComponent(() => import('@/components/Console/components/GoHome.vue')),
+  },
+  {
     id: 'theme-toggle',
     zone: Zone.FEATURES,
     colSpan: 2,

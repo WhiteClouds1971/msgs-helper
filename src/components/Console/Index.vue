@@ -75,7 +75,8 @@ const visibleZones = computed(() =>
     :open="isOpen"
     title="尚书台"
     description="经纬天下 · 纲纪四方"
-    height="50dvh"
+    min-height="50dvh"
+    max-height="75dvh"
     @update:open="close"
   >
     <div class="console-body">
@@ -143,7 +144,7 @@ const visibleZones = computed(() =>
   min-width: 0;
   position: relative;
   border-radius: var(--radius-lg);
-  padding: var(--space-3);
+  padding: var(--space-2);
   isolation: isolate;
   box-shadow: var(--shadow-md);
 }
@@ -153,9 +154,9 @@ const visibleZones = computed(() =>
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: color-mix(in srgb, var(--bg) 94%, transparent);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: -1;
 }
 
