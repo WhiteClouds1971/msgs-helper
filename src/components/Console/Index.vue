@@ -2,6 +2,7 @@
 import { computed, ref, onUnmounted } from 'vue'
 import { useConsole } from '@/composables/useConsole'
 import Drawer from '@/components/ui/Drawer/Index.vue'
+import Tooltip from '@/components/ui/Tooltip/Index.vue'
 import { consoleItems } from '@/constants/consoleItems'
 
 const { isOpen, close } = useConsole()
@@ -51,6 +52,40 @@ function cellStyle(item) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// 长按提示 — cell 容器上统一检测，Tooltip 受控打开
+// ═══════════════════════════════════════════════════════════════════
+const LONGPRESS_MS = 500
+
+const longpressedId = ref(null)
+let pressTimer = null
+
+function clearPressTimer() {
+  if (pressTimer) {
+    clearTimeout(pressTimer)
+    pressTimer = null
+  }
+}
+
+function onCellPressStart(id) {
+  if (!id) return
+  pressTimer = setTimeout(() => {
+    longpressedId.value = id
+  }, LONGPRESS_MS)
+}
+
+function onCellPressEnd() {
+  longpressedId.value = null
+  clearPressTimer()
+}
+
+function onCellPressCancel() {
+  longpressedId.value = null
+  clearPressTimer()
+}
+
+onUnmounted(() => clearPressTimer())
+
+// ═══════════════════════════════════════════════════════════════════
 // Zone 编排
 // ═══════════════════════════════════════════════════════════════════
 
@@ -86,8 +121,8 @@ const visibleZones = computed(() =>
         class="console-zone"
       >
         <div
-          class="console-zone__grid"
           :ref="(el) => observeGrid(el)"
+          class="console-zone__grid"
           :style="{ '--unit-size': unitSize }"
         >
           <div
@@ -95,8 +130,25 @@ const visibleZones = computed(() =>
             :key="item.id"
             class="console-zone__cell"
             :style="cellStyle(item)"
+            @mousedown="onCellPressStart(item.id)"
+            @mouseup="onCellPressEnd"
+            @mouseleave="onCellPressCancel"
+            @touchstart="onCellPressStart(item.id)"
+            @touchend="onCellPressEnd"
+            @touchcancel="onCellPressCancel"
           >
-            <component :is="item.component" />
+            <Tooltip
+              v-if="item.tip"
+              :content="item.tip"
+              :open="longpressedId === item.id"
+              :delay-duration="0"
+            >
+              <component :is="item.component" />
+            </Tooltip>
+            <component
+              :is="item.component"
+              v-else
+            />
           </div>
         </div>
       </section>

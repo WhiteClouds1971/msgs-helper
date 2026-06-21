@@ -21,15 +21,8 @@ export const tourSteps = Object.freeze({
       {
         element: '#card-stack',
         popover: {
-          title: '左右拖动',
-          description: '在卡片堆叠区域左右拖动，快速切换菜单。',
-        },
-      },
-      {
-        element: '.home-card--front',
-        popover: {
-          title: '点击进入',
-          description: '点击前置卡片，进入对应菜单的详情页面。',
+          title: '操作指引',
+          description: '左右拖动切换菜单，点击前置卡片进入详情。',
         },
       },
     ]),

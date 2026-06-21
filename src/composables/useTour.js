@@ -113,8 +113,7 @@ function renderNav(popover, activeIndex, totalSteps) {
 // ── Driver 实例 ──
 
 function createDriver(options = {}, steps = []) {
-  const userOnPopoverRender = options.onPopoverRender
-  const { onPopoverRender: _, ...restOptions } = options
+  const { onPopoverRender: userOnPopoverRender, ...restOptions } = options
 
   const d = driver({
     ...restOptions,
@@ -167,19 +166,40 @@ const ls = useLocalStorage()
 ls.load(StorageKeys.TOUR, {})
 
 /**
+ * 解析/初始化 tour 存储数据，兼容旧格式（number → { count, data }）
+ * @param {object} counts — ls.cache[StorageKeys.TOUR]
+ * @param {string} key    — tour 标识
+ * @returns {{ count: number, data: object }}
+ */
+function resolveTourData(counts, key) {
+  if (!counts[key]) {
+    counts[key] = { count: 0, data: {} }
+  }
+  return counts[key]
+}
+
+/**
  * 启动教学导览（模块级，不注册 onUnmounted）
- * @param {string|array} tourNameOrSteps — TourKeys 常量或步骤数组
+ * @param {string|array|object} tourNameOrSteps — TourKeys 常量、步骤数组，或纯字符串
  * @param {number|object} stepIndexOrOpts  — 起始步骤索引，或 { stepIndex, mode } 选项
- *   mode: 'auto'  — 自动触发，从未教学才执行，执行后次数 +1
+ *   mode: 'auto'  — 自动触发，已教学次数 ≥ 基数（tourConfig.count）则跳过，执行后次数 +1
  *         'manual' — 手动触发，直接执行（默认）
  */
 export function startTour(tourNameOrSteps, stepIndexOrOpts = 0) {
   const stepIndex = typeof stepIndexOrOpts === 'number' ? stepIndexOrOpts : (stepIndexOrOpts.stepIndex ?? 0)
   const mode = typeof stepIndexOrOpts === 'object' ? (stepIndexOrOpts.mode ?? 'manual') : 'manual'
 
+  // 解析 TourKeys 对象 → 提取 key + count
+  let tourConfig = null
+  let tourName = tourNameOrSteps
+  if (typeof tourNameOrSteps === 'object' && !Array.isArray(tourNameOrSteps) && tourNameOrSteps.key) {
+    tourConfig = tourNameOrSteps
+    tourName = tourConfig.key
+  }
+
   const raw =
-    typeof tourNameOrSteps === 'string'
-      ? tourSteps[tourNameOrSteps]
+    typeof tourName === 'string'
+      ? tourSteps[tourName]
       : tourNameOrSteps
 
   // 向下兼容数组格式：{ steps, ...hooks } 或纯 steps[]
@@ -187,16 +207,18 @@ export function startTour(tourNameOrSteps, stepIndexOrOpts = 0) {
   const { steps, ...hooks } = config
 
   if (!steps?.length) {
-    console.warn(`[useTour] 未找到步骤: ${tourNameOrSteps}`)
+    console.warn(`[useTour] 未找到步骤: ${tourName}`)
     return
   }
 
-  const key = typeof tourNameOrSteps === 'string' ? tourNameOrSteps : null
+  const key = typeof tourName === 'string' ? tourName : null
 
-  // 自动模式：已教学过则跳过
+  // 自动模式：已教学次数 ≥ 基数则跳过
   if (mode === 'auto' && key) {
     const counts = ls.cache[StorageKeys.TOUR] ?? {}
-    if ((counts[key] ?? 0) > 0) return
+    const tourData = resolveTourData(counts, key)
+    const baseCount = tourConfig?.count ?? 1
+    if (tourData.count >= baseCount) return
   }
 
   destroyDriver()
@@ -210,10 +232,11 @@ export function startTour(tourNameOrSteps, stepIndexOrOpts = 0) {
   driverInstance.drive(stepIndex)
   isActive.value = true
 
-  // 自动模式：记录教学次数
-  if (mode === 'auto' && key) {
+  // 记录教学次数（auto/manual 均累加）
+  if (key) {
     const counts = ls.cache[StorageKeys.TOUR] ?? {}
-    counts[key] = (counts[key] ?? 0) + 1
+    const tourData = resolveTourData(counts, key)
+    tourData.count += 1
   }
 }
 
