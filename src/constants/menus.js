@@ -12,7 +12,7 @@ export const PackageName = Object.freeze({
   TOOL: '工具',
   OL: 'OL',
   ANNIVERSARY: '十周年',
-  MOBILE: 'Mobile',
+  MOBILE: 'M',
 });
 
 /** 主题色枚举 */
@@ -28,19 +28,19 @@ export const ThemeColor = Object.freeze({
 
 const menus = [
   {
-    code: 'gao-dian-zhi-jiu',
-    name: '高殿置酒 SP曹操',
+    code: `LuoTong`,
+    name: '落笔生花 骆统',
     route: '/mobile/luo_tong',
     component: () => import('@/pages/mobile/LuoTong/Index.vue'),
     image: {
-      src: 'src/assets/images/menus/高殿置酒-SP曹操-静态.webp',
-      focalX: 50,
-      focalY: 50,
+      src: 'src/assets/images/menus/落笔生花-骆统.webp',
+      focalX: 52,
+      focalY: 16,
       fit: 'cover',
     },
-    themeColor: ThemeColor.CRIMSON,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
+    themeColor: ThemeColor.FOREST,
+    packageName: PackageName.MOBILE,
+    // tourKey: TourKeys.HOME,
     orientation: 'vertical',
   },
   {
@@ -64,8 +64,8 @@ const menus = [
     route: '/mobile/jin-zhi-cui-luan',
     image: {
       src: 'src/assets/images/menus/锦织翠鸾-薛灵芸-静态.webp',
-      focalX: 50,
-      focalY: 50,
+      focalX: 30,
+      focalY: 26,
       fit: 'cover',
     },
     themeColor: ThemeColor.STEEL_BLUE,

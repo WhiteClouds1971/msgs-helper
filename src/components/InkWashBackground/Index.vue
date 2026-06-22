@@ -74,7 +74,7 @@ function createBlob() {
     y: rand(0, height),
     baseRadius: rand(180, 420),
     radius: 0,
-    opacity: rand(0.06, 0.14), // ↑ 原来是 0.015-0.045，太淡
+    opacity: rand(0.08, 0.16),
     speedX: rand(0.02, 0.07) * (Math.random() > 0.5 ? 1 : -1),
     speedY: rand(0.01, 0.05) * (Math.random() > 0.5 ? 1 : -1),
     breatheFreq: rand(0.0006, 0.0018),
@@ -95,7 +95,7 @@ function createInkDot() {
     x: rand(0, width),
     y: rand(0, height),
     radius: rand(2, 18),
-    opacity: rand(0.04, 0.14),
+    opacity: rand(0.08, 0.20),
     blur: rand(0, 4), // 0=锐利飞白，>0=湿墨晕边
     speedX: rand(0.01, 0.04) * (Math.random() > 0.5 ? 1 : -1),
     speedY: rand(0.01, 0.04) * (Math.random() > 0.5 ? 1 : -1),
@@ -168,7 +168,7 @@ function makeTextProps(char) {
   return {
     char,
     fontSize: isLight ? rand(20, 34) : rand(26, 56),
-    opacity: isLight ? rand(0.08, 0.14) : rand(0.12, 0.24),
+    opacity: isLight ? rand(0.15, 0.25) : rand(0.22, 0.38),
     wobble: rand(0.04, 0.18),
     wobblePhase: rand(0, Math.PI * 2),
     rotation: rand(-3, 3),
@@ -202,7 +202,12 @@ function updateColors() {
   } else {
     isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
   }
-  colorInk = isDark ? '200, 190, 170' : '44, 44, 44'
+  // 从设计 Token 读取，保证明暗模式颜色始终一致
+  const hex = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  colorInk = `${r}, ${g}, ${b}`
 }
 
 /* ================================================================
@@ -279,7 +284,7 @@ function drawRipple(rp) {
 
 /** 底部墨深 — 山水画"近深远淡" */
 function drawBottomDepth() {
-  const bottomAlpha = isDark ? 0.08 : 0.12
+  const bottomAlpha = isDark ? 0.14 : 0.18
   const grad = ctx.createLinearGradient(0, height * 0.6, 0, height)
   grad.addColorStop(0, `rgba(${colorInk}, 0)`)
   grad.addColorStop(1, `rgba(${colorInk}, ${bottomAlpha})`)
@@ -345,7 +350,7 @@ function render() {
       x: props.touchPos.x,
       y: props.touchPos.y,
       radius: 0,
-      opacity: 0.18,
+      opacity: 0.25,
       maxRadius: 120,
     })
   }

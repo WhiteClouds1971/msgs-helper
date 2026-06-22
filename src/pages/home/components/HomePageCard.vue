@@ -98,7 +98,10 @@ function onImageError() {
         <span class="seal-stamp">签</span>
         <span class="edict-center">
           <span class="edict-package">{{ menu.packageName }}</span>
-          <span class="edict-sep">·</span>
+          <span
+            class="edict-sep"
+            :style="{ color: menu.themeColor }"
+          >·</span>
           <span
             class="edict-title"
             :style="{ color: menu.themeColor }"
@@ -213,17 +216,18 @@ function onImageError() {
 .edict-package {
   font-size: var(--text-sm);
   color: var(--text-secondary);
+  line-height: 1;
 }
 
 .edict-sep {
-  color: var(--accent-gold-light);
   font-size: var(--text-sm);
+  line-height: 1;
 }
 
 .edict-center {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
   min-width: 0;
   gap: 2px;
@@ -232,6 +236,7 @@ function onImageError() {
 .edict-title {
   font-family: var(--font-display);
   font-size: var(--text-lg);
+  line-height: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;

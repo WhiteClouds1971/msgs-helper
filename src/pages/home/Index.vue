@@ -273,7 +273,7 @@ import { TourKeys } from '@/constants/tourKeys';
 </script>
 
 <template>
-  <div class="home-page texture-rice-paper">
+  <div class="home-page">
     <div
       id="card-stack"
       ref="cardStackRef"
@@ -313,32 +313,6 @@ import { TourKeys } from '@/constants/tourKeys';
     position: relative;
     height: 100dvh;
     overflow: hidden;
-    background: transparent;
-
-    /* 宣纸洗白 — 柔化底层 canvas 墨洇，50% 透出保持隐约可见 */
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      background: var(--bg);
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    /* 暗角 — 压暗边缘，凸显中心卡片 */
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(
-        ellipse at center,
-        transparent 30%,
-        var(--ink-wash-overlay) 100%
-      );
-      z-index: 1;
-      pointer-events: none;
-    }
   }
 
   /* ================================================================

@@ -170,6 +170,7 @@ defineSlots()
   z-index: var(--z-modal);
   /* 金色顶部描边 — 漆盒开盖处的鎏金线 */
   border-top: var(--border-medium) solid var(--accent-gold);
+
   /* 防止背景滚动穿透 */
   overscroll-behavior: contain;
   touch-action: manipulation;

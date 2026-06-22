@@ -4,10 +4,8 @@ defineProps({
   src: { type: String, required: true },
   /** 图片焦点位置，CSS background-position 值，如 '20% 80%'、'top right' */
   position: { type: String, default: 'center' },
-  /** 模糊强度，如 '2px'，默认不模糊 */
+  /** 模糊强度，默认不模糊 */
   blur: { type: String, default: '0px' },
-  /** 是否显示弱化遮罩层 */
-  overlay: { type: Boolean, default: true },
 })
 
 defineSlots()
@@ -17,17 +15,11 @@ defineSlots()
   <div
     class="image-bg"
     :style="{
-      backgroundImage: `url(${src})`,
-      backgroundPosition: position,
+      '--ib-src': `url(${src})`,
+      '--ib-pos': position,
       '--ib-blur': blur,
     }"
   >
-    <!-- 弱化遮罩 — 降低图片视觉权重，凸显前景内容 -->
-    <div
-      v-if="overlay"
-      class="image-bg__overlay"
-    />
-
     <!-- 内容层 -->
     <div class="image-bg__content">
       <slot />
@@ -37,39 +29,30 @@ defineSlots()
 
 <style scoped lang="less">
 /* ================================================================
-   ImageBackground — 图片弱化背景容器
-   灵感：古籍插画的淡墨衬底 — 图片退为背景，内容浮于纸上
+   ImageBackground — 图片背景容器
+   背景图通过 ::before 承载，blur 由外部控制
    ================================================================ */
 
 .image-bg {
   position: relative;
   overflow: hidden;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  isolation: isolate;
 
-  /* 模糊通过 CSS 变量驱动，方便按需启用 */
-  filter: blur(var(--ib-blur, 0px));
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--ib-src);
+    background-size: cover;
+    background-position: var(--ib-pos);
+    background-repeat: no-repeat;
+    filter: blur(var(--ib-blur, 0px));
+  }
 }
 
-/* ── 弱化遮罩 ── */
-.image-bg__overlay {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-overlay);
-  z-index: 0;
-}
-
-/* ── 内容层 ── */
 .image-bg__content {
   position: relative;
   z-index: 1;
-}
-
-/* ── 无障碍 ── */
-@media (prefers-reduced-motion: reduce) {
-  .image-bg {
-    /* 模糊在 reduce-motion 下不退化 — blur 是静态视觉效果，非动画 */
-  }
 }
 </style>
