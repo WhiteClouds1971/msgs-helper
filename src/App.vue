@@ -2,8 +2,7 @@
 import { watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import SplashScreen from '@/ui/SplashScreen/Index.vue'
-import JadeSeal from '@/components/JadeSeal/Index.vue'
-import Console from '@/components/Console/Index.vue'
+import GlobalControls from '@/components/GlobalControls/Index.vue'
 import BackgroundLayout from '@/layout/BackgroundLayout.vue'
 import BlankLayout from '@/layout/BlankLayout.vue'
 import { useAppShell } from '@/composables/useAppShell'
@@ -57,11 +56,8 @@ watch(
     </router-view>
   </component>
 
-  <!-- 玉玺悬浮按钮：全路由可见，splash 结束后显示 -->
-  <JadeSeal v-if="isReady" />
-
-  <!-- 控制台面板：从底部弹出，全路由可用 -->
-  <Console />
+  <!-- 全局控件：玉玺、控制台等，权限统一管理 -->
+  <GlobalControls />
 </template>
 
 <style>

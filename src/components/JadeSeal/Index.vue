@@ -15,8 +15,6 @@ const LONG_PRESS_DURATION = 600;
 const DOUBLE_CLICK_WINDOW = 250;
 const DRAG_THRESHOLD = 5;
 
-// 404 页面不显示
-const isVisible = computed(() => route.name !== 'NotFound');
 const isHome = computed(() => route.name === 'Home');
 
 // 主页隐藏位置：仅左下 1/4 露出右上角
@@ -216,7 +214,6 @@ onUnmounted(() => {
 
 <template>
   <button
-    v-if="isVisible"
     class="jade-seal"
     :class="{
       'is-dragging': isDragging,

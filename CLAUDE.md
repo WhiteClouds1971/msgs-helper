@@ -46,6 +46,7 @@ msgs-helper/
 │   │   │   ├── Index.vue                 # 编排层：zone 分组 → 网格渲染
 │   │   │   └── components/
 │   │   │       └── ThemeToggle.vue       # 昼夜滑动开关（控制台）
+│   │   ├── GlobalControls/          # 全局控件容器：统一管理控件可见性
 │   │   ├── InkWashBackground/       # 墨洇动态背景
 │   │   ├── JadeSeal/                # 玉玺悬浮按钮
 │   │   └── QingGangJian/            # 青釭剑悬浮球
