@@ -5,7 +5,7 @@
  * 菜单顺序即为默认排序。
  */
 
-import { TourKeys } from '@/constants/tourKeys'
+import { TourKeys } from '@/constants/tourKeys';
 
 /** 签题分类枚举 */
 export const PackageName = Object.freeze({
@@ -39,6 +39,96 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
+    orientation: 'vertical',
+  },
+  {
+    code: 'fang-chen-yi-qu',
+    name: '芳辰逸趣 董翓',
+    route: '/mobile/fang-chen-yi-qu',
+    image: {
+      src: 'src/assets/images/menus/芳辰逸趣-董翓-静态.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.ROSE,
+    packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
+    orientation: 'vertical',
+  },
+  {
+    code: 'jin-zhi-cui-luan',
+    name: '锦织翠鸾 薛灵芸',
+    route: '/mobile/jin-zhi-cui-luan',
+    image: {
+      src: 'src/assets/images/menus/锦织翠鸾-薛灵芸-静态.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.STEEL_BLUE,
+    packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
+    orientation: 'vertical',
+  },
+  {
+    code: 'li-ge-yue-zhu',
+    name: '黎歌跃竹 族陆郁生',
+    route: '/mobile/li-ge-yue-zhu',
+    image: {
+      src: 'src/assets/images/menus/黎歌跃竹-族陆郁生-静态.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.JADE,
+    packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
+    orientation: 'vertical',
+  },
+  {
+    code: 'qian-ying-e-nuo',
+    name: '倩影婀娜 胡金定',
+    route: '/mobile/qian-ying-e-nuo',
+    image: {
+      src: 'src/assets/images/menus/倩影婀娜-胡金定-静态.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.ORCHID,
+    packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
+    orientation: 'vertical',
+  },
+  {
+    code: 'yu-zhuo-cheng-qi',
+    name: '玉琢成器 孔淑',
+    route: '/mobile/yu-zhuo-cheng-qi',
+    image: {
+      src: 'src/assets/images/menus/玉琢成器-孔淑-静态.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.JADE,
+    packageName: PackageName.OL,
+    tourKey: TourKeys.HOME,
+    orientation: 'vertical',
+  },
+  {
+    code: 'zhi-long-lie-dan',
+    name: '炙龙烈胆 SP赵云',
+    route: '/mobile/zhi-long-lie-dan',
+    image: {
+      src: 'src/assets/images/menus/炙龙烈胆-SP赵云-静态.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
     packageName: PackageName.OL,
     tourKey: TourKeys.HOME,
     orientation: 'vertical',

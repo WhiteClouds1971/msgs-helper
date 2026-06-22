@@ -55,7 +55,8 @@ msgs-helper/
 │   │   ├── SplashScreen/                 # 启动画面
 │   │   └── Tooltip/                      # 悬停提示
 │   ├── layout/                      # 布局容器
-│   │   └── BackgroundLayout.vue          # 背景全屏布局：按路由 meta 自动切换背景
+│   │   ├── BackgroundLayout.vue          # 背景全屏布局：按路由 meta 自动切换背景
+│   │   └── BlankLayout.vue               # 空白布局：纯 slot 透传，无任何装饰
 │   ├── composables/                 # 组合式函数
 │   │   ├── useAppShell.js           # 首屏 Splash → App 过渡（代际管理）
 │   │   ├── useConsole.js            # 控制台面板开关状态

@@ -1,13 +1,19 @@
 <script setup>
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import SplashScreen from '@/ui/SplashScreen/Index.vue'
 import JadeSeal from '@/components/JadeSeal/Index.vue'
 import Console from '@/components/Console/Index.vue'
+import BackgroundLayout from '@/layout/BackgroundLayout.vue'
+import BlankLayout from '@/layout/BlankLayout.vue'
 import { useAppShell } from '@/composables/useAppShell'
 
 const route = useRoute()
 const { isReady, resetReady } = useAppShell()
+
+const layoutMap = { BackgroundLayout, BlankLayout }
+
+const layout = computed(() => layoutMap[route.meta?.layout] || null)
 
 // 路由切换 → 拉起 SplashScreen，由目标页面负责解除
 watch(
@@ -37,17 +43,19 @@ watch(
   <!-- ================================================================
       应用主体
       ================================================================ -->
-  <router-view v-slot="{ Component, route }">
-    <Transition
-      name="page-fade"
-      mode="out-in"
-    >
-      <component
-        :is="Component"
-        :key="route.path"
-      />
-    </Transition>
-  </router-view>
+  <component :is="layout">
+    <router-view v-slot="{ Component, route }">
+      <Transition
+        name="page-fade"
+        mode="out-in"
+      >
+        <component
+          :is="Component"
+          :key="route.path"
+        />
+      </Transition>
+    </router-view>
+  </component>
 
   <!-- 玉玺悬浮按钮：全路由可见，splash 结束后显示 -->
   <JadeSeal v-if="isReady" />

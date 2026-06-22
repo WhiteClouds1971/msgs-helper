@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, watch, nextTick, reactive } from 'vue';
+  import { ref, computed, watch, nextTick } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
   import { usePageReady } from '@/composables/usePageReady';
   import { useTour } from '@/composables/useTour';
@@ -7,7 +7,7 @@ import { TourKeys } from '@/constants/tourKeys';
   import menus from '@/constants/menus';
   import { useLocalStorage } from '@/stores/localStorage';
   import HomePageCard from '@/pages/home/components/HomePageCard.vue';
-  import InkWashBackground from '@/components/InkWashBackground/Index.vue';
+
 
   const router = useRouter();
   const route = useRoute();
@@ -38,9 +38,6 @@ import { TourKeys } from '@/constants/tourKeys';
     order.splice(idx, 1)
     order.unshift(code)
   }
-
-  /* ---- 触摸坐标（透传给动态背景） ---- */
-  const touchPos = reactive({ x: 0, y: 0, active: false });
 
   /* ================================================================
    卡片扇形展开参数
@@ -178,16 +175,11 @@ import { TourKeys } from '@/constants/tourKeys';
     touchStartTime = lastT;
     velocity = 0;
     hasSwitched = false;
-
-    touchPos.x = x;
-    touchPos.y = y;
-    touchPos.active = true;
   }
 
   function onTouchMove(e) {
     const now = performance.now();
     const x = e.touches[0].clientX;
-    const y = e.touches[0].clientY;
     const dt = now - lastT;
 
     if (dt > 0) {
@@ -196,9 +188,6 @@ import { TourKeys } from '@/constants/tourKeys';
     }
     lastX = x;
     lastT = now;
-
-    touchPos.x = x;
-    touchPos.y = y;
 
     const isFlick = now - touchStartTime < FLICK_MS;
     const step = Math.max(MIN_STEP, BASE_STEP - velocity * 35);
@@ -236,8 +225,6 @@ import { TourKeys } from '@/constants/tourKeys';
   const cardStackRef = ref(null);
 
   function onTouchEnd(e) {
-    touchPos.active = false;
-
     // 只在卡片堆叠区域内响应 tap
     const stack = cardStackRef.value;
     if (!stack) return;
@@ -287,8 +274,6 @@ import { TourKeys } from '@/constants/tourKeys';
 
 <template>
   <div class="home-page texture-rice-paper">
-    <InkWashBackground :touch-pos="touchPos" />
-
     <div
       id="card-stack"
       ref="cardStackRef"
@@ -327,21 +312,31 @@ import { TourKeys } from '@/constants/tourKeys';
   .home-page {
     position: relative;
     height: 100dvh;
-    background: var(--bg);
     overflow: hidden;
+    background: transparent;
 
-    /* 墨洇效果：径向渐变 + 模糊 + 暖黑遮罩 */
+    /* 宣纸洗白 — 柔化底层 canvas 墨洇，50% 透出保持隐约可见 */
     &::before {
       content: '';
-      position: fixed;
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: var(--bg);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* 暗角 — 压暗边缘，凸显中心卡片 */
+    &::after {
+      content: '';
+      position: absolute;
       inset: 0;
       background: radial-gradient(
         ellipse at center,
-        transparent 40%,
+        transparent 30%,
         var(--ink-wash-overlay) 100%
       );
-      backdrop-filter: blur(12px) brightness(0.6);
-      z-index: 0;
+      z-index: 1;
       pointer-events: none;
     }
   }
@@ -394,9 +389,4 @@ import { TourKeys } from '@/constants/tourKeys';
   /* ================================================================
    无障碍
    ================================================================ */
-  @media (prefers-reduced-motion: reduce) {
-    .home-page::before {
-      backdrop-filter: none;
-    }
-  }
 </style>
