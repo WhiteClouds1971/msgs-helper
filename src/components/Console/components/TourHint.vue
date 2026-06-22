@@ -21,7 +21,6 @@ function handleClick() {
   <MenuIcon
     v-if="tourKey"
     icon="tour-hint"
-    name="提示"
     @click="handleClick"
   />
 </template>

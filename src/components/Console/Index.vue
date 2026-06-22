@@ -1,8 +1,8 @@
 <script setup>
 import { computed, ref, onUnmounted } from 'vue'
 import { useConsole } from '@/composables/useConsole'
-import Drawer from '@/components/ui/Drawer/Index.vue'
-import Tooltip from '@/components/ui/Tooltip/Index.vue'
+import Drawer from '@/ui/Drawer/Index.vue'
+import Tooltip from '@/ui/Tooltip/Index.vue'
 import { consoleItems } from '@/constants/consoleItems'
 
 const { isOpen, close } = useConsole()

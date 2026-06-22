@@ -28,22 +28,10 @@ export const ThemeColor = Object.freeze({
 
 const menus = [
   {
-    name: '芳辰逸趣',
-    route: '/tool/fang-chen-yi-qu',
-    image: {
-      src: 'src/assets/images/menus/芳辰逸趣-董翓-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.ROSE,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
+    code: 'gao-dian-zhi-jiu',
     name: '高殿置酒 SP曹操',
-    route: '/tool/gao-dian-zhi-jiu',
+    route: '/mobile/luo_tong',
+    component: () => import('@/pages/mobile/LuoTong/Index.vue'),
     image: {
       src: 'src/assets/images/menus/高殿置酒-SP曹操-静态.webp',
       focalX: 50,
@@ -54,76 +42,6 @@ const menus = [
     packageName: PackageName.OL,
     tourKey: TourKeys.HOME,
     orientation: 'vertical',
-  },
-  {
-    name: '锦织翠鸾',
-    route: '/tool/jin-zhi-cui-luan',
-    image: {
-      src: 'src/assets/images/menus/锦织翠鸾-薛灵芸-静态.webp',
-      focalX: 25,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.STEEL_BLUE,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    name: '黎歌跃竹',
-    route: '/tool/li-ge-yue-zhu',
-    image: {
-      src: 'src/assets/images/menus/黎歌跃竹-族陆郁生-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.FOREST,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    name: '倩影婀娜',
-    route: '/tool/qian-ying-e-nuo',
-    image: {
-      src: 'src/assets/images/menus/倩影婀娜-胡金定-静态.webp',
-      focalX: 50,
-      focalY: 20,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.ORCHID,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    name: '玉琢成器',
-    route: '/tool/yu-zhuo-cheng-qi',
-    image: {
-      src: 'src/assets/images/menus/玉琢成器-孔淑-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.JADE,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    name: '炙龙烈胆',
-    route: '/tool/zhi-long-lie-dan',
-    image: {
-      src: 'src/assets/images/menus/炙龙烈胆-SP赵云-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.EMBER,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'horizontal',
   },
 ];
 

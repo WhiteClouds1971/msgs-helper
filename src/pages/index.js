@@ -1,4 +1,17 @@
 import { TourKeys } from '@/constants/tourKeys'
+import menus from '@/constants/menus'
+
+const menuRoutes = menus.map(menu => ({
+  name: menu.code,
+  path: menu.route,
+  component: menu.component,
+  meta: {
+    layout: 'background',
+    code: menu.code,
+    orientation: menu.orientation,
+    isMenuRoute: true,
+  },
+}))
 
 export default [
   {
@@ -13,6 +26,7 @@ export default [
     component: () => import('@/pages/404.vue'),
     meta: { title: '未寻得' },
   },
+  ...menuRoutes,
   {
     name: 'Demo',
     path: '/demo',

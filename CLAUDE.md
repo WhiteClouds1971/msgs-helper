@@ -42,10 +42,6 @@ msgs-helper/
 │   │   │   └── yue_liang.svg        # 月亮（主题切换）
 │   │   └── images/menus/            # 菜单卡片图片
 │   ├── components/
-│   │   ├── ui/                      # 无业务耦合的 UI 组件
-│   │   │   ├── Drawer/                   # 抽屉面板（reka-ui 封装）
-│   │   │   ├── SplashScreen/             # 启动画面
-│   │   │   └── ThemeToggle.vue           # 主题切换按钮（主页）
 │   │   ├── Console/                 # 尚书台控制台
 │   │   │   ├── Index.vue                 # 编排层：zone 分组 → 网格渲染
 │   │   │   └── components/
@@ -53,6 +49,13 @@ msgs-helper/
 │   │   ├── InkWashBackground/       # 墨洇动态背景
 │   │   ├── JadeSeal/                # 玉玺悬浮按钮
 │   │   └── QingGangJian/            # 青釭剑悬浮球
+│   ├── ui/                          # 无业务耦合的基础 UI 组件
+│   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
+│   │   ├── ImageBackground/              # 图片弱化背景容器
+│   │   ├── SplashScreen/                 # 启动画面
+│   │   └── Tooltip/                      # 悬停提示
+│   ├── layout/                      # 布局容器
+│   │   └── BackgroundLayout.vue          # 背景全屏布局：按路由 meta 自动切换背景
 │   ├── composables/                 # 组合式函数
 │   │   ├── useAppShell.js           # 首屏 Splash → App 过渡（代际管理）
 │   │   ├── useConsole.js            # 控制台面板开关状态
@@ -120,16 +123,6 @@ msgs-helper/
 - `@/../ANIMATION_SPECS.md` — 动效精确参数
 - `src/assets/css/design-tokens.css` — **单一事实源**，所有颜色/字体/间距通过 `var(--token)` 引用，禁止硬编码
 
-## 组件分类
-
-| 目录 | 性质 |
-|------|------|
-| `ui/` | 无业务耦合，跨项目可复用 |
-| `<Name>/` | 有业务耦合，内部可含子组件 |
-
-**命名**：组件与页面目录用大驼峰（`SplashScreen/`），入口文件命名为 `Index.vue`。  
-**升级**：组件被其他通用组件引用时 → 提升到 `ui/`。
-
 ## 教学导览 (Tour)
 
 基于 Driver.js，`tourSteps.js` → `useTour.js` → 组件。
@@ -153,6 +146,16 @@ msgs-helper/
 向下兼容纯 `steps[]` 数组格式。
 
 **使用：** `tourSteps.js` + `tourKeys.js` 追加 key，组件中 `start(TourKeys.XXX)`。禁止写字符串字面量。
+
+## 新建页面
+
+每个页面组件**必须**调用 `usePageReady()`，否则 SplashScreen 永不解除、页面卡在加载态。
+
+```js
+import { usePageReady } from '@/composables/usePageReady'
+usePageReady()  // 自动追踪 <img> 加载，无图片则即刻就绪
+```
+
 
 ## 版本号管理
 

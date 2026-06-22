@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import SplashScreen from '@/components/ui/SplashScreen/Index.vue'
+import SplashScreen from '@/ui/SplashScreen/Index.vue'
 
 const props = defineProps({
   menu: { type: Object, required: true },

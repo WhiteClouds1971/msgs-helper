@@ -1,7 +1,7 @@
 <script setup>
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
-import SplashScreen from '@/components/ui/SplashScreen/Index.vue'
+import SplashScreen from '@/ui/SplashScreen/Index.vue'
 import JadeSeal from '@/components/JadeSeal/Index.vue'
 import Console from '@/components/Console/Index.vue'
 import { useAppShell } from '@/composables/useAppShell'

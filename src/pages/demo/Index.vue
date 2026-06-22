@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import Tooltip from '@/components/ui/Tooltip/Index.vue'
+import Tooltip from '@/ui/Tooltip/Index.vue'
 import { usePageReady } from '@/composables/usePageReady'
 
 usePageReady()

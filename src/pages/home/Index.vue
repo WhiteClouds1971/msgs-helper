@@ -16,14 +16,14 @@ import { TourKeys } from '@/constants/tourKeys';
   const { start: startTour } = useTour();
 
   /* ---- 菜单排序（页面数据） ---- */
-  function rebuild(names, source) {
-    const map = new Map(source.map((m) => [m.name, m]))
-    return names.map((n) => map.get(n)).filter(Boolean)
+  function rebuild(codes, source) {
+    const map = new Map(source.map((m) => [m.code, m]))
+    return codes.map((c) => map.get(c)).filter(Boolean)
   }
 
   const orderedMenus = ref([])
 
-  ls.load(route.fullPath, { order: menus.map((m) => m.name) })
+  ls.load(route.fullPath, { order: menus.map((m) => m.code) })
 
   orderedMenus.value = rebuild(ls.pageData.order ?? [], menus)
 
@@ -31,12 +31,12 @@ import { TourKeys } from '@/constants/tourKeys';
     orderedMenus.value = rebuild(order ?? [], menus)
   })
 
-  function recordAccess(name) {
+  function recordAccess(code) {
     const order = ls.pageData.order
-    const idx = order.findIndex((n) => n === name)
+    const idx = order.findIndex((c) => c === code)
     if (idx <= 0) return
     order.splice(idx, 1)
-    order.unshift(name)
+    order.unshift(code)
   }
 
   /* ---- 触摸坐标（透传给动态背景） ---- */
@@ -257,7 +257,7 @@ import { TourKeys } from '@/constants/tourKeys';
 
   /* ---- 卡片点击 → 导航 ---- */
   function onCardClick(menu) {
-    recordAccess(menu.name);
+    recordAccess(menu.code);
     router.push(menu.route);
   }
 
@@ -265,17 +265,17 @@ import { TourKeys } from '@/constants/tourKeys';
   const splashResolved = ref(new Set());
   let splashDone = false;
 
-  function onCardImageResolved(menuName) {
+  function onCardImageResolved(menuCode) {
     if (splashDone) return;
-    splashResolved.value.add(menuName);
+    splashResolved.value.add(menuCode);
 
     // 用 nextTick 等当前帧可见卡片列表稳定
     nextTick(() => {
       if (splashDone) return;
-      const visibleNames = visibleCards.value.map(c => c.menu.name);
-      if (visibleNames.length === 0) return;
+      const visibleCodes = visibleCards.value.map(c => c.menu.code);
+      if (visibleCodes.length === 0) return;
 
-      const allResolved = visibleNames.every(n => splashResolved.value.has(n));
+      const allResolved = visibleCodes.every(c => splashResolved.value.has(c));
       if (allResolved) {
         splashDone = true;
         markReady();
@@ -297,13 +297,13 @@ import { TourKeys } from '@/constants/tourKeys';
     >
       <HomePageCard
         v-for="card in visibleCards"
-        :key="card.menu.name"
+        :key="card.menu.code"
         :menu="card.menu"
         :is-front="card.isFront"
         :offset="card.relPos"
         :style="getCardStyle(card.relPos, card.isFront)"
         @click="onCardClick(card.menu)"
-        @image-resolved="onCardImageResolved(card.menu.name)"
+        @image-resolved="onCardImageResolved(card.menu.code)"
       />
     </div>
 
