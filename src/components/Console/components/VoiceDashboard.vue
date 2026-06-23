@@ -146,12 +146,13 @@ function cyclePlayMode() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.2em;
-  height: 1.2em;
+  width: 1.3em;
+  height: 1.3em;
 
   :deep(svg) {
     width: 100%;
     height: 100%;
+    display: block;
   }
 }
 
