@@ -146,9 +146,9 @@ function cyclePlayMode() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 0.9em;
-  height: 0.9em;
-  margin-left: 0.15em; // 播放三角形视觉居中
+  width: 1.2em;
+  height: 1.2em;
+  margin-left: 0.1em; // 播放三角形视觉居中
 
   :deep(svg) {
     width: 100%;
