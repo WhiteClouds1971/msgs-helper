@@ -148,7 +148,6 @@ function cyclePlayMode() {
   justify-content: center;
   width: 1.2em;
   height: 1.2em;
-  margin-left: 0.1em; // 播放三角形视觉居中
 
   :deep(svg) {
     width: 100%;
