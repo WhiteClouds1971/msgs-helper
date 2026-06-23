@@ -89,7 +89,7 @@ onUnmounted(() => clearPressTimer())
 // Zone 编排
 // ═══════════════════════════════════════════════════════════════════
 
-const zoneCodes = ['features']
+const zoneCodes = ['features', 'voice']
 
 const itemsByZone = computed(() => {
   const map = {}
