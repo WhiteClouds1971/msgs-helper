@@ -41,7 +41,8 @@ msgs-helper/
 │   │   │   ├── tai_yang.svg         # 太阳（主题切换）
 │   │   │   ├── yue_liang.svg        # 月亮（主题切换）
 │   │   │   └── qing_chu.svg         # 清除（控制台 · 清除本页数据）
-│   │   └── images/menus/            # 菜单卡片图片
+│   │   ├── images/menus/            # 菜单卡片图片
+│   │   └── md/                      # 页内展示的 Markdown 正文（?raw 导入）
 │   ├── components/
 │   │   ├── Console/                 # 尚书台控制台
 │   │   │   ├── Index.vue                 # 编排层：zone 分组 → 网格渲染
@@ -55,6 +56,7 @@ msgs-helper/
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
 │   │   ├── ImageGallery/                 # 多图展示（逐张铺满宽度 + 纵向滚动）
+│   │   ├── MdViewer/                     # Markdown 正文展示（marked 渲染）
 │   │   ├── Message/                      # 全局轻提示宿主（reka-ui Toast 封装）
 │   │   ├── SplashScreen/                 # 启动画面
 │   │   └── Tooltip/                      # 悬停提示
@@ -116,6 +118,29 @@ msgs-helper/
 页面展示图片一律用 `src/ui/ImageGallery/`：`<ImageGallery :images="[{ src, alt? }]" />`（图片永不裁切，逐张铺满容器宽度纵向排列；一屏放不下就纵向滚动，放得下则整组居中；无内边距、无边框、无圆角）。
 
 可选 props：`gap`（图间距，CSS 长度，默认 `var(--space-2)`）。排布与滚动全部由 CSS 完成（`width: 100%` + `height: auto`），没有脚本测量，图片加载前后不跳版；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑。
+
+## Markdown 展示 (MdViewer)
+
+页面展示 Markdown 一律用 `src/ui/MdViewer/`。两种送内容的方式，二选一：
+
+```vue
+<!-- ① content：原文直给（推荐）—— 正文随包发布，无请求、离线可用、改文件即热更 -->
+<script setup>
+import cunGuiMd from '@/assets/md/cun-gui.md?raw'
+</script>
+<template>
+  <MdViewer :content="cunGuiMd" />
+</template>
+
+<!-- ② src：给地址，组件自行 fetch —— 内容可脱离构建单独更新 -->
+<MdViewer src="/rules/cun-gui.md" />
+```
+
+- `content` 非空时优先，且**不发起请求**；换 `src` 时中断上一次请求，慢响应不会覆盖新内容
+- 只负责"把 Markdown 画出来"：**不自建滚动容器**（滚动交给页面）、不带标题栏/操作栏
+- 空 / 加载 / 失败三态各有提示文案，可覆盖：`loadingText` / `emptyText` / `errorText`
+- 渲染出的 HTML 经 `v-html` 注入，**只喂可信来源**（仓库内的 `.md`），不要传用户输入
+- 版式已按设计系统落定：h1/h2 用 `--font-display`、正文 `--font-body`，列表记号/引用线/分隔线走古铜金，图片铺满容器宽度（与 ImageGallery 同规则）；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
 
 ## 常用命令
 
