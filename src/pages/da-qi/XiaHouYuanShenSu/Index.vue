@@ -19,7 +19,6 @@ const images = [{ src: bannerUrl, alt: '神速大旗' }]
 .xia-hou-yuan-shen-su {
   /* #app 为固定高度壳，页面自建滚动容器（组件内部已处理排布与滚动） */
   height: 100%;
-  padding: var(--space-3);
   overflow: hidden;
 }
 </style>

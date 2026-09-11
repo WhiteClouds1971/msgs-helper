@@ -54,7 +54,7 @@ msgs-helper/
 │   │   └── QingGangJian/            # 青釭剑悬浮球
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
-│   │   ├── ImageGallery/                 # 多图展示（自适应排布 + 册页裱框）
+│   │   ├── ImageGallery/                 # 多图展示（逐张铺满宽度 + 纵向滚动）
 │   │   ├── Message/                      # 全局轻提示宿主（reka-ui Toast 封装）
 │   │   ├── SplashScreen/                 # 启动画面
 │   │   └── Tooltip/                      # 悬停提示
@@ -113,9 +113,9 @@ msgs-helper/
 
 ## 多图展示 (ImageGallery)
 
-页面展示图片一律用 `src/ui/ImageGallery/`：`<ImageGallery :images="[{ src, alt?, caption? }]" />`（图片永不裁切，单图一屏展示完、多图逐张铺满宽度纵向滑动，外框贴合图片尺寸并自动居中）。
+页面展示图片一律用 `src/ui/ImageGallery/`：`<ImageGallery :images="[{ src, alt? }]" />`（图片永不裁切，逐张铺满容器宽度纵向排列；一屏放不下就纵向滚动，放得下则整组居中；无内边距、无边框、无圆角）。
 
-可选 props：`gap` / `max-per-row` / `min-scale` / `frame` / `padding` / `divider`；排布算法在 `layout.js`（由 `layout.test.js` 覆盖，`npm test` 可跑）。
+可选 props：`gap`（图间距，CSS 长度，默认 `var(--space-2)`）。排布与滚动全部由 CSS 完成（`width: 100%` + `height: auto`），没有脚本测量，图片加载前后不跳版；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑。
 
 ## 常用命令
 

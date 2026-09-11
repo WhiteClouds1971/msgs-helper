@@ -1,6 +1,6 @@
 ---
 name: add-menu
-description: 在面杀辅助工具 (msgs-helper) 中新增一个菜单/工具卡片：转换并重命名封面图、在 menus.js 注册表追加条目、创建页面、选择布局与教学导览、升级版本号，并在浏览器中验证。Use when adding, registering, or creating a new menu, tool entry, or home card in this project.
+description: 在面杀辅助工具 (msgs-helper) 中新增一个菜单/工具卡片：转换并重命名图片资源（卡片封面、页面内容图）、在 menus.js 注册表追加条目、创建页面（含 ImageGallery 图片页模板）、选择布局与教学导览、升级版本号，并在浏览器中验证。Use when adding, registering, or creating a new menu, tool entry, or home card in this project.
 whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让某个武将或玩法出现在主页」时；或需要调整已有菜单的注册表字段（标题、路由、分类、布局、封面）时。
 ---
 
@@ -24,6 +24,7 @@ whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让
 另需问清（决定第 2、3 步的写法）：
 - **要不要教程**：要 → 加 `tourKey`（并在 `tourKeys.js`/`tourSteps.js` 注册）；不要 → **不写该字段**，控制台「教学导览」会自动提示「本页面暂无教学导览」。
 - **要不要持久化数据**：要 → 页面里用 `useLocalStorage`；不要 → 页面不引入该 store，控制台「清除本页数据」会自动提示「本页面暂无持久化数据」（`clearPage` 返回 false）。
+- **页面主内容是什么形态**：图片为主 → 用现成的 `@/ui/ImageGallery`（第 3 步有模板）；内容待开发 → 空壳骨架；有交互 → 按需写。
 
 主题色 `themeColor` 从 `ThemeColor` 枚举里挑一个贴合封面主色调的；`orientation` 现有条目统一为 `'vertical'`。
 
@@ -114,22 +115,20 @@ usePageReady()
 </style>
 ```
 
-- **页面主内容是图片**（牌面 / 流程板 / 长图说明）时，**用现成的 `@/ui/ImageGallery`，不要手写 flex 容器**：
-  它负责完整展示（永不裁切）+ 尽量填满 + 自适应排布 + 册页裱框，单图多图同一套用法。
+- **页面主内容是图片**（牌面 / 流程板 / 长图说明）时，**用现成的 `@/ui/ImageGallery`，不要手写 img + flex**：
+  它负责完整展示（只等比缩放、永不裁切），逐张铺满容器宽度、纵向排列 —— 一屏放不下就纵向滚动，
+  放得下则整组居中；自身无内边距 / 边框 / 圆角，**默认只放图、不加任何叠加物**。
 
 ```vue
 <script setup>
 import { usePageReady } from '@/composables/usePageReady'
 import ImageGallery from '@/ui/ImageGallery/Index.vue'
-import frontUrl from '@/assets/images/<包前缀>/<文件名>.webp'
-import backUrl from '@/assets/images/<包前缀>/<文件名>背.webp'
+import bannerUrl from '@/assets/images/<包前缀>/<文件名>.webp'
 
 usePageReady()
 
-const images = [
-  { src: frontUrl, alt: '<描述>', caption: '正' },
-  { src: backUrl, alt: '<描述>', caption: '背' },
-]
+// 只放图；多图就继续往数组里加 { src, alt }（逐张铺满宽度、纵向滑动）
+const images = [{ src: bannerUrl, alt: '<描述>' }]
 </script>
 
 <template>
@@ -141,16 +140,15 @@ const images = [
 <style scoped lang="less">
 .page {
   height: 100%;
-  padding: var(--space-3);   /* 页面留白由页面决定，组件自身不额外加 */
-  overflow: hidden;
+  overflow: hidden;   /* 排布与滚动都在 ImageGallery 内完成；要让图片四周留白就自己加 padding */
 }
 </style>
 ```
 
-  常用 props：`gap`(px 数值) / `max-per-row`(默认 1 = 逐张铺满宽度滚动，设 2/3 排成网格) /
-  `min-scale`(默认 0.62，仅约束单图 contain 的下限) / `frame`(默认 true，裱框) /
-  `padding`(裱边，默认 `var(--space-3)`) / `divider`(多行中缝，默认 true)。
-  行为：单图一屏展示完，多图铺满宽度纵向滑动。详细约束见 CLAUDE.md「多图展示 (ImageGallery)」。
+  常用 props：`gap`（图间距，CSS 长度，默认 `var(--space-2)`）；完整契约见
+  `src/ui/ImageGallery/Index.vue` 顶部注释与同目录 `Index.test.js`。
+
+  图片页的页面根元素写 `height: 100%; overflow: hidden` 即可 —— 排布与滚动都在组件内完成，页面不要再套一层滚动容器。
 
 - 需要持久化时（此时才引入 store，key 用路由全路径）：
 
@@ -168,11 +166,14 @@ ls.load(route.fullPath, { qty: 0 })   // 读 ls.pageData.qty
 
 `menus.js` 注册表变更会影响持久化数据 → `package.json` 的 `version` **patch +1**（如 `0.1.7` → `0.1.8`），与本次改动同一次提交。`useVersionCheck` 首屏比对版本号，不一致即清空 localStorage。`package-lock.json` 早已与 package.json 脱节，**不要动**。
 
-## 5. 验证（三步都要做）
+## 5. 验证（都要做）
 
 1. `npx eslint <改动文件>` — 无新增问题即可。仓库存量 2 个 `no-empty` 报错来自 `useTheme.js` / `localStorage.js`，与本次无关。
-2. `npm run build` — 确认新图片作为产物 webp 生成、动态 import 路径可解析。
-3. 浏览器实测（dev server 端口 9456，用户通常在跑）：见 [references/browser-verify.md](references/browser-verify.md)，含「合成 touch 事件滑到新卡片 → 读标签与封面 → 点击跳转 → 校验布局与零报错」的完整脚本。
+2. `npm test`（vitest）— 改动 `src/ui/ImageGallery` 时必跑。
+3. `npm run build` — 确认新图片作为产物 webp 生成、动态 import 路径可解析。
+4. 浏览器实测（dev server 端口 9456，用户通常在跑）：见 [references/browser-verify.md](references/browser-verify.md)，
+   含两段可直跑的程序 —— 主页卡片（合成 touch 事件滑到新卡片 → 读标签与封面 → 点击跳转）与
+   图片页（不裁切 / 铺满宽度 / 框内零空白 / 滚动条已隐藏 / 零报错）。
 
 ## 6. 陷阱
 
