@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import SplashScreen from '@/ui/SplashScreen/Index.vue'
+import TextCover from '@/pages/home/components/TextCover.vue'
 
 const props = defineProps({
   menu: { type: Object, required: true },
@@ -24,7 +25,7 @@ const imageModules = import.meta.glob('@/assets/images/menus/*.{gif,png,jpg,jpeg
 })
 
 const imageUrl = computed(() => {
-  const src = props.menu.image.src
+  const src = props.menu.image?.src
   if (!src) return ''
   const filename = src.replace(/\\/g, '/').split('/').pop()
   for (const [path, url] of Object.entries(imageModules)) {
@@ -44,6 +45,11 @@ function onImageError() {
   imageState.value = 'error'
   emit('image-resolved')
 }
+
+// 文字封面（menu.cover）无图片资源可等：子组件先于父组件挂载，此处即为就绪
+onMounted(() => {
+  if (props.menu.cover) emit('image-resolved')
+})
 </script>
 
 <template>
@@ -53,43 +59,55 @@ function onImageError() {
     :style="style"
     @click="$emit('click')"
   >
-    <!-- 图片区域 -->
+    <!-- 封面区域：组件封面（menu.cover）与图片封面（menu.image）二选一 -->
     <div class="home-card__image">
-      <!-- 加载态：占位背景色跟随卡片主题色 -->
-      <div
-        v-show="imageState !== 'loaded'"
-        class="home-card__placeholder"
-        :style="{ backgroundColor: menu.themeColor + '18' }"
-      >
-        <SplashScreen
-          :size="48"
-          :show-line="true"
-          subtitle="受命于天 既寿永昌"
-        />
-      </div>
+      <!-- 文字封面：menu.cover 直接是文案数据，无图片资源 -->
+      <TextCover
+        v-if="menu.cover"
+        class="home-card__cover"
+        :title="menu.cover.title"
+        :subtitle="menu.cover.subtitle"
+        :color="menu.themeColor"
+      />
 
-      <!-- 图片（加载成功后覆盖在占位色块上层） -->
-      <img
-        v-show="imageState === 'loaded'"
-        :src="imageUrl"
-        :alt="menu.name"
-        class="home-card__img"
-        :loading="imgLoading"
-        decoding="async"
-        :style="{
-          objectPosition: `${menu.image.focalX}% ${menu.image.focalY}%`,
-        }"
-        @load="onImageLoad"
-        @error="onImageError"
-      >
+      <!-- 图片封面：占位 → 图片 → 失败提示 -->
+      <template v-else>
+        <!-- 加载态：占位背景色跟随卡片主题色 -->
+        <div
+          v-show="imageState !== 'loaded'"
+          class="home-card__placeholder"
+          :style="{ backgroundColor: menu.themeColor + '18' }"
+        >
+          <SplashScreen
+            :size="48"
+            :show-line="true"
+            subtitle="受命于天 既寿永昌"
+          />
+        </div>
 
-      <!-- 加载失败提示 -->
-      <div
-        v-if="imageState === 'error'"
-        class="home-card__error-overlay"
-      >
-        <span>图片加载失败</span>
-      </div>
+        <!-- 图片（加载成功后覆盖在占位色块上层） -->
+        <img
+          v-show="imageState === 'loaded'"
+          :src="imageUrl"
+          :alt="menu.name"
+          class="home-card__img"
+          :loading="imgLoading"
+          decoding="async"
+          :style="{
+            objectPosition: `${menu.image.focalX}% ${menu.image.focalY}%`,
+          }"
+          @load="onImageLoad"
+          @error="onImageError"
+        >
+
+        <!-- 加载失败提示 -->
+        <div
+          v-if="imageState === 'error'"
+          class="home-card__error-overlay"
+        >
+          <span>图片加载失败</span>
+        </div>
+      </template>
     </div>
 
     <!-- 诏书标签 -->
@@ -170,6 +188,12 @@ function onImageError() {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+/* 文字封面：铺满封面区域，内部布局由 TextCover 自己决定 */
+.home-card__cover {
+  position: absolute;
+  inset: 0;
 }
 
 .home-card__placeholder {

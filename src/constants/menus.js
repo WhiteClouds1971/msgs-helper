@@ -3,9 +3,11 @@
  *
  * 每个条目代表一个工具/武将卡片入口，定义其展示元数据。
  * 菜单顺序即为默认排序。
+ *
+ * 卡片封面二选一（HomePageCard 按 cover 优先）：
+ *   · cover — 文字封面 { title, subtitle }，底色取本条目 themeColor，无图片资源
+ *   · image — 位图封面，src 必须是 src/assets/images/menus/ 下的文件名
  */
-
-import { TourKeys } from '@/constants/tourKeys';
 
 /** 签题分类枚举 */
 export const PackageName = Object.freeze({
@@ -35,109 +37,16 @@ export const ThemeColor = Object.freeze({
 
 const menus = [
   {
-    code: `LuoTong`,
-    name: '落笔生花 骆统',
-    route: '/mobile/luo_tong',
-    component: () => import('@/pages/mobile/LuoTong/Index.vue'),
-    image: {
-      src: 'src/assets/images/menus/落笔生花-骆统.webp',
-      focalX: 52,
-      focalY: 16,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.FOREST,
-    packageName: PackageName.MOBILE,
-    // tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    code: 'fang-chen-yi-qu',
-    name: '芳辰逸趣 董翓',
-    route: '/mobile/fang-chen-yi-qu',
-    image: {
-      src: 'src/assets/images/menus/芳辰逸趣-董翓-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.ROSE,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    code: 'jin-zhi-cui-luan',
-    name: '锦织翠鸾 薛灵芸',
-    route: '/mobile/jin-zhi-cui-luan',
-    image: {
-      src: 'src/assets/images/menus/锦织翠鸾-薛灵芸-静态.webp',
-      focalX: 30,
-      focalY: 26,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.STEEL_BLUE,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    code: 'li-ge-yue-zhu',
-    name: '黎歌跃竹 族陆郁生',
-    route: '/mobile/li-ge-yue-zhu',
-    image: {
-      src: 'src/assets/images/menus/黎歌跃竹-族陆郁生-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.JADE,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    code: 'qian-ying-e-nuo',
-    name: '倩影婀娜 胡金定',
-    route: '/mobile/qian-ying-e-nuo',
-    image: {
-      src: 'src/assets/images/menus/倩影婀娜-胡金定-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.ORCHID,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    code: 'yu-zhuo-cheng-qi',
-    name: '玉琢成器 孔淑',
-    route: '/mobile/yu-zhuo-cheng-qi',
-    image: {
-      src: 'src/assets/images/menus/玉琢成器-孔淑-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.JADE,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
-    orientation: 'vertical',
-  },
-  {
-    code: 'zhi-long-lie-dan',
-    name: '炙龙烈胆 SP赵云',
-    route: '/mobile/zhi-long-lie-dan',
-    image: {
-      src: 'src/assets/images/menus/炙龙烈胆-SP赵云-静态.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.EMBER,
-    packageName: PackageName.OL,
-    tourKey: TourKeys.HOME,
+    code: 'cun-gui',
+    name: '村规',
+    route: '/tool/cun-gui',
+    component: () => import('@/pages/tool/CunGui/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor
+    cover: { title: '村规', subtitle: '入乡随俗 众议成规' },
+    themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.TOOL,
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
   {
