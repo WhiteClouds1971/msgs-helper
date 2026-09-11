@@ -22,8 +22,10 @@ const layout = computed(() => layoutMap[route.meta?.layout] || null)
 const pageKey = computed(() => `${route.path}#${ls.pageRevision}`)
 
 // 路由切换 → 拉起 SplashScreen，由目标页面负责解除
+// 只看 path：pageKey 也是 path 口径，仅 query 变化时页面不会重挂载，
+// 若此时复位 Splash，就再也没有页面会来解除它（例如全局搜索就地换锚点）。
 watch(
-  () => route.fullPath,
+  () => route.path,
   () => {
     resetReady()
   },

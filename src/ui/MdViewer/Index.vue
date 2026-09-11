@@ -362,5 +362,40 @@ onBeforeUnmount(() => {
     border: none;
     background: var(--decorative-line);
   }
+
+  /* --- 搜索命中高亮 ---
+     mark 由 mark.js 在运行时注入（见 composables/useKeywordHighlight），
+     故用 :deep 穿透；.md-hit--active 是滚动到位后的落点闪烁。 */
+  :deep(mark) {
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--accent-gold) 34%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-gold) 42%, transparent);
+    color: var(--text-primary);
+    transition: box-shadow var(--duration-slow) var(--ease-out);
+  }
+
+  :deep(mark.md-hit--active) {
+    animation: md-hit-flash 1400ms var(--ease-out);
+  }
+}
+
+/* 落点闪烁：亮一下再落回常亮态，指明「就是这里」 */
+@keyframes md-hit-flash {
+  0%,
+  100% {
+    background: color-mix(in srgb, var(--accent-gold) 34%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-gold) 42%, transparent);
+  }
+  25% {
+    background: color-mix(in srgb, var(--accent-gold) 62%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-gold) 30%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-viewer__body :deep(mark.md-hit--active) {
+    animation: none;
+  }
 }
 </style>

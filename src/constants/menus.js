@@ -7,6 +7,11 @@
  * 卡片封面二选一（HomePageCard 按 cover 优先）：
  *   · cover — 文字封面 { title, subtitle }，底色取本条目 themeColor，无图片资源
  *   · image — 位图封面，src 必须是 src/assets/images/menus/ 下的文件名
+ *
+ * 可选检索/关联字段（全局搜索用）：
+ *   · tags — 补充检索标签，参与模糊匹配，并作为标签显示在结果行
+ *   · docs — 本菜单页展示的 Markdown 文档 id 列表（src/assets/md/ 下的文件名，不含扩展名），
+ *            文档搜索结果据此跳到对应菜单页并在正文里滚动高亮
  */
 
 /** 签题分类枚举 */
@@ -45,6 +50,9 @@ const menus = [
     cover: { title: '村规', subtitle: '入乡随俗 众议成规' },
     themeColor: ThemeColor.CRIMSON,
     packageName: PackageName.TOOL,
+    // 正文文件：src/assets/md/cun-gui.md
+    docs: ['cun-gui'],
+    tags: ['规则', '约定'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',

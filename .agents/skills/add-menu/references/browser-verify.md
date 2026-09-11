@@ -4,8 +4,9 @@ dev server 默认 9456（`npm run dev`，用户通常在跑，先 `lsof -nP -i :
 用 `tabbit` skill 驱动真实浏览器；下面的程序可直接喂给
 `"$HOME/.local/bin/tabbit-cli" nodejs --task menu-verify --request-id <id>`。
 
-两段程序分开跑：**A** 走主页卡片（注册、封面、跳转），**B** 走图片页（渲染、裁切、滚动）。
-两段**共用同一个浏览器页**（同一个 task 下就一个 page），**必须串行执行** —— 并行跑会互相导航，
+三段程序分开跑：**A** 走主页卡片（注册、封面、跳转），**B** 走图片页（渲染、裁切、滚动），
+**C** 走全局搜索（`tags` / `docs` 是否被检索与跳转正确识别）。
+三段**共用同一个浏览器页**（同一个 task 下就一个 page），**必须串行执行** —— 并行跑会互相导航，
 出现 `pageRoot: false` 这类假失败（实测踩过）。
 
 ---
@@ -158,3 +159,80 @@ return { out, errors: errors.slice(0, 5) };
 | `scrollbarHidden` | `true` |
 | `splashGone` | `true` —— `usePageReady()` 生效，图片加载完才解除 Splash |
 | `errors` | 空数组 |
+
+---
+
+## C. 全局搜索（注册表写了 `tags` / `docs` 时）
+
+走真实入口，别直接改 `useGlobalSearch`：**玉玺单击**打开蒙层（长按是控制台）。
+两个要点：① 玉玺靠 `pointerdown/up` 判定，Playwright 的 `mouse.click` 可用；
+② 蒙层要等索引就绪才出结果（首次打开会动态 import 拼音库，dev 下几百 ms），所以等内容出现要 `waitForSelector('.search-row')`，别只 sleep。
+
+```js
+const base = 'http://127.0.0.1:9456';
+const errors = [];
+page.on('pageerror', e => errors.push('pageerror: ' + e.message));
+page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
+
+await page.setViewportSize({ width: 390, height: 844 });   // 手机竖屏：蒙层满屏，贴近真实
+await page.goto(base + '<route>', { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.jade-seal', { timeout: 20000 });
+await page.waitForTimeout(1400);
+
+// 单击玉玺 → 搜索蒙层（长按是控制台，别用 down/wait/up 那套）
+const box = await page.locator('.jade-seal').boundingBox();
+await page.mouse.click(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2));
+await page.waitForSelector('.search-field__input', { timeout: 5000 });
+
+const search = async (q) => {
+  await page.locator('.search-field__input').fill(q);
+  await page.waitForTimeout(350);
+  return page.evaluate(() => [...document.querySelectorAll('.search-row')].map(n => ({
+    text: n.textContent.trim().replace(/\s+/g, ' ').slice(0, 40),
+    disabled: n.classList.contains('search-row--disabled'),
+    marks: [...n.querySelectorAll('mark')].map(m => m.textContent),
+  })));
+};
+
+// ① tags：菜单名之外的叫法（汉字 / 全拼 / 首字母三路都试）
+const byTag = await search('<tags 里的词，如 规则>');
+const byPinyin = await search('<该词的拼音，如 guize>');
+const byAcronym = await search('<或首字母，如 xhys>');
+
+// ② docs：文档正文里的词 → 结果行应挂在本菜单名下且可点
+const byDoc = await search('<文档正文里的词>');
+const docRow = byDoc.find(r => r.text.startsWith('文档'));
+
+// ③ 点文档行 → 跳本菜单页 + 滚动高亮到那一句
+await page.locator('.search-row:not(.search-row--disabled)').first().click();
+await page.waitForSelector('mark.md-hit', { timeout: 8000 });
+await page.waitForTimeout(1000);
+const landed = await page.evaluate(() => {
+  const mark = document.querySelector('mark.md-hit');
+  const scroller = document.querySelector('.<页面根类名>');
+  return {
+    url: location.pathname,
+    query: location.search.includes('keyword='),
+    mark: mark ? mark.textContent : null,
+    inView: mark ? (() => { const r = mark.getBoundingClientRect(); return r.top > 0 && r.bottom < window.innerHeight; })() : false,
+    scrolled: scroller ? Math.round(scroller.scrollTop) > 0 : null,
+    panelClosed: document.querySelectorAll('.search-panel').length === 0,
+  };
+});
+
+return { byTag, byPinyin, byAcronym, docRow, landed, errors: errors.slice(0, 6) };
+```
+
+**判读**
+
+| 检查 | 期望 |
+|---|---|
+| `byTag` / `byPinyin` / `byAcronym` | 都能搜出新菜单行（菜单行只有标签、没有高亮片段）；命中的**文档行** `marks` 里应出现高亮汉字 —— 拼音/首字母查询也会回溯成汉字标红 |
+| `docRow` | `text` 以 `文档` 开头、标题是**菜单名**（不是 `文件名`）、`disabled: false` |
+| `landed.url` / `query` | 本菜单的 route，且 query 里带 `keyword=` |
+| `landed.mark` / `inView` / `scrolled` | 命中那句被高亮、滚进了视野、容器确实滚过 |
+| `landed.panelClosed` | `true` —— 选中结果后蒙层自动收起 |
+| `errors` | 空数组 |
+
+文档行标题显示成文件名、或整行 `disabled: true` → `docs` 没写或 id 与 `src/assets/md/` 下的文件名不一致（先 `ls src/assets/md/` 比对）。
+搜不到 `tags` 里的词 → 该字段拼写有误，或条目根本没写 `tags`。

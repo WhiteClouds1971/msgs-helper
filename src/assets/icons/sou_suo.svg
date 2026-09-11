@@ -1,0 +1,5 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="84" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 搜索：镜圈 + 镜柄 -->
+  <circle cx="444" cy="444" r="268" />
+  <path d="M640 640l216 216" />
+</svg>

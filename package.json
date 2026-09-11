@@ -1,7 +1,7 @@
 {
   "name": "msgs-helper",
   "private": true,
-  "version": "0.1.9",
+  "version": "0.1.10",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,8 +15,11 @@
   "dependencies": {
     "@vueuse/core": "^14.3.0",
     "driver.js": "^1.4.0",
+    "fuse.js": "^7.5.0",
+    "mark.js": "^8.11.1",
     "marked": "^18.0.12",
     "pinia": "^3.0.3",
+    "pinyin-pro": "^3.29.4",
     "reka-ui": "^2.10.0",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"

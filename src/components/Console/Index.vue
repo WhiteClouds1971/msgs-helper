@@ -110,6 +110,7 @@ const visibleZones = computed(() =>
     :open="isOpen"
     title="尚书台"
     description="经纬天下 · 纲纪四方"
+    min-height="35dvh"
     max-height="75dvh"
     @update:open="close"
   >

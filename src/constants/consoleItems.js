@@ -27,6 +27,13 @@ export const consoleItems = [
     component: defineAsyncComponent(() => import('@/components/Console/components/GoHome.vue')),
   },
   {
+    id: 'global-search',
+    zone: Zone.FEATURES,
+    colSpan: 1,
+    tip: '搜索菜单与文档',
+    component: defineAsyncComponent(() => import('@/components/Console/components/OpenSearch.vue')),
+  },
+  {
     id: 'theme-toggle',
     zone: Zone.FEATURES,
     colSpan: 2,

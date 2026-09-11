@@ -40,15 +40,22 @@ msgs-helper/
 │   │   │   ├── yu_xi.svg            # 玉玺
 │   │   │   ├── tai_yang.svg         # 太阳（主题切换）
 │   │   │   ├── yue_liang.svg        # 月亮（主题切换）
-│   │   │   └── qing_chu.svg         # 清除（控制台 · 清除本页数据）
+│   │   │   ├── qing_chu.svg         # 清除（控制台 · 清除本页数据）
+│   │   │   └── sou_suo.svg          # 搜索（控制台 · 全局搜索）
 │   │   ├── images/menus/            # 菜单卡片图片
 │   │   └── md/                      # 页内展示的 Markdown 正文（?raw 导入）
+│   │       └── index.js             # 文档注册表：import.meta.glob 自动收录本目录全部 .md
 │   ├── components/
 │   │   ├── Console/                 # 尚书台控制台
 │   │   │   ├── Index.vue                 # 编排层：zone 分组 → 网格渲染
 │   │   │   └── components/
 │   │   │       ├── ThemeToggle.vue       # 昼夜滑动开关（控制台）
-│   │   │       └── ClearPageData.vue     # 清除本页数据（控制台）
+│   │   │       ├── ClearPageData.vue     # 清除本页数据（控制台）
+│   │   │       └── OpenSearch.vue        # 打开全局搜索（控制台）
+│   │   ├── GlobalSearch/            # 全局搜索
+│   │   │   ├── Index.vue                 # 全屏搜索蒙层（reka-ui Dialog）
+│   │   │   ├── ResultItem.vue            # 结果行：类型印记 + 标题 + 命中片段
+│   │   │   └── engine.js                 # 检索索引：菜单 + 文档，按需动态加载
 │   │   ├── GlobalControls/          # 全局控件容器：统一管理控件可见性
 │   │   ├── InkWashBackground/       # 墨洇动态背景
 │   │   ├── JadeSeal/                # 玉玺悬浮按钮
@@ -66,6 +73,8 @@ msgs-helper/
 │   ├── composables/                 # 组合式函数
 │   │   ├── useAppShell.js           # 首屏 Splash → App 过渡（代际管理）
 │   │   ├── useConsole.js            # 控制台面板开关状态
+│   │   ├── useGlobalSearch.js       # 搜索蒙层开关状态（单例）
+│   │   ├── useKeywordHighlight.js   # 跳转落地后的滚动 + 高亮（mark.js）
 │   │   ├── usePageReady.js          # 页面资源就绪检测（自动/手动）
 │   │   └── useImagePreload.js       # 图片预加载
 │   ├── constants/
@@ -88,6 +97,10 @@ msgs-helper/
 │   │   ├── localStorage.js          # 统一缓存 store（load/reset/clearPage/pageData）
 │   │   └── menuOrder.js
 │   └── utils/
+│       ├── markdown.js              # Markdown 逐行切段 + 跳转锚点候选
+│       ├── pinyin.js                # 汉字 → 全拼 / 首字母
+│       ├── random.js                # 加权随机工具
+│       └── search.js                # Fuse 封装 + 命中片段高亮
 └── docs/
     └── superpowers/specs/
 ```
@@ -99,6 +112,7 @@ msgs-helper/
 - 6 列正方形网格，`colSpan` / `rowSpan` 控制占位，ResizeObserver 计算单位尺寸
 - 加控件：`consoleItems.js` 追加条目，`Console/components/` 写组件，Index.vue 不动
 - `tip` 为长按提示文本，由 Index.vue 统一监听长按后打开 Tooltip
+- 抽屉高度：`min-height: 35dvh`（保底，控件下方留白）+ `max-height: 75dvh`（封顶），两者均用 dvh
 
 ## 数据持久化
 
@@ -141,12 +155,6 @@ import cunGuiMd from '@/assets/md/cun-gui.md?raw'
 - 空 / 加载 / 失败三态各有提示文案，可覆盖：`loadingText` / `emptyText` / `errorText`
 - 渲染出的 HTML 经 `v-html` 注入，**只喂可信来源**（仓库内的 `.md`），不要传用户输入
 - 版式已按设计系统落定：h1/h2 用 `--font-display`、正文 `--font-body`，列表记号/引用线/分隔线走古铜金，图片铺满容器宽度（与 ImageGallery 同规则）；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
-
-## 常用命令
-
-| 命令 | 说明 |
-|------|------|
-| `npm run dev` | 启动开发服务器（端口 9456，监听 0.0.0.0） |
 
 ## 路径别名
 
@@ -213,7 +221,6 @@ usePageReady()  // 自动追踪 <img> 加载，无图片则即刻就绪
   -webkit-overflow-scrolling: touch;
 }
 ```
-
 
 ## 版本号管理
 

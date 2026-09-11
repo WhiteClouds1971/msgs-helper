@@ -1,18 +1,18 @@
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import sealSvg from '@/assets/icons/yin_zhang.svg?raw';
 import { useConsole } from '@/composables/useConsole';
+import { useGlobalSearch } from '@/composables/useGlobalSearch';
 
-const router = useRouter();
 const route = useRoute();
 const console = useConsole();
+const search = useGlobalSearch();
 
 const BUTTON_SIZE = 56;
 const EDGE_MARGIN = 10;
 const DIM_DELAY = 5000;
 const LONG_PRESS_DURATION = 600;
-const DOUBLE_CLICK_WINDOW = 250;
 const DRAG_THRESHOLD = 5;
 
 // 404 页面不显示
@@ -65,8 +65,6 @@ let hasMoved = false;
 let longPressFired = false;
 let wasDimmed = false;
 let pressTimer = null;
-let clickTimer = null;
-let clickCount = 0;
 
 function activate() {
   isDimmed.value = false;
@@ -100,23 +98,20 @@ function vibrate(pattern, visualClass) {
   }
 }
 
-// ── 手势回调（预留） ──
+// ── 手势回调 ──
+// 单击 = 搜索，长按 = 控制台。两个动作都不需要「等一等再决定」，
+// 因此单击可以当场响应 —— 移动端软键盘只认手势内的 focus()。
 
-/** 单击：不触发操作（避免误触，控制台改为双击打开） */
+/** 单击：打开全局搜索 */
 function onSingleClickAction() {
-  // 预留：可分配给搜索等轻量操作
+  search.open();
 }
 
-/** 双击：打开控制台菜单 */
-function onDoubleClickAction() {
-  console.open()
-}
-
-/** 长按：返回主页 */
+/** 长按：打开控制台菜单（返回主页改由控制台的「返回主页」控件承担） */
 function onLongPress() {
   longPressFired = true;
   vibrate(40, 'haptic-long');
-  router.push('/');
+  console.open();
 }
 
 // ── 手势识别逻辑 ──
@@ -164,23 +159,10 @@ function onPointerUp() {
   // 主页隐藏状态 → 仅展开，不触发 click
   if (isHome.value && wasDimmed) return;
 
-  // 未移动 → 判定为点击
+  // 未移动 → 判定为单击，立即响应
   if (!hasMoved) {
-    clickCount++;
-    if (clickCount === 1) {
-      // 震动立刻触发；单击无操作，仅等双击窗口结束以重置计数
-      vibrate(10, 'haptic-click');
-      clickTimer = setTimeout(() => {
-        onSingleClickAction();
-        clickCount = 0;
-      }, DOUBLE_CLICK_WINDOW);
-    } else {
-      clearTimeout(clickTimer);
-      // 覆盖为双击震动
-      vibrate([10, 40, 10], 'haptic-double');
-      onDoubleClickAction();
-      clickCount = 0;
-    }
+    vibrate(10, 'haptic-click');
+    onSingleClickAction();
   }
 }
 
@@ -207,7 +189,6 @@ onMounted(() => {
 onUnmounted(() => {
   clearTimeout(dimTimer);
   clearTimeout(pressTimer);
-  clearTimeout(clickTimer);
   document.removeEventListener('pointermove', onPointerMove);
   document.removeEventListener('pointerup', onPointerUp);
   window.removeEventListener('resize', onResize);
