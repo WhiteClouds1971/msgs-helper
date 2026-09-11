@@ -9,4 +9,7 @@
  */
 export const TourKeys = Object.freeze({
   HOME: Object.freeze({ key: 'home', count: 1 }),
+
+  /** 玉玺手势 — 首次进入非主页菜单时自动教学（单击搜索 / 长按控制台） */
+  MENU_SEAL: Object.freeze({ key: 'menu-seal', count: 1 }),
 });

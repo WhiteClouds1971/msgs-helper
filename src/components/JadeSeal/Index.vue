@@ -4,20 +4,26 @@ import { useRoute } from 'vue-router';
 import sealSvg from '@/assets/icons/yin_zhang.svg?raw';
 import { useConsole } from '@/composables/useConsole';
 import { useGlobalSearch } from '@/composables/useGlobalSearch';
+import { useTour } from '@/composables/useTour';
+import { TourKeys } from '@/constants/tourKeys';
 
 const route = useRoute();
 const console = useConsole();
 const search = useGlobalSearch();
+const { start: startTour, stop: stopTour, isActive: isTourActive } = useTour();
 
 const BUTTON_SIZE = 56;
 const EDGE_MARGIN = 10;
 const DIM_DELAY = 5000;
 const LONG_PRESS_DURATION = 600;
 const DRAG_THRESHOLD = 5;
+const TOUR_DELAY = 600; // 等 Splash 淡出（--duration-slow）后再教学
 
 // 404 页面不显示
 const isVisible = computed(() => route.name !== 'NotFound');
 const isHome = computed(() => route.name === 'Home');
+// 菜单页（路由注册表里带 meta.code 的项）— 玉玺教学只在这里触发
+const isMenuPage = computed(() => Boolean(route.meta?.code));
 
 // 主页隐藏位置：仅左下 1/4 露出右上角
 function homeHiddenPos() {
@@ -60,16 +66,27 @@ const posStart = ref({ x: 0, y: 0 });
 const isDimmed = ref(true);
 let dimTimer = null;
 
+// 玉玺教学进行中 — 一方面保持清晰不被弱化，一方面在 tour-theme.css 里放行指针事件，
+// 让用户当场就能试「单击 / 长按」（driver 挂的 .driver-active-element 会被 Vue 的
+// class 补丁抹掉，故改用模板绑定的这个类）
+const isTouring = ref(false);
+
 // 手势识别
 let hasMoved = false;
 let longPressFired = false;
 let wasDimmed = false;
 let pressTimer = null;
+let tourTimer = null;
 
 function activate() {
   isDimmed.value = false;
   clearTimeout(dimTimer);
   dimTimer = setTimeout(() => {
+    // 教学期间保持玉玺清晰：教学结束后再恢复自动弱化
+    if (isTouring.value) {
+      activate();
+      return;
+    }
     isDimmed.value = true;
   }, DIM_DELAY);
 }
@@ -80,6 +97,11 @@ watch(isDimmed, (dimmed) => {
   const target = dimmed ? homeHiddenPos() : homeRevealedPos();
   posX.value = target.x;
   posY.value = target.y;
+});
+
+// 教学收场（✕ 关闭 / 上手操作 / 离开本页）→ 收回指针事件放行
+watch(isTourActive, (active) => {
+  if (!active) isTouring.value = false;
 });
 
 function clampPos() {
@@ -102,8 +124,14 @@ function vibrate(pattern, visualClass) {
 // 单击 = 搜索，长按 = 控制台。两个动作都不需要「等一等再决定」，
 // 因此单击可以当场响应 —— 移动端软键盘只认手势内的 focus()。
 
+/** 用户照着教学上手了 → 教学使命达成，立即收场（免得遮罩盖住刚打开的蒙层） */
+function endTourOnGesture() {
+  if (isTourActive.value) stopTour();
+}
+
 /** 单击：打开全局搜索 */
 function onSingleClickAction() {
+  endTourOnGesture();
   search.open();
 }
 
@@ -111,6 +139,7 @@ function onSingleClickAction() {
 function onLongPress() {
   longPressFired = true;
   vibrate(40, 'haptic-long');
+  endTourOnGesture();
   console.open();
 }
 
@@ -184,11 +213,22 @@ onMounted(() => {
   document.addEventListener('pointermove', onPointerMove);
   document.addEventListener('pointerup', onPointerUp);
   window.addEventListener('resize', onResize);
+
+  // 首次进入非主页菜单 → 自动教学玉玺手势（auto 模式：教学过就不再打扰）
+  if (!isMenuPage.value) return;
+  tourTimer = setTimeout(() => {
+    startTour(TourKeys.MENU_SEAL, { mode: 'auto' });
+    // startTour 同步置位 isActive：没置位说明 auto 模式判定已教学过，本场没开
+    if (!isTourActive.value) return;
+    isTouring.value = true;
+    activate();
+  }, TOUR_DELAY);
 });
 
 onUnmounted(() => {
   clearTimeout(dimTimer);
   clearTimeout(pressTimer);
+  clearTimeout(tourTimer);
   document.removeEventListener('pointermove', onPointerMove);
   document.removeEventListener('pointerup', onPointerUp);
   window.removeEventListener('resize', onResize);
@@ -198,10 +238,12 @@ onUnmounted(() => {
 <template>
   <button
     v-if="isVisible"
+    id="jade-seal"
     class="jade-seal"
     :class="{
       'is-dragging': isDragging,
       'is-dimmed': isDimmed,
+      'is-touring': isTouring,
       [hapticClass]: hapticClass,
     }"
     :style="{ left: posX + 'px', top: posY + 'px' }"

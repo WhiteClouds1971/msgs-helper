@@ -17,10 +17,14 @@
 /** 签题分类枚举 */
 export const PackageName = Object.freeze({
   TOOL: '工具',
+  DA_QI: '大旗',
   OL: 'OL',
   ANNIVERSARY: '十周年',
   MOBILE: 'M',
-  DA_QI: '大旗',
+  JXTP: '界限突破',
+  SHZL: '神话再临',
+  YJCM: '一将',
+  JX: '将星',
   JSRG: '江山如故',
 });
 
@@ -92,7 +96,7 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.STEEL_BLUE,
-    packageName: PackageName.OL,
+    packageName: PackageName.SHZL,
     // 补充检索标签（全局搜索用，也显示在结果行）：江东的小霸王
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
@@ -110,7 +114,7 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.ORCHID,
-    packageName: PackageName.OL,
+    packageName: PackageName.SHZL,
     tags: ['鬼才', '放逐', '集智', '制衡', '完杀'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
@@ -128,7 +132,7 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.ORCHID,
-    packageName: PackageName.DA_QI,
+    packageName: PackageName.JX,
     // 补充检索标签（全局搜索用，也显示在结果行）：汉献帝 —— 刘协的常用别称
     tags: ['汉献帝'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
@@ -204,7 +208,7 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.CRIMSON,
-    packageName: PackageName.DA_QI,
+    packageName: PackageName.SHZL,
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
@@ -240,7 +244,7 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.CRIMSON,
-    packageName: PackageName.OL,
+    packageName: PackageName.JXTP,
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',

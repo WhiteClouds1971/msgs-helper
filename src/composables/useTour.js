@@ -162,8 +162,17 @@ function destroyDriver() {
 
 // ── 模块级：Tour 启动逻辑，无生命周期绑定，供控制台控件等子组件直接调用 ──
 
-const ls = useLocalStorage()
-ls.load(StorageKeys.TOUR, {})
+/**
+ * 取教学记录 store — 必须延迟到调用时再取：
+ * 本模块可能被 App.vue 组件树静态导入（如 GlobalControls → JadeSeal），
+ * 那一刻 pinia 还没装（main.js 的 use(pinia) 在 App 导入之后才执行），
+ * 模块顶层取 store 会直接抛 getActivePinia 错误、整个应用白屏。
+ */
+function tourStore() {
+  const ls = useLocalStorage()
+  ls.load(StorageKeys.TOUR, {})
+  return ls
+}
 
 /**
  * 解析/初始化 tour 存储数据，兼容旧格式（number → { count, data }）
@@ -231,6 +240,8 @@ export function startTour(tourNameOrSteps, stepIndexOrOpts = 0) {
   }
 
   const key = typeof tourName === 'string' ? tourName : null
+
+  const ls = tourStore()
 
   // 自动模式：已教学次数 ≥ 基数则跳过
   if (mode === 'auto' && key) {

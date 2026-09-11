@@ -27,4 +27,19 @@ export const tourSteps = Object.freeze({
       },
     ]),
   }),
+
+  /** 玉玺：主页之外唯一的常驻入口，两步手势（按钮在右下，弹窗置于其上方） */
+  'menu-seal': Object.freeze({
+    steps: Object.freeze([
+      {
+        element: '#jade-seal',
+        popover: {
+          title: '玉玺用法',
+          description: '单击打开全局搜索，长按打开控制台。',
+          side: 'top',
+          align: 'end',
+        },
+      },
+    ]),
+  }),
 });

@@ -176,6 +176,9 @@ import cunGuiMd from '@/assets/md/cun-gui.md?raw'
 
 **使用：** `tourSteps.js` + `tourKeys.js` 追加 key，组件中 `start(TourKeys.XXX)`。禁止写字符串字面量。
 
+**可静态导入：** `useTour.js` 的 store 是延迟获取的（不在模块顶层调 `useLocalStorage()`）—— 它会被 App.vue 的组件树静态导入（如 `GlobalControls → JadeSeal`），而那一刻 `main.js` 的 `use(pinia)` 尚未执行，模块顶层取 store 会直接白屏。
+**交互放行：** driver 挂在目标元素上的 `.driver-active-element` 会被 Vue 的 class 补丁抹掉（该元素 class 绑定一变就整体重写），需要放行指针事件时用**组件自己绑定的类**（如玉玺的 `#jade-seal.is-touring`，见 `tour-theme.css` 7a/7b）。
+
 ## 新建页面
 
 每个页面组件**必须**调用 `usePageReady()`，否则 SplashScreen 永不解除、页面卡在加载态。
