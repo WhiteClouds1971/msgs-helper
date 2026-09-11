@@ -52,11 +52,10 @@ msgs-helper/
 │   │   └── QingGangJian/            # 青釭剑悬浮球
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
-│   │   ├── ImageBackground/              # 图片弱化背景容器
 │   │   ├── SplashScreen/                 # 启动画面
 │   │   └── Tooltip/                      # 悬停提示
 │   ├── layout/                      # 布局容器
-│   │   ├── BackgroundLayout.vue          # 背景全屏布局：按路由 meta 自动切换背景
+│   │   ├── BackgroundLayout.vue          # 背景全屏布局：墨洇动态背景 + 内容插槽
 │   │   └── BlankLayout.vue               # 空白布局：纯 slot 透传，无任何装饰
 │   ├── composables/                 # 组合式函数
 │   │   ├── useAppShell.js           # 首屏 Splash → App 过渡（代际管理）

@@ -3,7 +3,6 @@ import { defineAsyncComponent } from 'vue'
 /** 控制台区域标识 — 决定条目渲染到哪个布局区块 */
 export const Zone = Object.freeze({
   FEATURES: 'features',
-  VOICE: 'voice',
 })
 
 /**
@@ -40,12 +39,5 @@ export const consoleItems = [
     colSpan: 1,
     tip: '教学导览',
     component: defineAsyncComponent(() => import('@/components/Console/components/TourHint.vue')),
-  },
-  {
-    id: 'voice-dashboard',
-    zone: Zone.VOICE,
-    colSpan: 6,
-    tip: '语音仪表',
-    component: defineAsyncComponent(() => import('@/components/Console/components/VoiceDashboard.vue')),
   },
 ]

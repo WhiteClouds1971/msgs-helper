@@ -102,14 +102,14 @@ function vibrate(pattern, visualClass) {
 
 // ── 手势回调（预留） ──
 
-/** 单击：打开控制台菜单 */
+/** 单击：不触发操作（避免误触，控制台改为双击打开） */
 function onSingleClickAction() {
-  console.open()
+  // 预留：可分配给搜索等轻量操作
 }
 
-/** 双击：打开搜索 */
+/** 双击：打开控制台菜单 */
 function onDoubleClickAction() {
-  // TODO: 实现搜索
+  console.open()
 }
 
 /** 长按：返回主页 */
@@ -168,7 +168,7 @@ function onPointerUp() {
   if (!hasMoved) {
     clickCount++;
     if (clickCount === 1) {
-      // 震动立刻触发，只有逻辑回调等待双击窗口
+      // 震动立刻触发；单击无操作，仅等双击窗口结束以重置计数
       vibrate(10, 'haptic-click');
       clickTimer = setTimeout(() => {
         onSingleClickAction();

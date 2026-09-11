@@ -18,7 +18,6 @@ const menuRoutes = menus.map(menu => ({
     layout: 'BackgroundLayout',
     code: menu.code,
     orientation: menu.orientation,
-    isMenuRoute: true,
   },
 }))
 
