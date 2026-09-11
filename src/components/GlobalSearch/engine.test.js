@@ -29,10 +29,16 @@ describe('GlobalSearch 索引', () => {
 
   it('菜单支持拼音与首字母检索', () => {
     expect(getEngine().search('cungui').some(row => row.title === '村规')).toBe(true)
+    // 「郭嘉」合并了原「洞烛先机」「神速」两个菜单：两条检索标签的拼音 / 首字母都要能命中
     expect(
       getEngine()
-        .search('xhys')
-        .some(row => row.title === '夏侯渊 神速'),
+        .search('dzxj')
+        .some(row => row.title === '郭嘉'),
+    ).toBe(true)
+    expect(
+      getEngine()
+        .search('shensu')
+        .some(row => row.title === '郭嘉'),
     ).toBe(true)
   })
 

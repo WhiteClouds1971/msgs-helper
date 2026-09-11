@@ -7,12 +7,20 @@
 import Fuse from 'fuse.js'
 import { pinyin } from 'pinyin-pro'
 
-/** Fuse 默认配置：容错阈值 0.3，兼顾错拼与误召回 */
+/**
+ * Fuse 默认配置：容错阈值 0.3，兼顾错拼与误召回
+ *
+ * ignoreLocation —— 关掉 Fuse 默认的「命中位置越靠后、扣分越多」规则：
+ * 检索文本是「名称 + 分类 + 全部 tags」拼起来的一长串（拼音串同理），
+ * 位置惩罚会让排在后面的 tag（如「神速」的全拼 shensu）永远搜不到。
+ * 关掉后得分只与错拼数有关，等价于「整串里找近似子串」。
+ */
 export const DEFAULT_FUSE_OPTIONS = {
   keys: ['keyword', 'pinyin', 'acronym'],
   threshold: 0.3,
   includeScore: true,
   useExtendedSearch: false,
+  ignoreLocation: true,
 }
 
 /** 建索引（条目需自带 keyword / pinyin / acronym 字段） */

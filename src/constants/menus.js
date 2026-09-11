@@ -21,6 +21,7 @@ export const PackageName = Object.freeze({
   ANNIVERSARY: '十周年',
   MOBILE: 'M',
   DA_QI: '大旗',
+  JIANG_SHAN_RU_GU_ZHUAN: '江山如故·转',
 });
 
 /** 菜单布局枚举（值对应 App.vue 的 layoutMap 键名） */
@@ -58,18 +59,76 @@ const menus = [
     orientation: 'vertical',
   },
   {
-    code: 'xia-hou-yuan-shen-su',
-    name: '夏侯渊 神速',
-    route: '/da-qi/xia-hou-yuan-shen-su',
-    component: () => import('@/pages/da-qi/XiaHouYuanShenSu/Index.vue'),
+    // 合并自原「夏侯渊 神速」「洞烛先机」两个菜单（页面同时展示两张原图）
+    code: 'guo-jia',
+    name: '郭嘉',
+    route: '/jiang-shan-ru-gu-zhuan/guo-jia',
+    component: () => import('@/pages/jiang-shan-ru-gu-zhuan/GuoJia/Index.vue'),
     image: {
-      src: 'src/assets/images/menus/大旗-夏侯渊-神速.webp',
+      src: 'src/assets/images/menus/江山如故·转-郭嘉.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.JIANG_SHAN_RU_GU_ZHUAN,
+    // 补充检索标签（全局搜索用，也显示在结果行）：原两个菜单名
+    tags: ['洞烛先机', '神速'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'sun-ce',
+    name: '孙策 魂姿',
+    route: '/da-qi/sun-ce',
+    component: () => import('@/pages/da-qi/SunCe/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-孙策-魂姿.webp',
       focalX: 50,
       focalY: 50,
       fit: 'cover',
     },
     themeColor: ThemeColor.STEEL_BLUE,
     packageName: PackageName.DA_QI,
+    // 补充检索标签（全局搜索用，也显示在结果行）：江东的小霸王
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'shen-si-ma-yi-ji-lue',
+    name: '神司马懿 极略',
+    route: '/da-qi/shen-si-ma-yi-ji-lue',
+    component: () => import('@/pages/da-qi/ShenSiMaYiJiLue/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-神司马懿-极略.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.ORCHID,
+    packageName: PackageName.DA_QI,
+    tags: ['鬼才', '放逐', '集智', '制衡', '完杀'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'liu-xie-mi-zhao',
+    name: '刘协 密诏',
+    route: '/da-qi/liu-xie-mi-zhao',
+    component: () => import('@/pages/da-qi/LiuXieMiZhao/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-刘协-密诏.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.ORCHID,
+    packageName: PackageName.DA_QI,
+    // 补充检索标签（全局搜索用，也显示在结果行）：汉献帝 —— 刘协的常用别称
+    tags: ['汉献帝'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
