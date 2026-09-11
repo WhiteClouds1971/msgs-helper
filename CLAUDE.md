@@ -31,35 +31,17 @@ msgs-helper/
 │   ├── main.js
 │   ├── App.vue
 │   ├── style.css
-│   ├── assets/
-│   │   ├── css/design-tokens.css    # Design Token 定义
+│   ├── assets/                      # 静态资源
+│   │   ├── css/                     # 全局样式（Design Token 定义）
 │   │   ├── icons/                   # SVG 图标
-│   │   │   ├── arrow-left.svg       # 左箭头（导览）
-│   │   │   ├── arrow-right.svg      # 右箭头（导览）
-│   │   │   ├── yin_zhang.svg        # 印章
-│   │   │   ├── yu_xi.svg            # 玉玺
-│   │   │   ├── tai_yang.svg         # 太阳（主题切换）
-│   │   │   ├── yue_liang.svg        # 月亮（主题切换）
-│   │   │   ├── qing_chu.svg         # 清除（控制台 · 清除本页数据）
-│   │   │   └── sou_suo.svg          # 搜索（控制台 · 全局搜索）
 │   │   ├── images/menus/            # 菜单卡片图片
 │   │   └── md/                      # 页内展示的 Markdown 正文（?raw 导入）
-│   │       └── index.js             # 文档注册表：import.meta.glob 自动收录本目录全部 .md
-│   ├── components/
+│   ├── components/                  # 业务组件
 │   │   ├── Console/                 # 尚书台控制台
-│   │   │   ├── Index.vue                 # 编排层：zone 分组 → 网格渲染
-│   │   │   └── components/
-│   │   │       ├── ThemeToggle.vue       # 昼夜滑动开关（控制台）
-│   │   │       ├── ClearPageData.vue     # 清除本页数据（控制台）
-│   │   │       └── OpenSearch.vue        # 打开全局搜索（控制台）
 │   │   ├── GlobalSearch/            # 全局搜索
-│   │   │   ├── Index.vue                 # 全屏搜索蒙层（reka-ui Dialog）
-│   │   │   ├── ResultItem.vue            # 结果行：类型印记 + 标题 + 命中片段
-│   │   │   └── engine.js                 # 检索索引：菜单 + 文档，按需动态加载
 │   │   ├── GlobalControls/          # 全局控件容器：统一管理控件可见性
 │   │   ├── InkWashBackground/       # 墨洇动态背景
 │   │   ├── JadeSeal/                # 玉玺悬浮按钮
-│   │   └── QingGangJian/            # 青釭剑悬浮球
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
 │   │   ├── ImageGallery/                 # 多图展示（逐张铺满宽度 + 纵向滚动）
@@ -83,12 +65,9 @@ msgs-helper/
 │   │   ├── storageKeys.js           # localStorage Key 枚举（单一事实源）
 │   │   ├── tourKeys.js              # 导览 Key 枚举（单一事实源）
 │   │   └── tourSteps.js             # 导览步骤注册表（单一事实源）
-│   ├── pages/
-│   │   ├── index.js                 # 路由配置
-│   │   ├── 404.vue
+│   ├── pages/                       # 页面
 │   │   ├── demo/
 │   │   └── home/                    # 主页（卡片堆叠）
-│   │       └── components/
 │   ├── router/
 │   │   ├── index.js
 │   │   └── routes.js
