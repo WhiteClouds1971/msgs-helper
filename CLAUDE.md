@@ -178,6 +178,11 @@ usePageReady()  // 自动追踪 <img> 加载，无图片则即刻就绪
 ```less
 .page {
   height: 100%;            /* 不要用 min-height，否则只被裁剪 */
+  /* 页边距：左右 = --content-padding（16px，设计系统规则）；上下 = --space-4 叠加安全区 */
+  padding:
+    calc(var(--safe-area-top) + var(--space-4))
+    var(--content-padding)
+    calc(var(--safe-area-bottom) + var(--space-4));
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;

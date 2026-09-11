@@ -140,7 +140,12 @@ const images = [{ src: bannerUrl, alt: '<描述>' }]
 <style scoped lang="less">
 .page {
   height: 100%;
-  overflow: hidden;   /* 排布与滚动都在 ImageGallery 内完成；要让图片四周留白就自己加 padding */
+  /* 页边距：左右 = --content-padding，上下 = --space-4 叠加安全区（DESIGN_SYSTEM §2.3 / §3.7） */
+  padding:
+    calc(var(--safe-area-top) + var(--space-4))
+    var(--content-padding)
+    calc(var(--safe-area-bottom) + var(--space-4));
+  overflow: hidden;   /* 排布与滚动都在 ImageGallery 内完成 */
 }
 </style>
 ```

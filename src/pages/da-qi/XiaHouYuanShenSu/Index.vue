@@ -17,8 +17,14 @@ const images = [{ src: bannerUrl, alt: '神速大旗' }]
 
 <style scoped lang="less">
 .xia-hou-yuan-shen-su {
-  /* #app 为固定高度壳，页面自建滚动容器（组件内部已处理排布与滚动） */
+  /* #app 为固定高度壳，滚动在 ImageGallery 内部完成，故这里只做裁剪 */
   height: 100%;
+  /* 页边距：左右 = --content-padding（16px，设计系统页面左右留白）；
+     上下 = --space-4（16px，标准 padding）叠加刘海屏 / 底部指示条安全区 */
+  padding:
+    calc(var(--safe-area-top) + var(--space-4))
+    var(--content-padding)
+    calc(var(--safe-area-bottom) + var(--space-4));
   overflow: hidden;
 }
 </style>
