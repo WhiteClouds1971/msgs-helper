@@ -21,7 +21,7 @@ export const PackageName = Object.freeze({
   ANNIVERSARY: '十周年',
   MOBILE: 'M',
   DA_QI: '大旗',
-  JIANG_SHAN_RU_GU_ZHUAN: '江山如故·转',
+  JSRG: '江山如故',
 });
 
 /** 菜单布局枚举（值对应 App.vue 的 layoutMap 键名） */
@@ -61,9 +61,9 @@ const menus = [
   {
     // 合并自原「夏侯渊 神速」「洞烛先机」两个菜单（页面同时展示两张原图）
     code: 'guo-jia',
-    name: '郭嘉',
-    route: '/jiang-shan-ru-gu-zhuan/guo-jia',
-    component: () => import('@/pages/jiang-shan-ru-gu-zhuan/GuoJia/Index.vue'),
+    name: '转郭嘉',
+    route: '/jsrg/guo-jia',
+    component: () => import('@/pages/jsrg/GuoJia/Index.vue'),
     image: {
       src: 'src/assets/images/menus/江山如故·转-郭嘉.webp',
       focalX: 50,
@@ -71,16 +71,18 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.EMBER,
-    packageName: PackageName.JIANG_SHAN_RU_GU_ZHUAN,
+    packageName: PackageName.JSRG,
     // 补充检索标签（全局搜索用，也显示在结果行）：原两个菜单名
     tags: ['洞烛先机', '神速'],
+    // 正文文件：src/assets/md/dong-zhu-xian-ji.md
+    docs: ['dong-zhu-xian-ji'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
   {
     code: 'sun-ce',
-    name: '孙策 魂姿',
+    name: '界孙策 魂姿',
     route: '/da-qi/sun-ce',
     component: () => import('@/pages/da-qi/SunCe/Index.vue'),
     image: {
@@ -90,7 +92,7 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.STEEL_BLUE,
-    packageName: PackageName.DA_QI,
+    packageName: PackageName.OL,
     // 补充检索标签（全局搜索用，也显示在结果行）：江东的小霸王
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
@@ -108,7 +110,7 @@ const menus = [
       fit: 'cover',
     },
     themeColor: ThemeColor.ORCHID,
-    packageName: PackageName.DA_QI,
+    packageName: PackageName.OL,
     tags: ['鬼才', '放逐', '集智', '制衡', '完杀'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
@@ -129,6 +131,116 @@ const menus = [
     packageName: PackageName.DA_QI,
     // 补充检索标签（全局搜索用，也显示在结果行）：汉献帝 —— 刘协的常用别称
     tags: ['汉献帝'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'shen-hua-tuo-wu-qin-xi',
+    name: '神华佗 五禽戏',
+    route: '/da-qi/shen-hua-tuo-wu-qin-xi',
+    component: () => import('@/pages/da-qi/ShenHuaTuoWuQinXi/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-神华佗-五禽戏.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.FOREST,
+    packageName: PackageName.MOBILE,
+    // 补充检索标签（全局搜索用，也显示在结果行）：神华佗的常用别称
+    tags: ['华佗'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'mou-dong-zhuo-zhi-bing',
+    name: '谋董卓 执柄',
+    route: '/ol/mou-dong-zhuo-zhi-bing',
+    component: () => import('@/pages/ol/MouDongZhuoZhiBing/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/OL-谋董卓-执柄.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.OL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：谋董卓的两个技能名
+    tags: ['焚城', '崩坏'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'guan-suo-zheng-nan',
+    name: '关索 征南',
+    route: '/ol/guan-suo-zheng-nan',
+    component: () => import('@/pages/ol/GuanSuoZhengNan/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/OL-关索-征南.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.OL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：关索的三个技能名
+    tags: ['武圣', '当先', '制蛮'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'shen-cao-cao-fei-ying',
+    name: '神曹操 飞影',
+    route: '/da-qi/shen-cao-cao-fei-ying',
+    component: () => import('@/pages/da-qi/ShenCaoCaoFeiYing/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-神曹操-飞影.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.DA_QI,
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'si-ma-hui-jian-jie',
+    name: '司马徽 荐杰',
+    route: '/ol/si-ma-hui-jian-jie',
+    component: () => import('@/pages/ol/SiMaHuiJianJie/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/OL-司马徽-荐杰.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.STEEL_BLUE,
+    packageName: PackageName.OL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：司马徽的三个技能名
+    tags: ['火计', '连环', '业炎'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'jie-zhao-yun-long-dan',
+    name: '界赵云 龙胆',
+    route: '/ol/jie-zhao-yun-long-dan',
+    component: () => import('@/pages/ol/JieZhaoYunLongDan/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/OL-界赵云-龙胆.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.OL,
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',

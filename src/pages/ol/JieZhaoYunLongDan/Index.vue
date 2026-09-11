@@ -1,0 +1,30 @@
+<script setup>
+import { usePageReady } from '@/composables/usePageReady'
+import ImageGallery from '@/ui/ImageGallery/Index.vue'
+import bannerUrl from '@/assets/images/ol/龙胆.webp'
+
+// 空白布局页面：无装饰、无教学导览、无持久化数据
+usePageReady()
+
+const images = [{ src: bannerUrl, alt: '龙胆' }]
+</script>
+
+<template>
+  <div class="jie-zhao-yun-long-dan">
+    <ImageGallery :images="images" />
+  </div>
+</template>
+
+<style scoped lang="less">
+.jie-zhao-yun-long-dan {
+  /* #app 为固定高度壳，滚动在 ImageGallery 内部完成，故这里只做裁剪 */
+  height: 100%;
+  /* 页边距：左右 = --content-padding（设计系统页面左右留白）；
+     上下 = --space-4（16px，标准 padding）叠加刘海屏 / 底部指示条安全区 */
+  padding:
+    calc(var(--safe-area-top) + var(--space-4))
+    var(--content-padding)
+    calc(var(--safe-area-bottom) + var(--space-4));
+  overflow: hidden;
+}
+</style>

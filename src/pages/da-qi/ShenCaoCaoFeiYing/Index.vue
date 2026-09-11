@@ -1,27 +1,22 @@
 <script setup>
 import { usePageReady } from '@/composables/usePageReady'
 import ImageGallery from '@/ui/ImageGallery/Index.vue'
-import shenSuUrl from '@/assets/images/jiang-shan-ru-gu-zhuan/神速.webp'
-import dongZhuXianJiUrl from '@/assets/images/jiang-shan-ru-gu-zhuan/洞烛先机.webp'
+import bannerUrl from '@/assets/images/da-qi/飞影大旗.webp'
 
 // 空白布局页面：无装饰、无教学导览、无持久化数据
 usePageReady()
 
-// 合并自原「夏侯渊 神速」与「洞烛先机」两个菜单：先立绘、后牌面
-const images = [
-  { src: shenSuUrl, alt: '神速' },
-  { src: dongZhuXianJiUrl, alt: '洞烛先机' },
-]
+const images = [{ src: bannerUrl, alt: '飞影大旗' }]
 </script>
 
 <template>
-  <div class="guo-jia">
+  <div class="shen-cao-cao-fei-ying">
     <ImageGallery :images="images" />
   </div>
 </template>
 
 <style scoped lang="less">
-.guo-jia {
+.shen-cao-cao-fei-ying {
   /* #app 为固定高度壳，滚动在 ImageGallery 内部完成，故这里只做裁剪 */
   height: 100%;
   /* 页边距：左右 = --content-padding（设计系统页面左右留白）；
