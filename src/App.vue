@@ -3,6 +3,7 @@ import { watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import SplashScreen from '@/ui/SplashScreen/Index.vue'
 import GlobalControls from '@/components/GlobalControls/Index.vue'
+import Message from '@/ui/Message/Index.vue'
 import BackgroundLayout from '@/layout/BackgroundLayout.vue'
 import BlankLayout from '@/layout/BlankLayout.vue'
 import { useAppShell } from '@/composables/useAppShell'
@@ -58,6 +59,9 @@ watch(
 
   <!-- 全局控件：玉玺、控制台等，权限统一管理 -->
   <GlobalControls />
+
+  <!-- 全局轻提示宿主：message.success() 等命令式 API 的渲染出口 -->
+  <Message />
 </template>
 
 <style>

@@ -52,6 +52,7 @@ msgs-helper/
 │   │   └── QingGangJian/            # 青釭剑悬浮球
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
+│   │   ├── Message/                      # 全局轻提示宿主（reka-ui Toast 封装）
 │   │   ├── SplashScreen/                 # 启动画面
 │   │   └── Tooltip/                      # 悬停提示
 │   ├── layout/                      # 布局容器
@@ -100,6 +101,10 @@ msgs-helper/
 - **系统/控件**：固定 key（`StorageKeys.XXX`），`store.load(key, defaults)` → `store.cache[key]` 读写
 - **页面**：动态 key（`route.fullPath`），`store.load(fullPath, defaults)` → `store.pageData` 读写（语法糖）
 - **重置**：`store.reset(key, defaults)` → 删缓存 + 还原默认值
+
+## 全局轻提示 (Message)
+
+`useMessage()` → `message.success/error/warning/info(content, { duration })`（默认 2000ms，`duration: 0` 常驻）、`message.close(id)` / `message.closeAll()`；宿主 `<Message />` 已在 `App.vue` 全局挂载，直接调用即可。
 
 ## 常用命令
 
@@ -155,6 +160,17 @@ msgs-helper/
 ```js
 import { usePageReady } from '@/composables/usePageReady'
 usePageReady()  // 自动追踪 <img> 加载，无图片则即刻就绪
+```
+
+**内容超出一屏的页面**：`#app` 是 `overflow: hidden` 的固定高度壳，文档本身不滚动，页面根元素需自建滚动容器：
+
+```less
+.page {
+  height: 100%;            /* 不要用 min-height，否则只被裁剪 */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
 ```
 
 

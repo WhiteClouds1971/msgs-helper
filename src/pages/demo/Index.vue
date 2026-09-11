@@ -2,16 +2,19 @@
 import { ref } from 'vue'
 import Tooltip from '@/ui/Tooltip/Index.vue'
 import { usePageReady } from '@/composables/usePageReady'
+import { useMessage } from '@/composables/useMessage'
 
 usePageReady()
 
 const controlledOpen = ref(false)
+
+const message = useMessage()
 </script>
 
 <template>
   <div class="demo-page">
     <div class="demo-heading-row">
-      <h2 class="demo-heading">Tooltip 组件测试</h2>
+      <h2 class="demo-heading">UI 组件测试</h2>
     </div>
 
     <!-- ================================================================
@@ -119,6 +122,51 @@ const controlledOpen = ref(false)
         </button>
       </div>
     </section>
+
+    <!-- ================================================================
+         Message 全局轻提示
+         ================================================================ -->
+    <section class="demo-section">
+      <h3 class="section-title">全局轻提示（useMessage）</h3>
+      <div class="demo-row">
+        <button
+          class="demo-btn"
+          @click="message.success('身份已确认')"
+        >
+          success
+        </button>
+        <button
+          class="demo-btn"
+          @click="message.error('体力不足，无法出杀')"
+        >
+          error
+        </button>
+        <button
+          class="demo-btn demo-btn--ghost"
+          @click="message.warning('该操作不可撤销')"
+        >
+          warning
+        </button>
+        <button
+          class="demo-btn demo-btn--ghost"
+          @click="message.info('长按卡片可查看身份')"
+        >
+          info
+        </button>
+        <button
+          class="demo-btn demo-btn--ghost"
+          @click="message.info('持续 5 秒', { duration: 5000 })"
+        >
+          duration
+        </button>
+        <button
+          class="demo-btn demo-btn--ghost"
+          @click="message.closeAll()"
+        >
+          closeAll
+        </button>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -129,10 +177,15 @@ const controlledOpen = ref(false)
 .demo-page {
   width: 100%;
   max-width: 720px;
-  min-height: 100dvh;
+  /* 固定为 app 壳高度并自建滚动容器：#app 是 overflow:hidden，文档不滚动 */
+  height: 100%;
   margin: 0 auto;
   background: var(--bg);
   padding: var(--space-8) var(--content-padding) var(--space-12);
+  overflow-y: auto;
+  /* 滚动到边界时不串联到外层（防下拉刷新 / 回弹） */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .demo-heading-row {
