@@ -13,6 +13,13 @@ export const PackageName = Object.freeze({
   OL: 'OL',
   ANNIVERSARY: '十周年',
   MOBILE: 'M',
+  DA_QI: '大旗',
+});
+
+/** 菜单布局枚举（值对应 App.vue 的 layoutMap 键名） */
+export const MenuLayout = Object.freeze({
+  BACKGROUND: 'BackgroundLayout',
+  BLANK: 'BlankLayout',
 });
 
 /** 主题色枚举 */
@@ -131,6 +138,23 @@ const menus = [
     themeColor: ThemeColor.EMBER,
     packageName: PackageName.OL,
     tourKey: TourKeys.HOME,
+    orientation: 'vertical',
+  },
+  {
+    code: 'xia-hou-yuan-shen-su',
+    name: '夏侯渊 神速',
+    route: '/da-qi/xia-hou-yuan-shen-su',
+    component: () => import('@/pages/da-qi/XiaHouYuanShenSu/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-夏侯渊-神速.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.STEEL_BLUE,
+    packageName: PackageName.DA_QI,
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
 ];

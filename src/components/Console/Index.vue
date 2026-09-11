@@ -110,7 +110,6 @@ const visibleZones = computed(() =>
     :open="isOpen"
     title="尚书台"
     description="经纬天下 · 纲纪四方"
-    min-height="50dvh"
     max-height="75dvh"
     @update:open="close"
   >
@@ -162,6 +161,8 @@ const visibleZones = computed(() =>
    ================================================================ */
 .console-body {
   /* 延续 Drawer 的 .drawer-body 内边距体系 */
+  /* 抽屉高度贴合内容，底部补足留白，避免网格紧贴安全区 */
+  padding-bottom: var(--space-4);
 }
 
 /* ================================================================

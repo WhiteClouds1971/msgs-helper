@@ -40,4 +40,11 @@ export const consoleItems = [
     tip: '教学导览',
     component: defineAsyncComponent(() => import('@/components/Console/components/TourHint.vue')),
   },
+  {
+    id: 'clear-page-data',
+    zone: Zone.FEATURES,
+    colSpan: 1,
+    tip: '清除本页数据',
+    component: defineAsyncComponent(() => import('@/components/Console/components/ClearPageData.vue')),
+  },
 ]

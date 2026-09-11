@@ -7,13 +7,19 @@ import Message from '@/ui/Message/Index.vue'
 import BackgroundLayout from '@/layout/BackgroundLayout.vue'
 import BlankLayout from '@/layout/BlankLayout.vue'
 import { useAppShell } from '@/composables/useAppShell'
+import { useLocalStorage } from '@/stores/localStorage'
 
 const route = useRoute()
 const { isReady, resetReady } = useAppShell()
+const ls = useLocalStorage()
 
 const layoutMap = { BackgroundLayout, BlankLayout }
 
 const layout = computed(() => layoutMap[route.meta?.layout] || null)
+
+// 页面 key：路由 path + 数据修订号。清除本页持久化数据后修订号递增，
+// 页面重挂载 → setup 重新 load 默认值（Splash 由代际机制保持不变）
+const pageKey = computed(() => `${route.path}#${ls.pageRevision}`)
 
 // 路由切换 → 拉起 SplashScreen，由目标页面负责解除
 watch(
@@ -44,14 +50,14 @@ watch(
       应用主体
       ================================================================ -->
   <component :is="layout">
-    <router-view v-slot="{ Component, route }">
+    <router-view v-slot="{ Component }">
       <Transition
         name="page-fade"
         mode="out-in"
       >
         <component
           :is="Component"
-          :key="route.path"
+          :key="pageKey"
         />
       </Transition>
     </router-view>

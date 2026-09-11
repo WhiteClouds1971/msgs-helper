@@ -51,7 +51,9 @@ function onOpenChange(id, open) {
 <style lang="less">
 /* ================================================================
    Message — 全局轻提示（reka-ui Toast 封装）
-   灵感：令牌 — 从上方落入的一条窄简，左缘色条标示类型
+   形态：令牌 — 漆面窄简自上方落入，鎏金左线压边，
+        类型色记号居首，铭文以毛笔体书写
+   取材：DESIGN_SYSTEM 的漆器 / 鎏金线两则母题
 
    注意：不用 scoped —— reka 的 Toast 会把 DOM 传送到 Viewport（ol），
    该元素拿不到 SFC 的 data-v 作用域属性，scoped 规则不会命中。
@@ -76,7 +78,7 @@ function onOpenChange(id, open) {
   pointer-events: none;
 }
 
-/* ---------------- 消息本体 ---------------- */
+/* ---------------- 令牌本体 ---------------- */
 .message {
   --_accent: var(--text-secondary);
 
@@ -85,16 +87,20 @@ function onOpenChange(id, open) {
   gap: var(--space-3);
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  background: var(--bg-surface);
+  /* 漆面光感 — 与 Drawer、Card 同一材质；鎏金左线用背景绘制而非 border：
+     border 在圆角处与 1px 邻边做斜接，会出现台阶断层，背景则被圆角平滑裁切 */
+  background:
+    linear-gradient(var(--accent-gold), var(--accent-gold)) left /
+      var(--border-medium) 100% no-repeat,
+    var(--card-lacquer-gradient),
+    var(--bg-surface);
   border: var(--border-thin) solid var(--border);
-  /* 左缘色条 — 类型识别，如令牌的编绳 */
-  border-left: var(--border-medium) solid var(--_accent);
+  /* 左边不留 border，金线直接顶到外缘 */
+  border-left: 0;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   color: var(--text-primary);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  line-height: var(--leading-normal);
+  font-size: var(--text-base);
   pointer-events: auto;
 
   &[data-state='open'] {
@@ -106,7 +112,7 @@ function onOpenChange(id, open) {
   }
 }
 
-/* ---------------- 类型配色（info 沿用默认淡墨色） ---------------- */
+/* ---------------- 状态配色（info 沿用淡墨） ---------------- */
 .message--success {
   --_accent: var(--accent-green);
 }
@@ -116,15 +122,18 @@ function onOpenChange(id, open) {
 }
 
 .message--warning {
-  --_accent: var(--accent-gold);
+  /* 深金而非亮金：Light 模式亮金仅 3.0:1，不足以承载图形记号 */
+  --_accent: var(--accent-gold-dark);
 }
 
-/* ---------------- 图标 ---------------- */
+/* ---------------- 简首记号：只留类型色字形 ---------------- */
 .message__icon {
   display: flex;
   flex-shrink: 0;
-  width: 1.25em;
-  height: 1.25em;
+  align-items: center;
+  justify-content: center;
+  width: 1.2em;
+  height: 1.2em;
   color: var(--_accent);
 
   svg {
@@ -134,10 +143,14 @@ function onOpenChange(id, open) {
   }
 }
 
-/* ---------------- 文本 ---------------- */
+/* ---------------- 铭文：毛笔体 ---------------- */
 .message__text {
   flex: 1;
   min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
   word-break: break-word;
 }
 

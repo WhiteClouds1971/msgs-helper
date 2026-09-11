@@ -39,19 +39,22 @@ msgs-helper/
 │   │   │   ├── yin_zhang.svg        # 印章
 │   │   │   ├── yu_xi.svg            # 玉玺
 │   │   │   ├── tai_yang.svg         # 太阳（主题切换）
-│   │   │   └── yue_liang.svg        # 月亮（主题切换）
+│   │   │   ├── yue_liang.svg        # 月亮（主题切换）
+│   │   │   └── qing_chu.svg         # 清除（控制台 · 清除本页数据）
 │   │   └── images/menus/            # 菜单卡片图片
 │   ├── components/
 │   │   ├── Console/                 # 尚书台控制台
 │   │   │   ├── Index.vue                 # 编排层：zone 分组 → 网格渲染
 │   │   │   └── components/
-│   │   │       └── ThemeToggle.vue       # 昼夜滑动开关（控制台）
+│   │   │       ├── ThemeToggle.vue       # 昼夜滑动开关（控制台）
+│   │   │       └── ClearPageData.vue     # 清除本页数据（控制台）
 │   │   ├── GlobalControls/          # 全局控件容器：统一管理控件可见性
 │   │   ├── InkWashBackground/       # 墨洇动态背景
 │   │   ├── JadeSeal/                # 玉玺悬浮按钮
 │   │   └── QingGangJian/            # 青釭剑悬浮球
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
+│   │   ├── ImageGallery/                 # 多图展示（自适应排布 + 册页裱框）
 │   │   ├── Message/                      # 全局轻提示宿主（reka-ui Toast 封装）
 │   │   ├── SplashScreen/                 # 启动画面
 │   │   └── Tooltip/                      # 悬停提示
@@ -80,7 +83,7 @@ msgs-helper/
 │   │   └── routes.js
 │   ├── stores/
 │   │   ├── index.js
-│   │   ├── localStorage.js          # 统一缓存 store（load/reset/pageData）
+│   │   ├── localStorage.js          # 统一缓存 store（load/reset/clearPage/pageData）
 │   │   └── menuOrder.js
 │   └── utils/
 └── docs/
@@ -93,6 +96,7 @@ msgs-helper/
 
 - 6 列正方形网格，`colSpan` / `rowSpan` 控制占位，ResizeObserver 计算单位尺寸
 - 加控件：`consoleItems.js` 追加条目，`Console/components/` 写组件，Index.vue 不动
+- `tip` 为长按提示文本，由 Index.vue 统一监听长按后打开 Tooltip
 
 ## 数据持久化
 
@@ -101,10 +105,17 @@ msgs-helper/
 - **系统/控件**：固定 key（`StorageKeys.XXX`），`store.load(key, defaults)` → `store.cache[key]` 读写
 - **页面**：动态 key（`route.fullPath`），`store.load(fullPath, defaults)` → `store.pageData` 读写（语法糖）
 - **重置**：`store.reset(key, defaults)` → 删缓存 + 还原默认值
+- **清除页面数据**：`store.clearPage(key = route.fullPath)` → 删 localStorage + 删内存缓存 + 递增 `store.pageRevision`；`pageRevision` 参与 `App.vue` 中 router-view 的 key，页面随之重挂载，setup 重新 `load()` 回默认值（内存缓存必须一并删，否则残留态会在下次变更时被写回）。返回 `boolean`，页面本就无数据时为 `false`
 
 ## 全局轻提示 (Message)
 
 `useMessage()` → `message.success/error/warning/info(content, { duration })`（默认 2000ms，`duration: 0` 常驻）、`message.close(id)` / `message.closeAll()`；宿主 `<Message />` 已在 `App.vue` 全局挂载，直接调用即可。
+
+## 多图展示 (ImageGallery)
+
+页面展示图片一律用 `src/ui/ImageGallery/`：`<ImageGallery :images="[{ src, alt?, caption? }]" />`（图片永不裁切，单图一屏展示完、多图逐张铺满宽度纵向滑动，外框贴合图片尺寸并自动居中）。
+
+可选 props：`gap` / `max-per-row` / `min-scale` / `frame` / `padding` / `divider`；排布算法在 `layout.js`（由 `layout.test.js` 覆盖，`npm test` 可跑）。
 
 ## 常用命令
 

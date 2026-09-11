@@ -179,6 +179,28 @@ function resolveTourData(counts, key) {
 }
 
 /**
+ * 解析 tour 名称 — TourKeys 常量对象统一取其 key
+ * @param {string|object} tourNameOrKey — TourKeys 常量、纯字符串或步骤数组
+ * @returns {string|null}
+ */
+function resolveTourName(tourNameOrKey) {
+  if (typeof tourNameOrKey === 'string') return tourNameOrKey
+  return tourNameOrKey?.key ?? null
+}
+
+/**
+ * 判断某个导览是否有可用步骤（供入口控件判断能否启动，避免无效点击）
+ * @param {string|object} tourNameOrKey — TourKeys 常量、纯字符串或步骤数组
+ * @returns {boolean}
+ */
+export function hasTour(tourNameOrKey) {
+  const name = resolveTourName(tourNameOrKey)
+  const raw = name ? tourSteps[name] : tourNameOrKey
+  const steps = Array.isArray(raw) ? raw : raw?.steps
+  return Array.isArray(steps) && steps.length > 0
+}
+
+/**
  * 启动教学导览（模块级，不注册 onUnmounted）
  * @param {string|array|object} tourNameOrSteps — TourKeys 常量、步骤数组，或纯字符串
  * @param {number|object} stepIndexOrOpts  — 起始步骤索引，或 { stepIndex, mode } 选项
@@ -190,12 +212,9 @@ export function startTour(tourNameOrSteps, stepIndexOrOpts = 0) {
   const mode = typeof stepIndexOrOpts === 'object' ? (stepIndexOrOpts.mode ?? 'manual') : 'manual'
 
   // 解析 TourKeys 对象 → 提取 key + count
-  let tourConfig = null
-  let tourName = tourNameOrSteps
-  if (typeof tourNameOrSteps === 'object' && !Array.isArray(tourNameOrSteps) && tourNameOrSteps.key) {
-    tourConfig = tourNameOrSteps
-    tourName = tourConfig.key
-  }
+  const tourConfig =
+    typeof tourNameOrSteps === 'object' && !Array.isArray(tourNameOrSteps) ? tourNameOrSteps : null
+  const tourName = tourConfig?.key ?? tourNameOrSteps
 
   const raw =
     typeof tourName === 'string'

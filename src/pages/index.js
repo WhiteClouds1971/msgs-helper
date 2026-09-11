@@ -1,7 +1,7 @@
 import { h } from 'vue'
 import { TourKeys } from '@/constants/tourKeys'
 import { usePageReady } from '@/composables/usePageReady'
-import menus from '@/constants/menus'
+import menus, { MenuLayout } from '@/constants/menus'
 
 const PlaceholderPage = {
   setup() {
@@ -15,9 +15,12 @@ const menuRoutes = menus.map(menu => ({
   path: menu.route,
   component: menu.component || PlaceholderPage,
   meta: {
-    layout: 'BackgroundLayout',
+    // 布局：菜单级声明，未声明则用背景布局
+    layout: menu.layout || MenuLayout.BACKGROUND,
     code: menu.code,
     orientation: menu.orientation,
+    // 菜单级教学导览 Key（可为空）— 控制台「教学导览」入口据此判断有无教程
+    tourKey: menu.tourKey,
   },
 }))
 
