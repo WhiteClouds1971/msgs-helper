@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { usePageReady } from '@/composables/usePageReady'
 import { useKeywordHighlight } from '@/composables/useKeywordHighlight'
-import ImageGallery from '@/ui/ImageGallery/Index.vue'
+import ImageFigure from '@/ui/ImageFigure/Index.vue'
 import MdViewer from '@/ui/MdViewer/Index.vue'
 import shenSuUrl from '@/assets/images/jsrg/神速.webp'
 import dongZhuXianJiUrl from '@/assets/images/jsrg/洞烛先机.webp'
@@ -11,12 +11,6 @@ import dongZhuXianJiMd from '@/assets/md/dong-zhu-xian-ji.md?raw'
 
 // 空白布局页面：无装饰、无教学导览、无持久化数据
 usePageReady()
-
-// 合并自原「夏侯渊 神速」与「洞烛先机」两个菜单：先立绘、后牌面
-const images = [
-  { src: shenSuUrl, alt: '神速' },
-  { src: dongZhuXianJiUrl, alt: '洞烛先机' },
-]
 
 // 全局搜索跳转落地：按 URL 上的 keyword 在正文里滚动并高亮
 const pageRef = ref(null)
@@ -28,15 +22,21 @@ useKeywordHighlight(pageRef)
     ref="pageRef"
     class="guo-jia"
   >
-    <ImageGallery
-      class="guo-jia__gallery"
-      :images="images"
+    <!-- 合并自原「夏侯渊 神速」与「洞烛先机」两个菜单：先立绘、后牌面 -->
+    <ImageFigure
+      class="guo-jia__figure"
+      :src="shenSuUrl"
+      alt="神速"
     />
 
-    <MdViewer
-      class="guo-jia__doc"
-      :content="dongZhuXianJiMd"
-    />
+    <!-- 牌面自带说明区域：洞烛先机的规则正文就挂在这张图下 -->
+    <ImageFigure
+      class="guo-jia__figure"
+      :src="dongZhuXianJiUrl"
+      alt="洞烛先机"
+    >
+      <MdViewer :content="dongZhuXianJiMd" />
+    </ImageFigure>
   </div>
 </template>
 
@@ -55,16 +55,9 @@ useKeywordHighlight(pageRef)
   -webkit-overflow-scrolling: touch;
 }
 
-/* ImageGallery 自带滚动视口（.gallery 为 height: 100%），本页改为整页统一滚动，
-   故把它降级成普通块 —— 否则它先占满一屏并自成滚动区，正文被顶到视口之外。
-   选择器缀上 .guo-jia 以压过组件内 .gallery 的同等权重 */
-.guo-jia .guo-jia__gallery {
-  height: auto;
-  overflow: visible;
-}
-
-/* 正文与图组之间的区块间距 —— MdViewer 把首元素的上边距归零，间距由页面给 */
-.guo-jia__doc {
-  margin-top: var(--space-8);
+/* 两张图之间的间距 —— 多图排布归页面管，间距也由页面给。
+   立绘与牌面是两张独立的图，各自带留白，间距按设计系统的标准块间距给就够了 */
+.guo-jia__figure + .guo-jia__figure {
+  margin-top: var(--space-4);
 }
 </style>

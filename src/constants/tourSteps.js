@@ -64,7 +64,7 @@ export const tourSteps = Object.freeze({
         },
       },
       {
-        element: '#wqx-gallery',
+        element: '#wqx-banner',
         popover: {
           title: '规则大旗',
           description: '下方是五禽戏完整牌面，上下滑动可以看全。',

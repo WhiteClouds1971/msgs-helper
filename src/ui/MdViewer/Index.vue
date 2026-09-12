@@ -324,7 +324,7 @@ onBeforeUnmount(() => {
     border-bottom: none;
   }
 
-  /* --- 图片：铺满容器宽度、等比缩放，与 ImageGallery 同一规则 --- */
+  /* --- 图片：铺满容器宽度、等比缩放，与 ImageFigure 同一规则 --- */
   :deep(img) {
     width: 100%;
     height: auto;

@@ -44,7 +44,7 @@ msgs-helper/
 │   │   ├── JadeSeal/                # 玉玺悬浮按钮
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
-│   │   ├── ImageGallery/                 # 多图展示（逐张铺满宽度 + 纵向滚动）
+│   │   ├── ImageFigure/                  # 单张图片展示（铺满宽度 + 可选说明区域）
 │   │   ├── MdViewer/                     # Markdown 正文展示（marked 渲染）
 │   │   ├── Message/                      # 全局轻提示宿主（reka-ui Toast 封装）
 │   │   ├── SkillCard/                    # 单个三国杀技能展示（居中技能名 + 标签 + 规则）
@@ -107,11 +107,15 @@ msgs-helper/
 
 `useMessage()` → `message.success/error/warning/info(content, { duration })`（默认 2000ms，`duration: 0` 常驻）、`message.close(id)` / `message.closeAll()`；宿主 `<Message />` 已在 `App.vue` 全局挂载，直接调用即可。
 
-## 多图展示 (ImageGallery)
+## 图片展示 (ImageFigure)
 
-页面展示图片一律用 `src/ui/ImageGallery/`：`<ImageGallery :images="[{ src, alt? }]" />`（图片永不裁切，逐张铺满容器宽度纵向排列；一屏放不下就纵向滚动，放得下则整组居中；无内边距、无边框、无圆角）。
+页面展示图片一律用 `src/ui/ImageFigure/`：`<ImageFigure :src="url" alt="…" caption="…" />`（**一张图 = 一个组件**，铺满容器宽度、等比缩放，永不裁切、永不拉伸；无内边距、无边框、无圆角）。
 
-可选 props：`gap`（图间距，CSS 长度，默认 `var(--space-2)`）。排布与滚动全部由 CSS 完成（`width: 100%` + `height: auto`），没有脚本测量，图片加载前后不跳版；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑。
+- **只画一张图，不管一组图**：多图的排列、间距、谁跟谁一组，全由使用方在自己的页面里组织（叠几个 `<ImageFigure>` 即可）—— 组件不自建滚动容器、不画列表，否则同页多图各成一个滚动区会互相打架
+- **说明区域（可选）**：图下的 `<figcaption>`，与图之间只隔一段 `--space-3` 间距、不加装饰线。两种喂法二选一：`caption` 给纯文本，或默认插槽塞任意内容（如 `<MdViewer>`，参考 `src/pages/jsrg/GuoJia/`）；两者都不给就不渲染，图下不留空位
+- **滚动与居中归页面**：组件是普通块级元素（`margin: 0`）。整页只有一张图时，页面用 `display: flex` + 图 `margin: auto` 实现「放得下就整屏居中，放不下就整页滚」（`margin: auto` 在溢出时自动归零，不像 `justify-content: center` 那样裁掉顶部）
+- 尺寸全部交给 CSS（`width: 100%` + `height: auto`），没有脚本测量，图片加载前后不跳版；加载失败会撤下 `<img>` 原地留占位
+- 组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
 
 ## Markdown 展示 (MdViewer)
 
@@ -134,7 +138,7 @@ import cunGuiMd from '@/assets/md/cun-gui.md?raw'
 - 只负责"把 Markdown 画出来"：**不自建滚动容器**（滚动交给页面）、不带标题栏/操作栏
 - 空 / 加载 / 失败三态各有提示文案，可覆盖：`loadingText` / `emptyText` / `errorText`
 - 渲染出的 HTML 经 `v-html` 注入，**只喂可信来源**（仓库内的 `.md`），不要传用户输入
-- 版式已按设计系统落定：h1/h2 用 `--font-display`、正文 `--font-body`，列表记号/引用线/分隔线走古铜金，图片铺满容器宽度（与 ImageGallery 同规则）；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
+- 版式已按设计系统落定：h1/h2 用 `--font-display`、正文 `--font-body`，列表记号/引用线/分隔线走古铜金，图片铺满容器宽度（与 ImageFigure 同规则）；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
 
 ## 技能展示 (SkillCard)
 

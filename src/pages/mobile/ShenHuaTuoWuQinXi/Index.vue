@@ -6,7 +6,7 @@ import { useMessage } from '@/composables/useMessage'
 import { useLocalStorage } from '@/stores/localStorage'
 import { useTour } from '@/composables/useTour'
 import { TourKeys } from '@/constants/tourKeys'
-import ImageGallery from '@/ui/ImageGallery/Index.vue'
+import ImageFigure from '@/ui/ImageFigure/Index.vue'
 import SkillCard from '@/ui/SkillCard/Index.vue'
 import { useSkillGestures } from './useSkillGestures.js'
 import bannerUrl from '@/assets/images/da-qi/五禽戏大旗.webp'
@@ -16,37 +16,35 @@ import bannerUrl from '@/assets/images/da-qi/五禽戏大旗.webp'
  *
  * 技能文案随代码发布，页面数据里只存「顺序 + 存留」的 id 数组（见下方 load）：
  * 描述改了立即生效，删掉的技能也不怕文案丢失 —— 重置就是回到这份定义的顺序。
+ *
+ * 五禽戏这五张技能牌都没有技能标签：`types` 一律省略（@/ui/SkillCard 支持，
+ * 以后要加就在对应技能上补 `types: ['锁定技']`，会自动加粗排在正文前面）。
  */
 const SKILLS = Object.freeze([
   {
     id: 'hu',
     name: '虎',
-    types: ['锁定技'],
     description: '当你使用指定唯一目标的牌对目标角色造成伤害时，此伤害+1。',
   },
   {
     id: 'lu',
     name: '鹿',
-    types: ['锁定技'],
     description:
       '当你获得「鹿」时，你回复1点体力并弃置判定区里的所有牌。你不能成为延时锦囊牌的目标。',
   },
   {
     id: 'xiong',
     name: '熊',
-    types: ['锁定技'],
     description: '每回合限一次，当你受到伤害时，此伤害-1。',
   },
   {
     id: 'yuan',
     name: '猿',
-    types: ['锁定技'],
     description: '当你获得「猿」时，你选择一名其他角色，获得其装备区里的一张牌。',
   },
   {
     id: 'he',
     name: '鹤',
-    types: ['锁定技'],
     description: '当你获得「鹤」时，你摸三张牌。',
   },
 ])
@@ -57,8 +55,6 @@ const SKILL_MAP = new Map(SKILLS.map(skill => [skill.id, skill]))
 const route = useRoute()
 const ls = useLocalStorage()
 const message = useMessage()
-
-const images = [{ src: bannerUrl, alt: '五禽戏大旗' }]
 
 /* ── 页面数据：技能顺序（id 数组）──
    技能区在上、大旗在下，整体超一屏，故本页自建滚动容器 */
@@ -116,7 +112,8 @@ const { markReady } = usePageReady({ auto: false })
 // 用 useTour()（而非模块级 startTour）：离页时它会自动销毁导览，遮罩不会跟到下一个页面
 const { start: startTour } = useTour()
 
-const galleryRef = ref(null)
+/** 大旗容器 —— 教学导览打点用，也在这里等首图加载完 */
+const bannerBoxRef = ref(null)
 const mountedAt = Date.now()
 let bannerEl = null
 let tourTimer = 0
@@ -152,7 +149,7 @@ function settleReady() {
 
 onMounted(async () => {
   await nextTick()
-  bannerEl = galleryRef.value?.querySelector('img') ?? null
+  bannerEl = bannerBoxRef.value?.querySelector('img') ?? null
   if (!bannerEl || bannerEl.complete) {
     settleReady()
     return
@@ -239,11 +236,13 @@ onBeforeUnmount(() => {
 
     <!-- 大旗：高度随内容（按比例铺满宽度），滚动由页面承担 -->
     <div
-      id="wqx-gallery"
-      ref="galleryRef"
-      class="wqx__gallery"
+      id="wqx-banner"
+      ref="bannerBoxRef"
     >
-      <ImageGallery :images="images" />
+      <ImageFigure
+        :src="bannerUrl"
+        alt="五禽戏大旗"
+      />
     </div>
   </div>
 </template>
@@ -413,11 +412,5 @@ onBeforeUnmount(() => {
   line-height: var(--leading-relaxed);
   color: var(--text-tertiary);
   text-align: center;
-}
-
-/* 大旗高度交给内容：ImageGallery 的 height:100% 在 auto 高度容器里退化为内容高度，
-   内部不再自成滚动视口，整页一起滚 */
-.wqx__gallery {
-  height: auto;
 }
 </style>
