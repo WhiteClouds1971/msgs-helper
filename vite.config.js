@@ -3,28 +3,30 @@ import path from 'path';
 
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import imagemin from 'vite-plugin-imagemin';
-import Components from 'unplugin-vue-components/vite';
-import RekaResolver from 'reka-ui/resolver';
 
 export default defineConfig(() => {
   return {
-    plugins: [
-      vue(),
-      Components({
-        dts: true,
-        resolvers: [RekaResolver()],
-      }),
-      imagemin({
-        gifsicle: { optimizationLevel: 3 },
-        mozjpeg: { quality: 80 },
-        pngquant: { quality: [0.5, 0.75], speed: 1 },
-      }),
-    ],
+    plugins: [vue()],
     resolve: {
       alias: {
         '~': path.resolve(__dirname, './'),
         '@': path.resolve(__dirname, './src'),
+      },
+    },
+    build: {
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // @vueuse/core 的 dist 里 /* #__PURE__ */ 注解位置不合法（reka-ui 的传递依赖，
+          // 非本项目代码）。Rollup 已丢弃该注解、产物无影响，静音以免淹没真实警告。
+          const source = `${warning.id ?? ''}${warning.message ?? ''}`;
+          if (
+            warning.code === 'INVALID_ANNOTATION' &&
+            source.includes('@vueuse')
+          ) {
+            return;
+          }
+          warn(warning);
+        },
       },
     },
     server: {
