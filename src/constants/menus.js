@@ -10,8 +10,11 @@
  *
  * 可选检索/关联字段（全局搜索用）：
  *   · tags — 补充检索标签，参与模糊匹配，并作为标签显示在结果行
- *   · docs — 本菜单页展示的 Markdown 文档 id 列表（src/assets/md/ 下的文件名，不含扩展名），
- *            文档搜索结果据此跳到对应菜单页并在正文里滚动高亮
+ *   · docs — 本菜单页展示的 Markdown 正文（src/assets/md/ 下的文件名，不含扩展名），
+ *            文档搜索结果据此跳到对应菜单页并在正文里滚动高亮。两种写法：
+ *              · 'cun-gui'                                —— 认领整篇
+ *              · { id: 'you-xi-pai', heading: '趁火打劫' } —— 只认领该篇里这一节
+ *            （多张牌/多条规则合并成一篇时，各页面按节分认领，别让认领跨页串门）
  */
 
 import { TourKeys } from '@/constants/tourKeys';
@@ -101,8 +104,8 @@ const menus = [
     packageName: PackageName.JSRG,
     // 补充检索标签（全局搜索用，也显示在结果行）：原两个菜单名
     tags: ['洞烛先机', '神速'],
-    // 正文文件：src/assets/md/dong-zhu-xian-ji.md
-    docs: ['dong-zhu-xian-ji'],
+    // 正文文件：src/assets/md/you-xi-pai.md（合并文档）—— 本页只认领「洞烛先机」一节
+    docs: [{ id: 'you-xi-pai', heading: '洞烛先机' }],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
@@ -268,6 +271,104 @@ const menus = [
     packageName: PackageName.JXTP,
     // 补充检索标签（全局搜索用，也显示在结果行）：界曹操的另一技能与常用别称
     tags: ['护驾', '魏武帝'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'jie-liu-bei-ji-jiang',
+    name: '界刘备 激将',
+    route: '/jxtp/jie-liu-bei-ji-jiang',
+    component: () => import('@/pages/jxtp/JieLiuBeiJiJiang/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/界限突破-刘备-激将.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.JXTP,
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'mou-sun-quan-tong-ye',
+    name: '谋孙权 统业',
+    route: '/mobile/mou-sun-quan-tong-ye',
+    component: () => import('@/pages/mobile/MouSunQuanTongYe/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-谋孙权-统业.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.MOBILE,
+    // 补充检索标签（全局搜索用，也显示在结果行）：统业卡面上并出的两个技能名
+    tags: ['英姿', '固政'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'mou-pang-tong-hong-tu',
+    name: '谋庞统 鸿图',
+    route: '/ol/mou-pang-tong-hong-tu',
+    component: () => import('@/pages/ol/MouPangTongHongTu/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/OL-谋庞统-鸿图.webp',
+      focalX: 53,
+      focalY: 40,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.OL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：鸿图卡面上的两个技能名
+    tags: ['飞军', '潜袭'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'xia-hou-ba-bao-bian',
+    name: '夏侯霸 豹变',
+    route: '/jx/xia-hou-ba-bao-bian',
+    component: () => import('@/pages/jx/XiaHouBaBaoBian/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/将星-夏侯霸-豹变.webp',
+      focalX: 56,
+      focalY: 43,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.JX,
+    // 补充检索标签（全局搜索用，也显示在结果行）：豹变卡面上并出的三个技能名
+    tags: ['挑衅', '咆哮', '神速'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'cheng-lv-bu-qing-jiao',
+    name: '承吕布 轻狡',
+    route: '/jsrg/cheng-lv-bu-qing-jiao',
+    component: () => import('@/pages/jsrg/ChengLvBuQingJiao/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/江山如故·承-吕布.webp',
+      focalX: 50,
+      focalY: 45,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.JSRG,
+    // 补充检索标签（全局搜索用，也显示在结果行）：本页两张牌面的名字
+    tags: ['推心置腹', '趁火打劫'],
+    // 正文文件：src/assets/md/you-xi-pai.md（合并文档）—— 本页认领其中两节
+    docs: [
+      { id: 'you-xi-pai', heading: '推心置腹' },
+      { id: 'you-xi-pai', heading: '趁火打劫' },
+    ],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',

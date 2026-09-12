@@ -1,10 +1,14 @@
 /**
  * useKeywordHighlight — 跳转落地后的「滚动 + 高亮」
  *
- * 全局搜索的结果带 query 跳转：keyword = 命中整行/整句，q = 用户输入。
+ * 全局搜索的结果带 query 跳转：keyword = 命中整行/整句，q = 用户输入，
+ * section + hit = **落点身份**（哪一块 + 块内第几处，见 utils/highlight.js）。
  * 本组合式函数在页面根元素内用 mark.js 逐条尝试候选锚点
  * （命中整句 → 整行 → 纯文本块 → 前缀 → 关键词），
  * 命中即平滑滚动到视野中央并闪一下，未命中则重试一次（等页面过渡结束）。
+ *
+ * 没有落点身份时只认锚点文字，一页里同一句话出现几次就指不准（点哪条都跳第一处），
+ * 故拿身份先在页面上定位到那一块，再在块内数到第 hit 处。
  *
  * 用法：
  *   const pageRef = ref(null)
@@ -13,6 +17,7 @@
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { anchorCandidates } from '@/utils/markdown'
+import { pickHit, resolveLanding } from '@/utils/highlight'
 
 /** 命中后「落点闪烁」的持续时长 */
 const ACTIVE_MS = 1400
@@ -61,9 +66,10 @@ export function useKeywordHighlight(rootRef, options = {}) {
   }
 
   /** 依次尝试候选锚点，命中即止 */
-  async function highlight(root, candidates, onDone) {
+  async function highlight(root, candidates, landing, onDone) {
     const Mark = await loadMark()
     const instance = new Mark(root)
+    const { scope, hit } = resolveLanding(root, landing)
     let cursor = 0
 
     const step = () => {
@@ -73,6 +79,10 @@ export function useKeywordHighlight(rootRef, options = {}) {
       }
 
       const anchor = candidates[cursor++]
+      // 序号只对引擎算出来的那个锚点有意义：候选是逐级降级的（整句 → 整行 → 前缀 → 关键词），
+      // 降级后的字符串在块里出现几次跟文档对不上，一律取块内第一处
+      const wanted = cursor === 1 ? hit : 0
+
       instance.unmark({
         done: () => {
           instance.mark([anchor], {
@@ -80,9 +90,9 @@ export function useKeywordHighlight(rootRef, options = {}) {
             caseSensitive: false,
             className,
             done: () => {
-              const hit = root.querySelector(`mark.${className}`)
-              if (hit) {
-                reveal(hit)
+              const target = pickHit(scope, wanted, className)
+              if (target) {
+                reveal(target)
                 onDone(true)
               } else {
                 step()
@@ -106,6 +116,7 @@ export function useKeywordHighlight(rootRef, options = {}) {
       { text: anchor, segments: [anchor] },
       route.query.q ?? '',
     )
+    const landing = { section: route.query.section ?? '', hit: route.query.hit ?? 0 }
 
     // immediate 的 watch 在 setup 阶段就触发，此刻模板 ref 尚未绑定，必须等一帧
     nextTick(() => {
@@ -121,16 +132,23 @@ export function useKeywordHighlight(rootRef, options = {}) {
         return
       }
 
-      highlight(root, candidates, found => {
+      highlight(root, candidates, landing, found => {
         if (!found) retry()
       })
     })
   }
 
-  // 拼成字符串比较，避免数组每次新建导致无关路由变化也重跑
+  // 拼成字符串比较，避免数组每次新建导致无关路由变化也重跑；
+  // 落点身份也在内 —— 同页两条结果的 keyword 可能一模一样，靠 section/hit 分开重定位
   watch(
     () =>
-      `${route.query.keyword ?? ''}\u0000${route.query.q ?? ''}\u0000${highlightTick.value}`,
+      [
+        route.query.keyword ?? '',
+        route.query.q ?? '',
+        route.query.section ?? '',
+        route.query.hit ?? '',
+        highlightTick.value,
+      ].join('\u0000'),
     () => run(0),
     { immediate: true },
   )

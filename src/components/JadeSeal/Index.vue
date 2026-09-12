@@ -74,7 +74,6 @@ const isTouring = ref(false);
 // 手势识别
 let hasMoved = false;
 let longPressFired = false;
-let wasDimmed = false;
 let pressTimer = null;
 let tourTimer = null;
 
@@ -109,6 +108,33 @@ function clampPos() {
   posY.value = Math.max(0, Math.min(window.innerHeight - BUTTON_SIZE, posY.value));
 }
 
+// ── 「这一下是不是点在玉玺上」──
+// 搜索蒙层打开时，点在玉玺上不算外部点击（否则「再点一下玉玺」会把刚开的蒙层关掉，
+// 看着就是搜索闪了一下）。主页的玉玺会在隐藏态 / 展开态之间挪位，用户那一下往往落在
+// 它刚才的位置上，所以「当前位置」和「蒙层打开那一刻的位置」都算数，方块外扩 PAD 吸收
+// 动画途中的偏差。
+const SEAL_HIT_PAD = 16;
+let hitRectWhenOpened = null;
+
+function hitRect() {
+  return {
+    left: posX.value - SEAL_HIT_PAD,
+    right: posX.value + BUTTON_SIZE + SEAL_HIT_PAD,
+    top: posY.value - SEAL_HIT_PAD,
+    bottom: posY.value + BUTTON_SIZE + SEAL_HIT_PAD,
+  };
+}
+
+function withinRect(rect, x, y) {
+  return Boolean(rect) && x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
+watch(search.isOpen, (open) => {
+  hitRectWhenOpened = open ? hitRect() : null;
+});
+
+search.sealHitTest.value = (x, y) => withinRect(hitRect(), x, y) || withinRect(hitRectWhenOpened, x, y);
+
 // ── 触觉反馈（视觉震动兜底，兼容 Safari/微信等不支持 Vibration API 的环境）──
 const hapticClass = ref('');
 
@@ -123,6 +149,10 @@ function vibrate(pattern, visualClass) {
 // ── 手势回调 ──
 // 单击 = 搜索，长按 = 控制台。两个动作都不需要「等一等再决定」，
 // 因此单击可以当场响应 —— 移动端软键盘只认手势内的 focus()。
+//
+// 主页的隐藏态也走同一条路（单击直接唤起搜索），不设「先点醒、再点一次」的两步：
+// 玉玺静置 5 秒就缩回角落，用户几乎每次都点在隐藏态上；而展开动画会把按钮从指针
+// 底下挪走 —— 第二次点击必然落空，看起来就是「点了没反应/闪一下」。
 
 /** 用户照着教学上手了 → 教学使命达成，立即收场（免得遮罩盖住刚打开的蒙层） */
 function endTourOnGesture() {
@@ -146,7 +176,6 @@ function onLongPress() {
 // ── 手势识别逻辑 ──
 
 function onPointerDown(e) {
-  wasDimmed = isDimmed.value;
   activate();
   hasMoved = false;
   longPressFired = false;
@@ -184,9 +213,6 @@ function onPointerUp() {
 
   // 长按已触发 → 忽略后续 click
   if (longPressFired) return;
-
-  // 主页隐藏状态 → 仅展开，不触发 click
-  if (isHome.value && wasDimmed) return;
 
   // 未移动 → 判定为单击，立即响应
   if (!hasMoved) {
@@ -226,6 +252,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  search.sealHitTest.value = null;
   clearTimeout(dimTimer);
   clearTimeout(pressTimer);
   clearTimeout(tourTimer);

@@ -139,6 +139,8 @@ import cunGuiMd from '@/assets/md/cun-gui.md?raw'
 - 只负责"把 Markdown 画出来"：**不自建滚动容器**（滚动交给页面）、不带标题栏/操作栏
 - 空 / 加载 / 失败三态各有提示文案，可覆盖：`loadingText` / `emptyText` / `errorText`
 - 渲染出的 HTML 经 `v-html` 注入，**只喂可信来源**（仓库内的 `.md`），不要传用户输入
+- **合并文档按节取用**：多张牌 / 多条规则共用一篇 `.md` 时（一节一张牌，如 `src/assets/md/you-xi-pai.md` 的 `## 趁火打劫`），页面用 `extractMarkdownSection(raw, '趁火打劫')`（`@/utils/markdown`）切出自己那一节再喂 `MdViewer`；注册表同一篇由各页面**按节认领**（`docs: [{ id, heading }]`，见 `menus.js` 顶部字段说明），搜索结果的跳转路由据此落到真正渲染该节的页面
+- **搜索结果落地按「哪一块 + 块内第几处」认人**：文档结果点击后 URL 带 `keyword`（锚点文字）+ `section`（块标题）+ `hit`（块内第几处），落地页 `useKeywordHighlight` 先在页面上找到标题为 `section` 的那一块（MdViewer 把一节画在一个容器里，标题是它的直接子元素），再在块内取第 `hit` 处命中 —— 一页里同一句话出现几次也不会指错（否则点哪条都跳第一处）。**页面无需为此加任何标记**：块标题就是 Markdown 里那一节的标题，位置与序号由 `GlobalSearch/engine.js` 按文档算好（见 `utils/highlight.js`）
 - 版式已按设计系统落定：h1/h2 用 `--font-display`、正文 `--font-body`，列表记号/引用线/分隔线走古铜金，图片铺满容器宽度（与 ImageFigure 同规则）；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
 
 ## 技能展示 (SkillCard)

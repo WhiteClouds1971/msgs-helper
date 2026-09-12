@@ -1,9 +1,11 @@
 /**
- * Markdown 检索工具库 —— 把 .md 原文切成「可被搜到、也能被精准定位」的片段
+ * Markdown 工具库 —— 把 .md 原文切成「可被搜到、也能被精准定位」的片段，
+ * 以及把合并文档按节切给页面
  *
- * 两个消费者：
+ * 三个消费者：
  *   · 全局搜索建索引 —— parseMarkdownChunks() 逐行产出片段（正文 + 明细）
  *   · 结果跳转后定位 —— anchorCandidates() 给出候选锚点，供 mark.js 逐条尝试高亮
+ *   · 页面取正文 —— extractMarkdownSection() 从合并文档里切出自己那一节
  *
  * 片段里同时保留：
  *   text     —— 去掉行内标记的整行纯文本（模糊匹配用）
@@ -202,4 +204,52 @@ export function anchorCandidates(chunk, query) {
 /** 最佳锚点 —— 写进 URL 的那一个 */
 export function pickAnchor(chunk, query) {
   return anchorCandidates(chunk, query)[0] ?? String(chunk?.text ?? '').trim()
+}
+
+/** 去掉首尾空行（节的第一行是标题、最后一行常是留给下一个标题的空行） */
+function trimBlankLines(lines) {
+  let start = 0
+  let end = lines.length
+  while (start < end && !lines[start].trim()) start += 1
+  while (end > start && !lines[end - 1].trim()) end -= 1
+  return lines.slice(start, end).join('\n')
+}
+
+/**
+ * 取出一节 —— 合并文档（一篇 .md 里多节，多张牌/多条规则共用一篇）按节切给页面
+ *
+ * 从命中的标题行起，到下一个「同级或更高级」标题的前一行止；末节取到文末。
+ * 标题按剥掉行内标记后的纯文本比对（与 parseMarkdownChunks 的 heading 同口径），
+ * 既认 `## 趁火打劫` 也认 `## **趁火打劫**`。未命中返回空串，交给 MdViewer 的
+ * emptyText 提示，不会静默画出一整篇。
+ *
+ * @param {string} raw - Markdown 原文
+ * @param {string} heading - 节标题（如「趁火打劫」，不带 # 号）
+ * @returns {string} 含标题行在内的该节原文，首尾空行已修剪
+ */
+export function extractMarkdownSection(raw, heading) {
+  const target = stripInline(heading)
+  if (!target) return ''
+
+  const lines = String(raw ?? '').split(/\r?\n/)
+  let start = -1
+  let level = 0
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const match = /^(#{1,6})\s+(.*)$/.exec(lines[i].trim())
+    if (!match) continue
+
+    // 开切之前：找标题；开切之后：遇到同级或更高级标题就收工
+    if (start < 0) {
+      if (stripInline(match[2]) === target) {
+        start = i
+        level = match[1].length
+      }
+      continue
+    }
+
+    if (match[1].length <= level) return trimBlankLines(lines.slice(start, i))
+  }
+
+  return start < 0 ? '' : trimBlankLines(lines.slice(start))
 }

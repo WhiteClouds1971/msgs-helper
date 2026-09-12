@@ -4,6 +4,7 @@
  *
  * 触发：控制台「搜索」控件 / 玉玺单击。
  * 收录菜单与文档（src/assets/md），汉字、全拼、首字母三路检索。
+ * 文档结果点击后带锚点与落点身份（section + hit）跳转，落地页据此滚动高亮到那一行。
  *
  * 索引含拼音库与 Fuse，首次打开时才动态载入（见 ./engine.js）。
  */
@@ -25,7 +26,7 @@ import searchIcon from '@/assets/icons/sou_suo.svg?raw'
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
-const { isOpen, close } = useGlobalSearch()
+const { isOpen, close, sealHitTest } = useGlobalSearch()
 
 const keyword = ref('')
 const rows = ref([])
@@ -68,6 +69,49 @@ watch(isOpen, async open => {
 // ── 输入即搜（本地索引，无需防抖） ──
 watch(keyword, refresh)
 
+/**
+ * 「刚打开」的静默窗口 —— 打开这一下本身还会拖出一串尾巴事件。
+ *
+ * 单击/轻点玉玺那一下，浏览器在手势结束后还会补发一串事件（触摸的兼容鼠标事件：
+ * pointerdown / click，可能迟到 300ms 上下），它们落在**按完那一刻**的坐标上，也就是
+ * 蒙层刚刚盖住的地方：
+ *   - 落在遮罩上 → 被当成「点了别处」→ 蒙层被关掉；
+ *   - 落在「取消」上（窄屏时玉玺正好压着搜索栏右下角那颗按钮）→ 直接关掉。
+ * 单点一下却「刚弹出来又没了」就是这么来的。所以这段窗口内蒙层六亲不认：既不受
+ * 外部点击关闭，也不把手势尾巴上的 click 交给里面的控件。窗口过后一切照常。
+ *
+ * 500ms 参照系统双击判定的上限：人手不可能在 500ms 内「打开 → 又想关掉」。
+ */
+const OPEN_GRACE_MS = 500
+let openedAt = 0
+
+watch(isOpen, (open) => {
+  openedAt = open ? performance.now() : 0
+})
+
+function inOpeningGrace() {
+  return performance.now() - openedAt < OPEN_GRACE_MS
+}
+
+/**
+ * 外部点击 → 关闭蒙层。两种情况例外：
+ *  1. 刚打开（手势尾巴，见上）；
+ *  2. 点在玉玺上 —— 玉玺是「单击打开搜索」的按钮，宽屏下它露在蒙层边缘、透过半透明
+ *     遮罩依然看得见，在它上面再点一下的本意不是「关掉搜索」。
+ */
+function onPointerDownOutside(event) {
+  if (inOpeningGrace()) return event.preventDefault()
+
+  const native = event.detail?.originalEvent
+  if (!native) return
+  if (sealHitTest.value?.(native.clientX, native.clientY)) event.preventDefault()
+}
+
+/** 手势尾巴上的 click —— 别让它落到「取消」等控件上 */
+function onPanelClickCapture(event) {
+  if (inOpeningGrace()) event.stopPropagation()
+}
+
 /** 打开结果：菜单直接跳转，文档带上锚点让落地页滚动并高亮 */
 function activate(row) {
   if (!row) return
@@ -82,10 +126,13 @@ function activate(row) {
     return
   }
 
-  const target = {
-    path: row.route,
-    query: { keyword: row.anchor, q: keyword.value.trim() },
-  }
+  // 锚点文字只是「找什么」，一页里同一句话可能有好几处（两张牌都写着「出牌阶段」），
+  // 于是连「哪一块 + 块内第几处」一起带上，落地页才能认到用户点的这一条
+  const query = { keyword: row.anchor, q: keyword.value.trim() }
+  if (row.section) query.section = row.section
+  if (row.hit) query.hit = String(row.hit)
+
+  const target = { path: row.route, query }
 
   // 目标与当前地址一致（在文档页里又搜到同一条）时 router 不会再导航，
   // 直接请落地页按当前锚点重新滚动高亮一次
@@ -107,7 +154,11 @@ function activate(row) {
     <DialogPortal>
       <DialogOverlay class="search-mask" />
 
-      <DialogContent class="search-panel">
+      <DialogContent
+        class="search-panel"
+        @pointer-down-outside="onPointerDownOutside"
+        @click.capture="onPanelClickCapture"
+      >
         <DialogTitle class="search-panel__sr">
           全局搜索
         </DialogTitle>
