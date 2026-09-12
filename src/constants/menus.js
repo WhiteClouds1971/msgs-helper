@@ -14,6 +14,8 @@
  *            文档搜索结果据此跳到对应菜单页并在正文里滚动高亮
  */
 
+import { TourKeys } from '@/constants/tourKeys';
+
 /** 签题分类枚举 */
 export const PackageName = Object.freeze({
   TOOL: '工具',
@@ -87,8 +89,8 @@ const menus = [
   {
     code: 'sun-ce',
     name: '界孙策 魂姿',
-    route: '/da-qi/sun-ce',
-    component: () => import('@/pages/da-qi/SunCe/Index.vue'),
+    route: '/shzl/sun-ce',
+    component: () => import('@/pages/shzl/SunCe/Index.vue'),
     image: {
       src: 'src/assets/images/menus/大旗-孙策-魂姿.webp',
       focalX: 50,
@@ -105,8 +107,8 @@ const menus = [
   {
     code: 'shen-si-ma-yi-ji-lue',
     name: '神司马懿 极略',
-    route: '/da-qi/shen-si-ma-yi-ji-lue',
-    component: () => import('@/pages/da-qi/ShenSiMaYiJiLue/Index.vue'),
+    route: '/shzl/shen-si-ma-yi-ji-lue',
+    component: () => import('@/pages/shzl/ShenSiMaYiJiLue/Index.vue'),
     image: {
       src: 'src/assets/images/menus/大旗-神司马懿-极略.webp',
       focalX: 50,
@@ -123,8 +125,8 @@ const menus = [
   {
     code: 'liu-xie-mi-zhao',
     name: '刘协 密诏',
-    route: '/da-qi/liu-xie-mi-zhao',
-    component: () => import('@/pages/da-qi/LiuXieMiZhao/Index.vue'),
+    route: '/jx/liu-xie-mi-zhao',
+    component: () => import('@/pages/jx/LiuXieMiZhao/Index.vue'),
     image: {
       src: 'src/assets/images/menus/大旗-刘协-密诏.webp',
       focalX: 50,
@@ -142,8 +144,8 @@ const menus = [
   {
     code: 'shen-hua-tuo-wu-qin-xi',
     name: '神华佗 五禽戏',
-    route: '/da-qi/shen-hua-tuo-wu-qin-xi',
-    component: () => import('@/pages/da-qi/ShenHuaTuoWuQinXi/Index.vue'),
+    route: '/mobile/shen-hua-tuo-wu-qin-xi',
+    component: () => import('@/pages/mobile/ShenHuaTuoWuQinXi/Index.vue'),
     image: {
       src: 'src/assets/images/menus/大旗-神华佗-五禽戏.webp',
       focalX: 50,
@@ -154,7 +156,9 @@ const menus = [
     packageName: PackageName.MOBILE,
     // 补充检索标签（全局搜索用，也显示在结果行）：神华佗的常用别称
     tags: ['华佗'],
-    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    // 教学导览：五禽戏技能区手势（首次进入自动教一次，之后走控制台「教学导览」）
+    tourKey: TourKeys.SHEN_HUA_TUO_WU_QIN_XI,
+    // 空白布局：无装饰；有教学导览与页面数据（技能顺序存 route.fullPath）
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
@@ -199,8 +203,8 @@ const menus = [
   {
     code: 'shen-cao-cao-fei-ying',
     name: '神曹操 飞影',
-    route: '/da-qi/shen-cao-cao-fei-ying',
-    component: () => import('@/pages/da-qi/ShenCaoCaoFeiYing/Index.vue'),
+    route: '/shzl/shen-cao-cao-fei-ying',
+    component: () => import('@/pages/shzl/ShenCaoCaoFeiYing/Index.vue'),
     image: {
       src: 'src/assets/images/menus/大旗-神曹操-飞影.webp',
       focalX: 50,
@@ -245,6 +249,25 @@ const menus = [
     },
     themeColor: ThemeColor.CRIMSON,
     packageName: PackageName.JXTP,
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'jie-cao-cao-jian-xiong',
+    name: '界曹操 奸雄',
+    route: '/jxtp/jie-cao-cao-jian-xiong',
+    component: () => import('@/pages/jxtp/JieCaoCaoJianXiong/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/界限突破-曹操-奸雄.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.JXTP,
+    // 补充检索标签（全局搜索用，也显示在结果行）：界曹操的另一技能与常用别称
+    tags: ['护驾', '魏武帝'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',

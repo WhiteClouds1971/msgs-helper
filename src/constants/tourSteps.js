@@ -42,4 +42,35 @@ export const tourSteps = Object.freeze({
       },
     ]),
   }),
+
+  /** 神华佗 五禽戏：技能区在图片之上，三步讲清手势与还原 */
+  'shen-hua-tuo-wu-qin-xi': Object.freeze({
+    steps: Object.freeze([
+      {
+        element: '#wqx-skills',
+        popover: {
+          title: '五禽戏 · 技能',
+          description:
+            '五张技能牌自上而下就是你的技能顺序。长按任意一张，等它浮起后上下拖动即可排序。',
+        },
+      },
+      {
+        element: '#wqx-reset',
+        popover: {
+          title: '移除与重置',
+          description: '左滑任意技能牌可把它移除；想找回来，点这里「重置」一次还原。',
+          side: 'bottom',
+          align: 'end',
+        },
+      },
+      {
+        element: '#wqx-gallery',
+        popover: {
+          title: '规则大旗',
+          description: '下方是五禽戏完整牌面，上下滑动可以看全。',
+          side: 'top',
+        },
+      },
+    ]),
+  }),
 });

@@ -1,22 +1,22 @@
 <script setup>
 import { usePageReady } from '@/composables/usePageReady'
 import ImageGallery from '@/ui/ImageGallery/Index.vue'
-import bannerUrl from '@/assets/images/da-qi/五禽戏大旗.webp'
+import bannerUrl from '@/assets/images/jxtp/奸雄.webp'
 
 // 空白布局页面：无装饰、无教学导览、无持久化数据
 usePageReady()
 
-const images = [{ src: bannerUrl, alt: '五禽戏大旗' }]
+const images = [{ src: bannerUrl, alt: '奸雄' }]
 </script>
 
 <template>
-  <div class="shen-hua-tuo-wu-qin-xi">
+  <div class="jie-cao-cao-jian-xiong">
     <ImageGallery :images="images" />
   </div>
 </template>
 
 <style scoped lang="less">
-.shen-hua-tuo-wu-qin-xi {
+.jie-cao-cao-jian-xiong {
   /* #app 为固定高度壳，滚动在 ImageGallery 内部完成，故这里只做裁剪 */
   height: 100%;
   /* 页边距：左右 = --content-padding（设计系统页面左右留白）；

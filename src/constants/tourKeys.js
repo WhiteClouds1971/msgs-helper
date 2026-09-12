@@ -12,4 +12,7 @@ export const TourKeys = Object.freeze({
 
   /** 玉玺手势 — 首次进入非主页菜单时自动教学（单击搜索 / 长按控制台） */
   MENU_SEAL: Object.freeze({ key: 'menu-seal', count: 1 }),
+
+  /** 神华佗 五禽戏 — 技能区手势（长按拖动排序 / 左滑移除 / 重置还原） */
+  SHEN_HUA_TUO_WU_QIN_XI: Object.freeze({ key: 'shen-hua-tuo-wu-qin-xi', count: 1 }),
 });

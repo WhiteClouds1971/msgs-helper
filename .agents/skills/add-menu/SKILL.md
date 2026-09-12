@@ -16,10 +16,12 @@ whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让
 | 标题 | `name` | 用户给定的中文名，如 `夏侯渊 神速` |
 | 签题分类 | `packageName` | 卡片上「签」与「题」之间的标签；现有 `工具/OL/十周年/M/大旗`，无合适项就在 `PackageName` 枚举里加一条 |
 | 代号 | `code` | 标题转拼音 kebab-case，如 `xia-hou-yuan-shen-su`；全局唯一 |
-| 路由 | `route` | `/<包前缀>/<code>`，包前缀与 packageName 对应（如 大旗 → `/da-qi/`） |
+| 路由 | `route` | `/<包前缀>/<code>`，包前缀与 packageName 对应 |
 | 页面目录 | `component` | `@/pages/<包前缀>/<PascalCase>/Index.vue`，与路由同构 |
 | 布局 | `layout` | 默认 `MenuLayout.BACKGROUND`；纯内容页/无装饰页用 `MenuLayout.BLANK` |
 | 封面图 | `image` | 用户给的图片路径；命名与 focal 见第 1 步 |
+
+包前缀 = `PackageName` 枚举 key 的 kebab-case 小写：`TOOL → tool`、`DA_QI → da-qi`、`OL → ol`、`ANNIVERSARY → anniversary`、`MOBILE → mobile`、`JXTP → jxtp`、`SHZL → shzl`、`YJCM → yjcm`、`JX → jx`、`JSRG → jsrg`。**目录即分类**，页面按 packageName 归档，不按图片来源（封面图里的「大旗」是图片命名前缀，不是目录前缀）。
 
 另需问清（决定第 2、3 步的写法）：
 - **要不要教程**：要 → 加 `tourKey`（并在 `tourKeys.js`/`tourSteps.js` 注册）；不要 → **不写该字段**，控制台「教学导览」会自动提示「本页面暂无教学导览」。

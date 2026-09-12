@@ -47,6 +47,7 @@ msgs-helper/
 │   │   ├── ImageGallery/                 # 多图展示（逐张铺满宽度 + 纵向滚动）
 │   │   ├── MdViewer/                     # Markdown 正文展示（marked 渲染）
 │   │   ├── Message/                      # 全局轻提示宿主（reka-ui Toast 封装）
+│   │   ├── SkillCard/                    # 单个三国杀技能展示（居中技能名 + 标签 + 规则）
 │   │   ├── SplashScreen/                 # 启动画面
 │   │   └── Tooltip/                      # 悬停提示
 │   ├── layout/                      # 布局容器
@@ -134,6 +135,23 @@ import cunGuiMd from '@/assets/md/cun-gui.md?raw'
 - 空 / 加载 / 失败三态各有提示文案，可覆盖：`loadingText` / `emptyText` / `errorText`
 - 渲染出的 HTML 经 `v-html` 注入，**只喂可信来源**（仓库内的 `.md`），不要传用户输入
 - 版式已按设计系统落定：h1/h2 用 `--font-display`、正文 `--font-body`，列表记号/引用线/分隔线走古铜金，图片铺满容器宽度（与 ImageGallery 同规则）；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
+
+## 技能展示 (SkillCard)
+
+三国杀技能**单个**技能的展示用 `src/ui/SkillCard/`：`<SkillCard :skill="{ name, types, description }" />`。
+
+- **纯展示**：技能名居中（`--font-display` 毛笔字），下面接规则正文；技能标签（`types`，可选，可多个）加粗、以空格分隔后平铺在正文最前面，**技能可以没有标签**（不传 `types` 或传空数组就只显示正文，不留空位）
+- **只画一个技能，不画列表**：排列、间距、排序、左滑删除等一律由使用方在自己的页面里组织（`ui` 层不出现 `List`）
+- 根元素是 `div.skill-card`（`position: relative` + 底色/描边/圆角/阴影），class 可透传，方便页面挂自己的类做交互状态
+- 动效只动 `transform` / `border-color` 且时长走 token（reduced-motion 归零）；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
+
+**列表参考实现**：神华佗 五禽戏页（`src/pages/mobile/ShenHuaTuoWuQinXi/`）—— 列表结构写在页面 `Index.vue`（`ul.skill-board` + `li.skill-board__item[data-skill-key]` + `.skill-board__viewport` 裁剪层 + `.skill-board__bed` 朱砂滑出层，每项内嵌 `<SkillCard class="skill-board__card">`），手势由同目录 `useSkillGestures.js` 接管：
+
+- 长按 360ms 拖动排序；左滑移除（滑过 72px，或距离过半 ≥40px 且速度 ≥0.5px/ms）
+- 位移内联写在元素上，纯几何计算（落点下标 / 让位量）抽在 `sortable.js`，`sortable.test.js` 覆盖
+- 三个状态类挂在 li 上、样式在页面里：`is-pressed`（按下）/ `is-dragging`（拖起，金色描边 + 辉光）/ `is-swiping`（左滑中，滑出层才显形 —— 平时 `opacity: 0`，否则卡片浮起时缩放会漏红底）
+- li 上必须带 `touch-action: pan-y`：纵向滚动照常放行，横向留给手势。缺了它，触屏上的横向滑动会被浏览器判成平移并掐断指针事件流，左滑会整个失效
+- 拖拽期间 `preventDefault` 掉 touchmove 压住页面滚动；数据提交与视觉解耦（让位量 = 提交后的真实布局差，故清掉 transform 不跳版，被拖项再用一次 FLIP 补间落位）
 
 ## 路径别名
 

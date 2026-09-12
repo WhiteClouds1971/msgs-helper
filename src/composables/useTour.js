@@ -122,6 +122,14 @@ function createDriver(options = {}, steps = []) {
     overlayClickBehavior: () => {},
     popoverClass: 'tour-popover',
     showProgress: false,
+    // ✕ 关闭走的是 driver 内部的销毁路径，不会经过下面被改写的 destroy ——
+    // 只改 destroy，isActive 会一直挂在 true（玉玺的 is-touring 也跟着收不回）。
+    // 这里显式改道：点 ✕ 即调被改写的 destroy（销毁实例 + 复位 isActive）。
+    // （Esc 仍走 driver 内置路径，isActive 不会复位 —— 判断「有没有导览」时，
+    //   直接看遮罩 .driver-overlay 更可靠，五禽戏页就是这么做判定的。）
+    onCloseClick: () => {
+      d.destroy()
+    },
     onPopoverRender: (popover, opts) => {
       const activeIndex = opts.state.activeIndex ?? 0
       const totalSteps = opts.config.steps?.length ?? 0
