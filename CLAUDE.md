@@ -59,6 +59,7 @@ msgs-helper/
 │   │   ├── useGlobalSearch.js       # 搜索蒙层开关状态（单例）
 │   │   ├── useKeywordHighlight.js   # 跳转落地后的滚动 + 高亮（mark.js）
 │   │   ├── usePageReady.js          # 页面资源就绪检测（自动/手动）
+│   │   ├── usePageTour.js           # 页面级自动教学调度（同屏一个 / 第二次进入才教）
 │   │   └── useImagePreload.js       # 图片预加载
 │   ├── constants/
 │   │   ├── menus.js                 # 工具注册表（单一事实源）
@@ -197,6 +198,26 @@ import cunGuiMd from '@/assets/md/cun-gui.md?raw'
 向下兼容纯 `steps[]` 数组格式。
 
 **使用：** `tourSteps.js` + `tourKeys.js` 追加 key，组件中 `start(TourKeys.XXX)`。禁止写字符串字面量。
+
+**页面自动教学（主页除外）：** 一律用 `src/composables/usePageTour.js` 调度，不要在页面里自己写定时器 / 自己判有没有别的教程：
+
+```js
+const pageReady = ref(false)                     // 页面资源就绪信号（可选）
+usePageTour(TourKeys.XXX, { ready: pageReady })  // 资源就绪后再调度（等 Splash 淡出）
+usePageTour(TourKeys.XXX)                        // 不等资源：挂载后 delay（默认 600ms）调度
+```
+
+它保证三条硬规则，页面不用再操心冲突：
+
+| 规则 | 行为 |
+|------|------|
+| **玉玺教程优先** | 菜单页（`meta.code`）且 `menu-seal` 还没教过 → 本页教学这次不上场。玉玺教程由 JadeSeal 在挂载 600ms 后拉起，与本页教学是同一条时间线上的竞速：不挡它就会出现「谁后起谁赢」，输的一方次数已被记掉，第二次进入反而没教学 |
+| **同屏只有一个教程** | 调度那一刻屏幕上已有教程（`.driver-overlay` 在）→ 本次跳过，不抢也不排队 |
+| **页面教学从第二次进入本页起加载** | 首次进入整个让给玉玺教程，也避免用户刚点开搜索 / 控制台就被本页教学糊一脸 |
+
+三条让位路径都**不会调用 `startTour`**，所以 `msgs-tour` 里本页的 count 保持为 0，下次进入本页自动补上 —— 这是本模块最容易踩的坑：只要先 `startTour` 再被别的教程顶掉，次数就已经消耗掉了。
+
+进入次数按路由 path 记在 `StorageKeys.PAGE_VISITS`（`msgs-page-visits`），以「页面组件挂载」为一次进入。**主页不走这条**：主页教学逻辑保持原样（`pages/home/Index.vue` 里自己 `startTour(TourKeys.HOME, { mode: 'auto' })`）。
 
 **可静态导入：** `useTour.js` 的 store 是延迟获取的（不在模块顶层调 `useLocalStorage()`）—— 它会被 App.vue 的组件树静态导入（如 `GlobalControls → JadeSeal`），而那一刻 `main.js` 的 `use(pinia)` 尚未执行，模块顶层取 store 会直接白屏。
 **交互放行：** driver 挂在目标元素上的 `.driver-active-element` 会被 Vue 的 class 补丁抹掉（该元素 class 绑定一变就整体重写），需要放行指针事件时用**组件自己绑定的类**（如玉玺的 `#jade-seal.is-touring`，见 `tour-theme.css` 7a/7b）。

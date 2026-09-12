@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { usePageReady } from '@/composables/usePageReady'
 import { useMessage } from '@/composables/useMessage'
 import { useLocalStorage } from '@/stores/localStorage'
-import { useTour } from '@/composables/useTour'
+import { usePageTour } from '@/composables/usePageTour'
 import { TourKeys } from '@/constants/tourKeys'
 import ImageFigure from '@/ui/ImageFigure/Index.vue'
 import SkillCard from '@/ui/SkillCard/Index.vue'
@@ -106,45 +106,21 @@ function handleReset() {
   message.success('已重置为初始五禽')
 }
 
-/* ── 首屏与教学：等大旗加载完 → 解除 Splash → 启动画面淡出后再起教学 ──
-   （自动模式只教一次，之后可在控制台「教学导览」里手动再看） */
+/* ── 首屏：等大旗加载完 → 解除 Splash ──
+   本页教学不在页面里自己定时机：交给 usePageTour 统一调度
+   （第二次进入本页才教；屏幕上已有教程——比如玉玺教程——就让位） */
 const { markReady } = usePageReady({ auto: false })
-// 用 useTour()（而非模块级 startTour）：离页时它会自动销毁导览，遮罩不会跟到下一个页面
-const { start: startTour } = useTour()
 
-/** 大旗容器 —— 教学导览打点用，也在这里等首图加载完 */
+/** 大旗容器 —— 首图在这里等加载完，同时作为教学的就绪信号 */
 const bannerBoxRef = ref(null)
-const mountedAt = Date.now()
+const pageReady = ref(false)
 let bannerEl = null
-let tourTimer = 0
-let tourWaited = 0
 
-/** 玉玺教学（首次进入任一菜单页都会演示）在挂载后 600ms 起手，本页让过这个窗口再决定 */
-const SEAL_TOUR_GRACE = 900
-const TOUR_WAIT_STEP = 400
-const TOUR_WAIT_LIMIT = 12000
-
-/** 屏幕上是否已有导览（玉玺教学 / 别处起的教学）—— 直接看遮罩，比问状态可靠 */
-function tourOnScreen() {
-  return Boolean(document.querySelector('.driver-overlay'))
-}
-
-function scheduleTour() {
-  // 别人正在教学：startTour 内部会销毁当前实例（等于把它顶掉），先等它收场
-  if (tourOnScreen()) {
-    tourWaited += TOUR_WAIT_STEP
-    if (tourWaited >= TOUR_WAIT_LIMIT) return // 等太久就作罢，控制台「教学导览」随时可手动看
-    tourTimer = window.setTimeout(scheduleTour, TOUR_WAIT_STEP)
-    return
-  }
-  startTour(TourKeys.SHEN_HUA_TUO_WU_QIN_XI, { mode: 'auto' })
-}
+usePageTour(TourKeys.SHEN_HUA_TUO_WU_QIN_XI, { ready: pageReady })
 
 function settleReady() {
   markReady()
-  window.clearTimeout(tourTimer)
-  const grace = Math.max(0, mountedAt + SEAL_TOUR_GRACE - Date.now())
-  tourTimer = window.setTimeout(scheduleTour, grace)
+  pageReady.value = true
 }
 
 onMounted(async () => {
@@ -159,7 +135,6 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  window.clearTimeout(tourTimer)
   bannerEl?.removeEventListener('load', settleReady)
   bannerEl?.removeEventListener('error', settleReady)
 })

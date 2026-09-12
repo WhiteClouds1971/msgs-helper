@@ -10,6 +10,9 @@ export const StorageKeys = Object.freeze({
   /** 教学导览 — 对象，key 对应 TourKeys，值为 { count, data } */
   TOUR: 'msgs-tour',
 
+  /** 页面进入次数 — 对象，key 为路由 path，值为累计进入次数（页面级自动教学的调度依据） */
+  PAGE_VISITS: 'msgs-page-visits',
+
   /** 应用版本号 */
   APP_VERSION: 'msgs-app-version',
 })

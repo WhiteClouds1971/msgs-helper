@@ -65,6 +65,27 @@ const menus = [
     orientation: 'vertical',
   },
   {
+    code: 'shen-hua-tuo-wu-qin-xi',
+    name: '神华佗 五禽戏',
+    route: '/mobile/shen-hua-tuo-wu-qin-xi',
+    component: () => import('@/pages/mobile/ShenHuaTuoWuQinXi/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-神华佗-五禽戏.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.FOREST,
+    packageName: PackageName.MOBILE,
+    // 补充检索标签（全局搜索用，也显示在结果行）：神华佗的常用别称
+    tags: ['华佗'],
+    // 教学导览：五禽戏技能区手势（首次进入自动教一次，之后走控制台「教学导览」）
+    tourKey: TourKeys.SHEN_HUA_TUO_WU_QIN_XI,
+    // 空白布局：无装饰；有教学导览与页面数据（技能顺序存 route.fullPath）
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
     // 合并自原「夏侯渊 神速」「洞烛先机」两个菜单（页面同时展示两张原图）
     code: 'guo-jia',
     name: '转郭嘉',
@@ -138,27 +159,6 @@ const menus = [
     // 补充检索标签（全局搜索用，也显示在结果行）：汉献帝 —— 刘协的常用别称
     tags: ['汉献帝'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
-    layout: MenuLayout.BLANK,
-    orientation: 'vertical',
-  },
-  {
-    code: 'shen-hua-tuo-wu-qin-xi',
-    name: '神华佗 五禽戏',
-    route: '/mobile/shen-hua-tuo-wu-qin-xi',
-    component: () => import('@/pages/mobile/ShenHuaTuoWuQinXi/Index.vue'),
-    image: {
-      src: 'src/assets/images/menus/大旗-神华佗-五禽戏.webp',
-      focalX: 50,
-      focalY: 50,
-      fit: 'cover',
-    },
-    themeColor: ThemeColor.FOREST,
-    packageName: PackageName.MOBILE,
-    // 补充检索标签（全局搜索用，也显示在结果行）：神华佗的常用别称
-    tags: ['华佗'],
-    // 教学导览：五禽戏技能区手势（首次进入自动教一次，之后走控制台「教学导览」）
-    tourKey: TourKeys.SHEN_HUA_TUO_WU_QIN_XI,
-    // 空白布局：无装饰；有教学导览与页面数据（技能顺序存 route.fullPath）
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
