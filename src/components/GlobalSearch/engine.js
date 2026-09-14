@@ -18,7 +18,7 @@ import { createSearchIndex, highlightSnippet, searchItemsByKeyword } from '@/uti
  * 文档认领表 —— 菜单在 menus.js 的 docs 字段里认领本页展示的正文
  *
  * 两种写法（合并文档由多个页面各认领一节）：
- *   · 'cun-gui'                                  —— 认领整篇
+ *   · 'gui-ze-cun-gui'                         —— 认领整篇
  *   · { id: 'you-xi-pai', heading: '趁火打劫' }    —— 只认领该篇里这一节
  *
  * 返回 { whole: Map<docId, menu>, sections: Map<docId, Map<heading, menu>> }。

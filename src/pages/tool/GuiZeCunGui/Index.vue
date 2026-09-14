@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import MdViewer from '@/ui/MdViewer/Index.vue'
 import { usePageReady } from '@/composables/usePageReady'
 import { useKeywordHighlight } from '@/composables/useKeywordHighlight'
-// 基础规则正文随包发布：?raw 静态导入，无需请求、离线可用、改文件即热更
-import jiChuGuiZeMd from '@/assets/md/ji-chu-gui-ze.md?raw'
+// 规则&村规正文随包发布：?raw 静态导入，无需请求、离线可用、改文件即热更
+import guiZeCunGuiMd from '@/assets/md/gui-ze-cun-gui.md?raw'
 
 // 空白布局页面：无装饰、无教学导览、无持久化数据
 usePageReady()
@@ -17,17 +17,17 @@ useKeywordHighlight(pageRef)
 <template>
   <div
     ref="pageRef"
-    class="ji-chu-gui-ze"
+    class="gui-ze-cun-gui"
   >
     <MdViewer
-      class="ji-chu-gui-ze__doc"
-      :content="jiChuGuiZeMd"
+      class="gui-ze-cun-gui__doc"
+      :content="guiZeCunGuiMd"
     />
   </div>
 </template>
 
 <style scoped lang="less">
-.ji-chu-gui-ze {
+.gui-ze-cun-gui {
   /* #app 是 overflow: hidden 的固定高度壳，内容超一屏时自建滚动容器 */
   height: 100%;
   padding:
@@ -40,7 +40,7 @@ useKeywordHighlight(pageRef)
 }
 
 /* 正文限宽：桌面端不让汉字行宽过长（移动端本就窄，不生效） */
-.ji-chu-gui-ze__doc {
+.gui-ze-cun-gui__doc {
   max-width: 34em;
   margin: 0 auto;
 }

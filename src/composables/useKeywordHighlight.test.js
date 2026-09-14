@@ -76,7 +76,7 @@ const TWO_CARDS = `
 /** 一份文档里同一句话说了两遍（整篇认领，块标题取文档标题） */
 const REPEATED = `
   <article class="md-viewer__body">
-    <h2>村规</h2>
+    <h2>规则&amp;村规</h2>
     <p>出局玩家翻开身份牌。</p>
     <p>出局玩家翻开身份牌。</p>
   </article>
@@ -153,9 +153,9 @@ describe('useKeywordHighlight — 块内第几处', () => {
 
   it('hit:1 落在同句的第二处', async () => {
     const wrapper = await land({
-      path: '/tool/cun-gui',
+      path: '/tool/gui-ze-cun-gui',
       html: REPEATED,
-      query: { keyword: '出局玩家翻开身份牌。', q: '身份牌', section: '村规', hit: '1' },
+      query: { keyword: '出局玩家翻开身份牌。', q: '身份牌', section: '规则&村规', hit: '1' },
     })
 
     const mark = wrapper.element.querySelector('mark.md-hit--active')
@@ -165,9 +165,9 @@ describe('useKeywordHighlight — 块内第几处', () => {
 
   it('不带 hit 时落在第一处', async () => {
     const wrapper = await land({
-      path: '/tool/cun-gui',
+      path: '/tool/gui-ze-cun-gui',
       html: REPEATED,
-      query: { keyword: '出局玩家翻开身份牌。', q: '身份牌', section: '村规' },
+      query: { keyword: '出局玩家翻开身份牌。', q: '身份牌', section: '规则&村规' },
     })
 
     expect(wrapper.element.querySelector('mark.md-hit--active').closest('p')).toBe(at(wrapper, 0))

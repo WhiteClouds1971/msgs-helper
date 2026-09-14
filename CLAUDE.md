@@ -126,14 +126,14 @@ msgs-helper/
 ```vue
 <!-- ① content：原文直给（推荐）—— 正文随包发布，无请求、离线可用、改文件即热更 -->
 <script setup>
-import cunGuiMd from '@/assets/md/cun-gui.md?raw'
+import guiZeCunGuiMd from '@/assets/md/gui-ze-cun-gui.md?raw'
 </script>
 <template>
-  <MdViewer :content="cunGuiMd" />
+  <MdViewer :content="guiZeCunGuiMd" />
 </template>
 
 <!-- ② src：给地址，组件自行 fetch —— 内容可脱离构建单独更新 -->
-<MdViewer src="/rules/cun-gui.md" />
+<MdViewer src="/rules/gui-ze-cun-gui.md" />
 ```
 
 - `content` 非空时优先，且**不发起请求**；换 `src` 时中断上一次请求，慢响应不会覆盖新内容

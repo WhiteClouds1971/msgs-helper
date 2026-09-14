@@ -12,7 +12,7 @@
  *   · tags — 补充检索标签，参与模糊匹配，并作为标签显示在结果行
  *   · docs — 本菜单页展示的 Markdown 正文（src/assets/md/ 下的文件名，不含扩展名），
  *            文档搜索结果据此跳到对应菜单页并在正文里滚动高亮。两种写法：
- *              · 'cun-gui'                                —— 认领整篇
+ *              · 'gui-ze-cun-gui'                      —— 认领整篇
  *              · { id: 'you-xi-pai', heading: '趁火打劫' } —— 只认领该篇里这一节
  *            （多张牌/多条规则合并成一篇时，各页面按节分认领，别让认领跨页串门）
  */
@@ -54,17 +54,18 @@ export const ThemeColor = Object.freeze({
 
 const menus = [
   {
-    code: 'cun-gui',
-    name: '村规',
-    route: '/tool/cun-gui',
-    component: () => import('@/pages/tool/CunGui/Index.vue'),
-    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor
-    cover: { title: '村规', subtitle: '入乡随俗 众议成规' },
+    code: 'gui-ze-cun-gui',
+    name: '规则&村规',
+    route: '/tool/gui-ze-cun-gui',
+    component: () => import('@/pages/tool/GuiZeCunGui/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
+    cover: { title: '规则村规', subtitle: '开局立矩 众行有据' },
     themeColor: ThemeColor.CRIMSON,
     packageName: PackageName.TOOL,
-    // 正文文件：src/assets/md/cun-gui.md
-    docs: ['cun-gui'],
-    tags: ['规则', '约定'],
+    // 补充检索标签（全局搜索用，也显示在结果行）：村规条目已并入本页
+    tags: ['规则', '村规', '入门'],
+    // 正文文件：src/assets/md/gui-ze-cun-gui.md
+    docs: ['gui-ze-cun-gui'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
@@ -76,7 +77,7 @@ const menus = [
     component: () => import('@/pages/mode/DouDiZhu/Index.vue'),
     // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
     cover: { title: '斗地主', subtitle: '一主二农 斗智斗勇' },
-    themeColor: ThemeColor.JADE,
+    themeColor: ThemeColor.EMBER,
     packageName: PackageName.MODE,
     // 补充检索标签（全局搜索用，也显示在结果行）
     tags: [],
@@ -461,23 +462,6 @@ const menus = [
     packageName: PackageName.YJCM,
     // 补充检索标签（全局搜索用，也显示在结果行）：绮胄卡面上的四个技能名
     tags: ['短兵', '英姿', '奋威', '澜疆'],
-    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
-    layout: MenuLayout.BLANK,
-    orientation: 'vertical',
-  },
-  {
-    code: 'ji-chu-gui-ze',
-    name: '基础规则',
-    route: '/tool/ji-chu-gui-ze',
-    component: () => import('@/pages/tool/JiChuGuiZe/Index.vue'),
-    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
-    cover: { title: '基础规则', subtitle: '开局立矩 众行有据' },
-    themeColor: ThemeColor.JADE,
-    packageName: PackageName.TOOL,
-    // 补充检索标签（全局搜索用，也显示在结果行）
-    tags: ['规则', '入门'],
-    // 正文文件：src/assets/md/ji-chu-gui-ze.md（正文暂空，只留标题）
-    docs: ['ji-chu-gui-ze'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',

@@ -46,8 +46,8 @@ describe('resolveMenus', () => {
   });
 
   it('菜单已下线（码表里的陌生 code）时丢弃，不产出空洞', () => {
-    const codes = ['cun-gui', 'mei-you-zhe-ge-cai-dan'];
-    expect(resolveMenus(codes).map(menu => menu.code)).toEqual(['cun-gui']);
+    const codes = [menus[0].code, 'mei-you-zhe-ge-cai-dan'];
+    expect(resolveMenus(codes).map(menu => menu.code)).toEqual([menus[0].code]);
   });
 });
 describe('useMenuOrder（store）', () => {

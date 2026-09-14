@@ -30,11 +30,11 @@ describe('全局搜索 —— 合并文档按节认领', () => {
     expect(docRow('趁火打劫', '趁火打劫')?.disabled).toBe(false)
   })
 
-  it('整篇认领的文档照旧（村规）', () => {
-    const row = docRow('议规', '1.1 议规')
+  it('整篇认领的文档照旧（规则&村规）', () => {
+    const row = docRow('护甲', '护甲')
 
-    expect(row?.route).toBe('/tool/cun-gui')
-    expect(row?.title).toBe('村规')
+    expect(row?.route).toBe('/tool/gui-ze-cun-gui')
+    expect(row?.title).toBe('规则&村规')
   })
 
   it('节内正文行也归本节所属的页面', () => {
@@ -54,7 +54,7 @@ describe('全局搜索 —— 落点身份（section + hit）', () => {
 
     expect(new Set(rows)).toEqual(
       new Set([
-        '村规 → /tool/cun-gui',
+        '规则&村规 → /tool/gui-ze-cun-gui',
         '趁火打劫 → /jsrg/cheng-lv-bu-qing-jiao',
         '洞烛先机 → /jsrg/guo-jia',
         '推心置腹 → /jsrg/cheng-lv-bu-qing-jiao',
@@ -62,10 +62,10 @@ describe('全局搜索 —— 落点身份（section + hit）', () => {
     )
   })
 
-  it('整篇认领的行落在文档标题那一块（村规整篇画在一个块里）', () => {
-    const row = docRow('议规', '1.1 议规')
+  it('整篇认领的行落在文档标题那一块（规则&村规整篇画在一个块里）', () => {
+    const row = docRow('护甲', '护甲')
 
-    expect(row?.section).toBe('村规')
+    expect(row?.section).toBe('规则&村规')
     expect(row?.hit).toBe(0)
   })
 

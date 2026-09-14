@@ -7,7 +7,7 @@
  * 底色直接取菜单主题色。
  *
  * 用法：menus.js 条目写
- *   cover: { title: '村规', subtitle: '入乡随俗 众议成规' }
+ *   cover: { title: '规则&村规', subtitle: '开局立矩 众行有据' }
  * 标题、副标题均可用 CSS 容器宽度自适应缩放，无需传尺寸。
  */
 defineProps({
