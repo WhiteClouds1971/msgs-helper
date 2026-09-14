@@ -24,6 +24,15 @@ describe('全局搜索 —— 合并文档按节认领', () => {
     expect(docRow('洞烛先机', '洞烛先机')?.route).toBe('/jsrg/guo-jia')
   })
 
+  it('斗地主模式专属武将技能同样按节认领到本页', () => {
+    const row = docRow('破军', '破军')
+
+    expect(row?.route).toBe('/mode/dou-di-zhu')
+    expect(row?.title).toBe('斗地主')
+    expect(row?.section).toBe('界徐盛')
+    expect(row?.disabled).toBe(false)
+  })
+
   it('结果行标题取认领的菜单名，而不是退化成文件名', () => {
     expect(docRow('洞烛先机', '洞烛先机')?.title).toBe('转郭嘉')
     expect(docRow('趁火打劫', '趁火打劫')?.title).toBe('承吕布 轻狡')
