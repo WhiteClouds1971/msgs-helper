@@ -9,6 +9,7 @@ import { extractMarkdownSection } from '@/utils/markdown'
 import douDiZhuMd from '@/assets/md/dou-di-zhu.md?raw'
 import wuJiangMd from '@/assets/md/dou-di-zhu-wu-jiang.md?raw'
 import jieXuShengUrl from '@/assets/images/mode/手杀-界徐盛.webp'
+import shenLuSuUrl from '@/assets/images/mode/手杀-神鲁肃.webp'
 
 /**
  * 模式专属武将技能 —— 本模式下须改用专属技能的武将，逐张列在正文之后。
@@ -22,6 +23,11 @@ const exclusiveSkills = [
     alt: '界徐盛',
     src: jieXuShengUrl,
     info: extractMarkdownSection(wuJiangMd, '界徐盛'),
+  },
+  {
+    alt: '神鲁肃',
+    src: shenLuSuUrl,
+    info: extractMarkdownSection(wuJiangMd, '神鲁肃'),
   },
 ]
 

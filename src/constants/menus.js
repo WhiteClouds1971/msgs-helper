@@ -82,7 +82,11 @@ const menus = [
     // 补充检索标签（全局搜索用，也显示在结果行）
     tags: [],
     // 正文文件：src/assets/md/dou-di-zhu.md（规则，整篇）+ dou-di-zhu-wu-jiang.md（模式专属武将技能，按节认领）
-    docs: ['dou-di-zhu', { id: 'dou-di-zhu-wu-jiang', heading: '界徐盛' }],
+    docs: [
+      'dou-di-zhu',
+      { id: 'dou-di-zhu-wu-jiang', heading: '界徐盛' },
+      { id: 'dou-di-zhu-wu-jiang', heading: '神鲁肃' },
+    ],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
