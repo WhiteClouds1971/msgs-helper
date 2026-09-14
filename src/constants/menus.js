@@ -88,6 +88,23 @@ const menus = [
     orientation: 'vertical',
   },
   {
+    code: 'pai-wei',
+    name: '排位',
+    route: '/mode/pai-wei',
+    component: () => import('@/pages/mode/PaiWei/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
+    cover: { title: '排位', subtitle: '四人成席 两两为盟' },
+    themeColor: ThemeColor.FOREST,
+    packageName: PackageName.MODE,
+    // 补充检索标签（全局搜索用，也显示在结果行）：本模式的常见叫法与人数
+    tags: ['排位赛', '2v2', '团战'],
+    // 正文文件：src/assets/md/pai-wei.md（规则，整篇）
+    docs: ['pai-wei'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
     code: 'shen-hua-tuo-wu-qin-xi',
     name: '神华佗 五禽戏',
     route: '/mobile/shen-hua-tuo-wu-qin-xi',
