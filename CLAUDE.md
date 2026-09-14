@@ -76,7 +76,7 @@ msgs-helper/
 │   ├── stores/
 │   │   ├── index.js
 │   │   ├── localStorage.js          # 统一缓存 store（load/reset/clearPage/pageData）
-│   │   └── menuOrder.js
+│   │   └── menuOrder.js             # 菜单访问顺序（主页卡片堆的展示顺序）
 │   └── utils/
 │       ├── markdown.js              # Markdown 逐行切段 + 跳转锚点候选
 │       ├── pinyin.js                # 汉字 → 全拼 / 首字母
@@ -103,6 +103,7 @@ msgs-helper/
 - **页面**：动态 key（`route.fullPath`），`store.load(fullPath, defaults)` → `store.pageData` 读写（语法糖）
 - **重置**：`store.reset(key, defaults)` → 删缓存 + 还原默认值
 - **清除页面数据**：`store.clearPage(key = route.fullPath)` → 删 localStorage + 删内存缓存 + 递增 `store.pageRevision`；`pageRevision` 参与 `App.vue` 中 router-view 的 key，页面随之重挂载，setup 重新 `load()` 回默认值（内存缓存必须一并删，否则残留态会在下次变更时被写回）。返回 `boolean`，页面本就无数据时为 `false`
+- **菜单访问顺序**：`useMenuOrder`（`src/stores/menuOrder.js`）维护「最近访问的菜单排最前」，顺序就存在**主页的页面数据**里（key = 主页 path），所以在主页上「清除本页数据」即复位。**记录入口只有一处**：`App.vue` 监听 `route.meta.code`，主页卡片点击、全局搜索、直链/刷新一视同仁 —— 页面各自 `router.push` 时不用管顺序。主页读取用 `storeToRefs`（直接解构拿到的是解包后的值，既丢响应式又没有 `.value`）
 
 ## 全局轻提示 (Message)
 

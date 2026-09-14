@@ -22,10 +22,12 @@ import { TourKeys } from '@/constants/tourKeys';
 /** 签题分类枚举 */
 export const PackageName = Object.freeze({
   TOOL: '工具',
+  MODE: '模式',
   DA_QI: '大旗',
   OL: 'OL',
   ANNIVERSARY: '十周年',
   MOBILE: 'M',
+  XCX: '小程序',
   JXTP: '界限突破',
   SHZL: '神话再临',
   YJCM: '一将',
@@ -63,6 +65,21 @@ const menus = [
     // 正文文件：src/assets/md/cun-gui.md
     docs: ['cun-gui'],
     tags: ['规则', '约定'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'dou-di-zhu',
+    name: '斗地主',
+    route: '/mode/dou-di-zhu',
+    component: () => import('@/pages/mode/DouDiZhu/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
+    cover: { title: '斗地主', subtitle: '一主二农 斗智斗勇' },
+    themeColor: ThemeColor.JADE,
+    packageName: PackageName.MODE,
+    // 补充检索标签（全局搜索用，也显示在结果行）
+    tags: [],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
@@ -369,6 +386,98 @@ const menus = [
       { id: 'you-xi-pai', heading: '推心置腹' },
       { id: 'you-xi-pai', heading: '趁火打劫' },
     ],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'ji-si-ma-yi-yin-ren',
+    name: '极司马懿 隐忍',
+    route: '/ji/ji-si-ma-yi-yin-ren',
+    component: () => import('@/pages/ji/SiMaYiYinRen/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/极-司马懿-隐忍.webp',
+      focalX: 53,
+      focalY: 45,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.STEEL_BLUE,
+    packageName: PackageName.XCX,
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+    tags: ['奸雄', '行殇', '明鉴'],
+  },
+  {
+    code: 'mou-jiang-wei-ran-ji',
+    name: '谋姜维 燃己',
+    route: '/ol/mou-jiang-wei-ran-ji',
+    component: () => import('@/pages/ol/MouJiangWeiRanJi/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/OL-谋姜维-燃己.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.OL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：燃己卡面上的两个技能名
+    tags: ['困奋', '诈降'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'guan-xing-zhang-bao-fu-hun',
+    name: '关兴＆张苞 父魂',
+    route: '/yjcm/guan-xing-zhang-bao-fu-hun',
+    component: () => import('@/pages/yjcm/GuanXingZhangBaoFuHun/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/一将-关兴张苞-父魂.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.YJCM,
+    // 补充检索标签（全局搜索用，也显示在结果行）：父魂卡面上的两个技能名
+    tags: ['武圣', '咆哮'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'he-qi-qi-zhou',
+    name: '贺齐 绮胄',
+    route: '/yjcm/he-qi-qi-zhou',
+    component: () => import('@/pages/yjcm/HeQiQiZhou/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/一将-贺齐-绮胄.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.STEEL_BLUE,
+    packageName: PackageName.YJCM,
+    // 补充检索标签（全局搜索用，也显示在结果行）：绮胄卡面上的四个技能名
+    tags: ['短兵', '英姿', '奋威', '澜疆'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'ji-chu-gui-ze',
+    name: '基础规则',
+    route: '/tool/ji-chu-gui-ze',
+    component: () => import('@/pages/tool/JiChuGuiZe/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
+    cover: { title: '基础规则', subtitle: '开局立矩 众行有据' },
+    themeColor: ThemeColor.JADE,
+    packageName: PackageName.TOOL,
+    // 补充检索标签（全局搜索用，也显示在结果行）
+    tags: ['规则', '入门'],
+    // 正文文件：src/assets/md/ji-chu-gui-ze.md（正文暂空，只留标题）
+    docs: ['ji-chu-gui-ze'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',

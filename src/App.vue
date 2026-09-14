@@ -8,10 +8,12 @@ import BackgroundLayout from '@/layout/BackgroundLayout.vue'
 import BlankLayout from '@/layout/BlankLayout.vue'
 import { useAppShell } from '@/composables/useAppShell'
 import { useLocalStorage } from '@/stores/localStorage'
+import { useMenuOrder } from '@/stores/menuOrder'
 
 const route = useRoute()
 const { isReady, resetReady } = useAppShell()
 const ls = useLocalStorage()
+const menuOrder = useMenuOrder()
 
 const layoutMap = { BackgroundLayout, BlankLayout }
 
@@ -29,6 +31,16 @@ watch(
   () => {
     resetReady()
   },
+)
+
+// 访问即置顶：任何入口进入菜单页（主页卡片、全局搜索、直链/刷新）都把该菜单
+// 记到主页卡片堆的最前 —— 记录只此一处，页面各自 push 时不用管顺序
+watch(
+  () => route.meta?.code,
+  code => {
+    if (code) menuOrder.record(code)
+  },
+  { immediate: true },
 )
 </script>
 

@@ -1,43 +1,25 @@
 <script setup>
   import { ref, computed, watch, nextTick } from 'vue';
-  import { useRouter, useRoute } from 'vue-router';
+  import { storeToRefs } from 'pinia';
+  import { useRouter } from 'vue-router';
   import { usePageReady } from '@/composables/usePageReady';
   import { useTour } from '@/composables/useTour';
 import { TourKeys } from '@/constants/tourKeys';
-  import menus from '@/constants/menus';
-  import { useLocalStorage } from '@/stores/localStorage';
+  import { useMenuOrder } from '@/stores/menuOrder';
   import HomePageCard from '@/pages/home/components/HomePageCard.vue';
 
 
   const router = useRouter();
-  const route = useRoute();
   const { markReady } = usePageReady({ auto: false });
-  const ls = useLocalStorage();
   const { start: startTour } = useTour();
 
-  /* ---- 菜单排序（页面数据） ---- */
-  function rebuild(codes, source) {
-    const map = new Map(source.map((m) => [m.code, m]))
-    return codes.map((c) => map.get(c)).filter(Boolean)
-  }
+  /* ---- 菜单排序（menuOrder store：访问即置顶，由 App.vue 统一记录） ---- */
+  // 用 storeToRefs 取顺序：直接解构拿到的是解包后的值，既丢响应式又没有 .value
+  const menuOrder = useMenuOrder();
+  const { ordered: orderedMenus } = storeToRefs(menuOrder);
 
-  const orderedMenus = ref([])
-
-  ls.load(route.fullPath, { order: menus.map((m) => m.code) })
-
-  orderedMenus.value = rebuild(ls.pageData.order ?? [], menus)
-
-  watch(() => ls.pageData.order, (order) => {
-    orderedMenus.value = rebuild(order ?? [], menus)
-  })
-
-  function recordAccess(code) {
-    const order = ls.pageData.order
-    const idx = order.findIndex((c) => c === code)
-    if (idx <= 0) return
-    order.splice(idx, 1)
-    order.unshift(code)
-  }
+  // 清除本页数据后重挂载：缓存里的顺序被删掉，这里补回默认顺序
+  menuOrder.loadOrder();
 
   /* ================================================================
    卡片扇形展开参数
@@ -242,9 +224,8 @@ import { TourKeys } from '@/constants/tourKeys';
     }
   }
 
-  /* ---- 卡片点击 → 导航 ---- */
+  /* ---- 卡片点击 → 导航（访问顺序由 App.vue 统一记录，见 stores/menuOrder） ---- */
   function onCardClick(menu) {
-    recordAccess(menu.code);
     router.push(menu.route);
   }
 
