@@ -2,6 +2,7 @@ package com.msgshelper.server.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
@@ -104,6 +105,17 @@ class JiangChiStatRowTest {
         assertThat(row.get("bestRate")).isNull();
         assertThat(row.get("worstRole")).isNull();
         assertThat(row.get("worstRate")).isNull();
+    }
+
+    @Test
+    @DisplayName("最后更新时间：写成 yyyy-MM-dd HH:mm，没更新过就留空")
+    void updatedAtIsFormattedToMinute() {
+        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        record.setUpdatedAt(LocalDateTime.of(2026, 9, 16, 17, 13, 45));
+
+        // 秒不进报表：一局打完记的是日期与分钟，秒既没人看又白占一列宽度
+        assertThat(row(record).get("updatedAt")).isEqualTo("2026-09-16 17:13");
+        assertThat(row(newRecord("关羽", "jiang-chi-1")).get("updatedAt")).isNull();
     }
 
     @Test

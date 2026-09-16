@@ -65,11 +65,16 @@ class JiangChiExportEndpointTest {
             assertThat(sheet.getRow(1).getCell(0).getStringCellValue()).isEqualTo("武将");
             assertThat(sheet.getRow(1).getCell(2).getStringCellValue()).isEqualTo("最高胜率总场数");
             assertThat(sheet.getRow(1).getCell(36).getStringCellValue()).isEqualTo("四号位胜率");
+            assertThat(sheet.getRow(1).getCell(37).getStringCellValue()).isEqualTo("最后更新时间");
 
             for (int i = 0; i < records.size(); i++) {
                 Row row = sheet.getRow(2 + i);
                 assertThat(row.getCell(0).getStringCellValue()).isEqualTo(records.get(i).getHero());
                 assertThat(row.getCell(2).getNumericCellValue()).isGreaterThanOrEqualTo(0);
+                // 库里的 updated_at 是 NOT NULL，导出的每一行这一列都不该是空的，
+                // 且是「到分钟」的写法（不是 Excel 那串日期序列号）
+                assertThat(row.getCell(37).getStringCellValue())
+                        .matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}");
             }
         }
     }

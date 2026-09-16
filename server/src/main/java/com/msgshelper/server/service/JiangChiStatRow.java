@@ -1,5 +1,6 @@
 package com.msgshelper.server.service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,6 +20,9 @@ import com.msgshelper.server.entity.JiangChiRecord;
  *       与「胜率最高身份/位置」「身份/位置最高胜率」两列配成一组：这一档的胜率是在多少场里打出来的。
  *       <b>不是</b>所有身份加起来的局数 —— 三个模式的身份混在一起求和，凑出来的数跟哪一档的胜率都对不上，
  *       也撑不起升降级规则里「够不够份量」这个门槛。一场没打时为 0；</li>
+ *   <li><b>最后更新时间</b>取记录的 {@code updated_at}，写成 {@code yyyy-MM-dd HH:mm} 的文本
+ *       （按下「新增」记一局、或改所属将池都会刷新它）—— 精确到分钟就够用，
+ *       秒既没人看又要撑宽一列；写成文本是为了不看模板格子的格式脸色，导出即所见；</li>
  *   <li><b>胜率最高 / 最低身份</b>只在<b>打过</b>的身份里挑：0 场的身份没有胜率，
  *       要是让它算 0% 参赛，任何一个只打过一种身份的武将都会凭空多出一个「0% 的最低身份」，
  *       降级规则（最低胜率 &lt; 40 就降）就废了。撞上并列时取 {@link RoleCounter} 顺序靠前的那个，
@@ -26,6 +30,9 @@ import com.msgshelper.server.entity.JiangChiRecord;
  * </ul>
  */
 public final class JiangChiStatRow {
+
+    /** 「最后更新时间」一列在报表里的写法：见类注释 */
+    private static final DateTimeFormatter UPDATED_AT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final JiangChiRecord record;
 
@@ -109,6 +116,9 @@ public final class JiangChiStatRow {
             row.put(prefix + "Lose", loses.get(counter));
             row.put(prefix + "Rate", rates.get(counter));
         }
+        // 排在最后，与模板里这一列的位置一致（updated_at 库里有 NOT NULL 兜底，
+        // 只有「还没落库的新对象」才会是 null，那一格留空）
+        row.put("updatedAt", record.getUpdatedAt() == null ? null : UPDATED_AT.format(record.getUpdatedAt()));
         return row;
     }
 

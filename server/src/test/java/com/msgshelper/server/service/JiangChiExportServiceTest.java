@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -15,6 +16,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -27,8 +29,8 @@ class JiangChiExportServiceTest {
     /** 列表占位符 {.字段名} */
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\.([A-Za-z0-9]+)}");
 
-    /** 模板一共 37 列：7 个汇总列 + 10 个身份（位置）× 胜场 / 败场 / 胜率 */
-    private static final int COLUMNS = 37;
+    /** 模板一共 38 列：7 个汇总列 + 10 个身份（位置）× 胜场 / 败场 / 胜率 + 最后更新时间 */
+    private static final int COLUMNS = 38;
 
     /** 只测「模板 + 填充」这一段，用不着数据库，mapper 传 null */
     private final JiangChiExportService service = new JiangChiExportService(null);
@@ -40,6 +42,7 @@ class JiangChiExportServiceTest {
         guanyu.setLandlordWin(1);
         guanyu.setLandlordLose(1);      // 地主 1 胜 1 负 → 50%，这一档 2 场（全场最高）
         guanyu.setFarmerLose(2);        // 农民 0 胜 2 负 → 0%
+        guanyu.setUpdatedAt(LocalDateTime.of(2026, 9, 16, 17, 13, 45));
 
         byte[] xlsx = service.fillTemplate(List.of(
                 new JiangChiStatRow(guanyu).toMap(),
@@ -52,7 +55,8 @@ class JiangChiExportServiceTest {
             assertThat(text(sheet, 0, 0)).startsWith("若最高胜率总场数");
             assertThat(text(sheet, 1, 0)).isEqualTo("武将");
             assertThat(text(sheet, 1, 2)).isEqualTo("最高胜率总场数");
-            assertThat(text(sheet, 1, COLUMNS - 1)).isEqualTo("四号位胜率");
+            assertThat(text(sheet, 1, 36)).isEqualTo("四号位胜率");
+            assertThat(text(sheet, 1, COLUMNS - 1)).isEqualTo("最后更新时间");
 
             // 第一条数据落在模板的第三行（列表行）
             assertThat(text(sheet, 2, 0)).isEqualTo("关羽");
@@ -68,6 +72,8 @@ class JiangChiExportServiceTest {
             assertThat(number(sheet, 2, 9)).isEqualTo(50);
             assertThat(number(sheet, 2, 10)).isEqualTo(0);
             assertThat(number(sheet, 2, 12)).isEqualTo(0);
+            // 最后更新时间：精确到分钟，秒不进报表
+            assertThat(text(sheet, 2, COLUMNS - 1)).isEqualTo("2026-09-16 17:13");
 
             // 第二条接着往下长
             assertThat(text(sheet, 3, 0)).isEqualTo("张飞");
@@ -77,9 +83,18 @@ class JiangChiExportServiceTest {
             // 样式跟着模板那一行走：边框还在
             assertThat(sheet.getRow(3).getCell(0).getCellStyle().getBorderTop())
                     .isEqualTo(BorderStyle.THIN);
+            // 没更新过时间的那一行，这一列是空格子
+            assertThat(sheet.getRow(3).getCell(COLUMNS - 1).getCellType()).isEqualTo(CellType.BLANK);
 
             // 表头下面就该只有这两行，没有多出来的空行
             assertThat(sheet.getLastRowNum()).isEqualTo(3);
+
+            // 第一行的升降级规则是合并单元格，得跟着列数一起长到最后一列 ——
+            // 加列时只补占位符、忘了扩合并区，表头那行就会短一截
+            String lastColumn = CellReference.convertNumToColString(COLUMNS - 1);
+            assertThat(sheet.getMergedRegions()).hasSize(1);
+            assertThat(sheet.getMergedRegions().get(0).formatAsString())
+                    .isEqualTo("A1:" + lastColumn + "1");
         }
     }
 
