@@ -3,8 +3,9 @@ target/
 *.iml
 .idea/
 
-# build.sh 后台常驻时写的进程号（日志目录 server/logs 已被根 .gitignore 的 logs 规则覆盖）
-server.pid
+# build.sh 每次重新指向最新产物的软链（systemd 单元的固定入口）；
+# 日志目录 server/logs 已被根 .gitignore 的 logs 规则覆盖
+app.jar
 
 # 生产配置：里面有生产库的账号密码，不进仓库。
 # 光加这条不够 —— 它已经被 git 跟踪过，必须先 git rm --cached 掉（已处理），

@@ -188,6 +188,52 @@ npm test          # Vitest 单元测试
 
 多环境配置走 `.env` / `.env.dev` / `.env.uat` / `.env.prod`，构建脚本见 `build.sh`。
 
+### 生产部署
+
+生产机上一条命令：`./build.sh` —— git pull → 前端出 dist → 后端打 jar → 让 systemd 重启后端（重复执行即重新部署）。
+
+**部署机一次性准备**（本项目生产机是 Debian 12，路径按它写，换机器照改）：
+
+| 项                                               | 说明                                                                                                                                                                          |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JDK 21                                           | 后端按 `java.version=21` 编译；Debian 12 仓库只有 17，装 Temurin 21 到 `/opt/jdk-21` 并把 `java`/`javac` 软链到 `/usr/local/bin`                                              |
+| Node ≥ 22                                        | 前端构建用；注意别落到系统自带的旧 Node 上                                                                                                                                    |
+| `server/src/main/resources/application-prod.yml` | **不入库**（见 `server/.gitignore`），手工放一份，打包时会打进 jar                                                                                                            |
+| nginx                                            | 静态根指到 `dist/`；再加一条 `location ^~ /api/ { proxy_pass http://127.0.0.1:8081; }`（后端 context-path 本身就是 `/api`，**不做 rewrite**）。用 `^~` 是为了压过静态文件正则 |
+| systemd 单元                                     | 见下；指向 `server/app.jar` —— 那是 build.sh 每次重新生成的软链，pom 改版本号不用动 unit                                                                                      |
+
+后端不再由脚本 `nohup`，交给 systemd：开机自启、进程挂了自动拉起，日志仍在 `server/logs/server.log`。
+
+```ini
+# /etc/systemd/system/msgs-helper.service
+[Unit]
+Description=面杀辅助工具后端 (msgs-helper-server)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=whiteclouds
+WorkingDirectory=/home/app/msgs-helper
+Environment=JAVA_HOME=/opt/jdk-21
+ExecStartPre=/bin/mkdir -p /home/app/msgs-helper/server/logs
+ExecStart=/opt/jdk-21/bin/java -jar /home/app/msgs-helper/server/app.jar --spring.profiles.active=prod
+StandardOutput=append:/home/app/msgs-helper/server/logs/server.log
+StandardError=append:/home/app/msgs-helper/server/logs/server.log
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+再给部署账号放行一条窄规则，`build.sh` 才能免密重启（改完用 `visudo -cf` 校验，文件权限 440）：
+
+```
+# /etc/sudoers.d/msgs-helper
+whiteclouds ALL=(root) NOPASSWD: /usr/bin/systemctl start msgs-helper, /usr/bin/systemctl stop msgs-helper, /usr/bin/systemctl restart msgs-helper, /usr/bin/systemctl status msgs-helper
+```
+
 ---
 
 ## 六、目录结构
