@@ -489,6 +489,44 @@ const menus = [
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
+  {
+    code: 'jie-sun-shang-xiang-xiao-ji',
+    name: '界孙尚香 枭姬',
+    route: '/jxtp/jie-sun-shang-xiang-xiao-ji',
+    component: () => import('@/pages/jxtp/JieSunShangXiangXiaoJi/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/界限突破-孙尚香-枭姬.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.ROSE,
+    packageName: PackageName.JXTP,
+    // 补充检索标签（全局搜索用，也显示在结果行）：枭姬卡面上的另一技能与常用别称
+    tags: ['结姻', '弓腰姬'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'pang-tong-nie-pan',
+    name: '庞统 涅槃',
+    route: '/shzl/pang-tong-nie-pan',
+    component: () => import('@/pages/shzl/PangTongNiePan/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/神话再临-庞统-涅槃.webp',
+      focalX: 54,
+      focalY: 56,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.SHZL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：涅槃卡面上的另外三个技能名
+    tags: ['八阵', '火计', '看破'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
 ];
 
 export default menus;

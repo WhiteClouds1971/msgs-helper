@@ -9,10 +9,7 @@ import { version } from '../../package.json';
 import { StorageKeys } from '@/constants/storageKeys';
 
 /** 版本升级时保留的 key */
-const PRESERVE_KEYS = new Set([
-  StorageKeys.APP_VERSION,
-  // StorageKeys.TOUR,
-]);
+const PRESERVE_KEYS = new Set([StorageKeys.APP_VERSION, StorageKeys.TOUR]);
 
 export function checkVersion() {
   const storedVersion = localStorage.getItem(StorageKeys.APP_VERSION);
