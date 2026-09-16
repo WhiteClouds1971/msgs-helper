@@ -43,10 +43,14 @@ msgs-helper/
 │   │   ├── InkWashBackground/       # 墨洇动态背景
 │   │   ├── JadeSeal/                # 玉玺悬浮按钮
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
+│   │   ├── Button/                       # 按钮（primary / ghost 两变体）
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
 │   │   ├── ImageFigure/                  # 单张图片展示（铺满宽度 + 可选说明区域）
 │   │   ├── MdViewer/                     # Markdown 正文展示（marked 渲染）
 │   │   ├── Message/                      # 全局轻提示宿主（reka-ui Toast 封装）
+│   │   ├── RadioGroup/                   # 单选按钮组（选项摊成一行按钮，原生 radio 语义）
+│   │   ├── SearchSelect/                 # 可搜索 / 可手填的下拉选择
+│   │   ├── Select/                       # 单选下拉框（reka-ui 封装）
 │   │   ├── SkillCard/                    # 单个三国杀技能展示（居中技能名 + 标签 + 规则）
 │   │   ├── SplashScreen/                 # 启动画面
 │   │   └── Tooltip/                      # 悬停提示
@@ -160,6 +164,21 @@ import guiZeCunGuiMd from '@/assets/md/gui-ze-cun-gui.md?raw'
 - 三个状态类挂在 li 上、样式在页面里：`is-pressed`（按下）/ `is-dragging`（拖起，金色描边 + 辉光）/ `is-swiping`（左滑中，滑出层才显形 —— 平时 `opacity: 0`，否则卡片浮起时缩放会漏红底）
 - li 上必须带 `touch-action: pan-y`：纵向滚动照常放行，横向留给手势。缺了它，触屏上的横向滑动会被浏览器判成平移并掐断指针事件流，左滑会整个失效
 - 拖拽期间 `preventDefault` 掉 touchmove 压住页面滚动；数据提交与视觉解耦（让位量 = 提交后的真实布局差，故清掉 transform 不跳版，被拖项再用一次 FLIP 补间落位）
+
+## 表单选择 (Select / RadioGroup / SearchSelect)
+
+按「选项多不多」挑，三者对外都是 `v-model` + `:options="[{ label, value }]"`（`value` 是稳定标识：改 label 不动已存数据）。
+
+| 组件 | 用在哪 | 形态 |
+|------|--------|------|
+| `src/ui/Select/` | 值域大或会长（模式、将池） | 下拉，收着 |
+| `src/ui/RadioGroup/` | 两三枚、扫一眼就能定（身份、位置、对局） | 一行按钮，摊开 |
+| `src/ui/SearchSelect/` | 候选多到要找（武将：可搜、可手填） | 输入框 + 候选浮层 |
+
+- RadioGroup 每个选项是一枚按钮面，选中态＝金描边 + 淡金底 + 金辉光 + 半档字重（**不靠金色写字**：Light 模式下 `--accent-gold` 只有 3.0:1，见设计系统 §4.1）
+- 单选语义整个交给原生 `<input type="radio">`：同组自动同名（不传 `name` 按实例生成，一页放几组也不串台），方向键切换、表单提交、屏幕阅读器都是白拿的；按钮面只是它的 `label`
+- 选项一律排一行、等分宽度；一行放不下时文字省略而不折行（折行会让第二行那枚独占整行，看着像被选中）
+- 组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
 
 ## 路径别名
 

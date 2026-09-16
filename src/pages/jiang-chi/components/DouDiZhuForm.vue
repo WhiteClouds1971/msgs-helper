@@ -1,5 +1,5 @@
 <script setup>
-  import Select from '@/ui/Select/Index.vue';
+  import RadioGroup from '@/ui/RadioGroup/Index.vue';
 
   /**
    * 斗地主 —— 模式专属表单
@@ -28,18 +28,8 @@
 
 <template>
   <div class="mode-form mode-form--dou-di-zhu">
-    <Select
-      v-model="role"
-      label="身份"
-      placeholder="请选择身份"
-      :options="ROLES"
-    />
+    <RadioGroup v-model="role" label="身份" :options="ROLES" />
 
-    <Select
-      v-model="result"
-      label="对局"
-      placeholder="请选择对局结果"
-      :options="RESULTS"
-    />
+    <RadioGroup v-model="result" label="对局" :options="RESULTS" />
   </div>
 </template>

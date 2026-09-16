@@ -314,7 +314,8 @@
     background: var(--decorative-line);
   }
 
-  /* 模式专属表单：字段样式归 @/ui/Select，这里只给整块的排布 ——
+  /* 模式专属表单：字段样式归 @/ui/RadioGroup（身份 / 位置 / 对局 值域都只有两三枚，
+     摊成一行按钮比收进下拉少点一下），这里只给整块的排布 ——
      各模式组件只画字段，行距与上下留白统一由页面给 */
   .jiang-chi__mode-form {
     display: flex;
@@ -347,7 +348,8 @@
      整页所有字段的控件左边线就齐了。
      只是下限不是定宽：将来出现更长的标题，它会自己长出去，不会挤坏文字 */
   .jiang-chi__inner :deep(.select-field__label),
-  .jiang-chi__inner :deep(.search-select__label) {
+  .jiang-chi__inner :deep(.search-select__label),
+  .jiang-chi__inner :deep(.radio-field__label) {
     min-width: 3em;
   }
 
@@ -356,6 +358,7 @@
      （幽灵按钮是 6px），把热区从 36px 补到 44px（设计系统 §3.8 的下限），视觉上不可见。
      本页是「一行一个控件、行距 16px」的窄栏，不需要这层外扩 —— 统一收进视觉框，
      行与行之间不再有看不见的 ±4 侵入。
+     模式表单里的 @/ui/RadioGroup 本来就不带这层外扩，无需在此收。
      代价：这些控件的触控高度就是 36px，低于 §3.8 的下限，本页有意为之。
      （武将行的 SearchSelect 也外扩 4px，但那两条贴边窄条是「点外框外沿也能聚焦
      输入框」的入口，不属于纯热区冗余，本页保留） */

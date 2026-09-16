@@ -5,3 +5,11 @@ target/
 
 # build.sh 后台常驻时写的进程号（日志目录 server/logs 已被根 .gitignore 的 logs 规则覆盖）
 server.pid
+
+# 生产配置：里面有生产库的账号密码，不进仓库。
+# 光加这条不够 —— 它已经被 git 跟踪过，必须先 git rm --cached 掉（已处理），
+# 否则 ignore 对已跟踪的文件不生效。
+# 部署机上手动放一份到 src/main/resources/，build.sh 打包时会一起打进 jar；
+# 想改库配置又不想重新打包，也可以放到 jar 运行时的工作目录（仓库根目录）下，
+# Spring Boot 读外部配置的优先级高于 jar 内的。
+src/main/resources/application-prod.yml

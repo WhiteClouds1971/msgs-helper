@@ -1,5 +1,5 @@
 <script setup>
-  import Select from '@/ui/Select/Index.vue';
+  import RadioGroup from '@/ui/RadioGroup/Index.vue';
 
   /**
    * 团战 —— 模式专属表单
@@ -30,18 +30,8 @@
 
 <template>
   <div class="mode-form mode-form--tuan-zhan">
-    <Select
-      v-model="role"
-      label="位置"
-      placeholder="请选择位置"
-      :options="ROLES"
-    />
+    <RadioGroup v-model="role" label="位置" :options="ROLES" />
 
-    <Select
-      v-model="result"
-      label="对局"
-      placeholder="请选择对局结果"
-      :options="RESULTS"
-    />
+    <RadioGroup v-model="result" label="对局" :options="RESULTS" />
   </div>
 </template>
