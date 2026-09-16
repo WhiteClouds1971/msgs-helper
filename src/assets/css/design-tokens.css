@@ -364,6 +364,15 @@
 
   /* --- Touch --- */
   --tap-highlight: transparent;  /* 自定义选中高亮色，替代系统默认灰 */
+
+  /* --- 表单控件（Select / SearchSelect / Button 共用同一份高度数据） --- */
+  --control-height: 36px;  /* 控件视觉高度（border-box，含上下描边） */
+
+  /* 触控热区上下外扩量（设计系统 §3.8：交互元素 ≥44px）：
+     绝对定位伪元素的包含块是 padding box（已在描边之内），所以要在 4px 之外
+     再补掉 1px 描边 —— 视觉 36px + 上下各 4px = 44px，正好凑满下限。
+     没有描边的控件（如 Button 主变体）直接补 --space-1 即可 */
+  --control-hit-pad: calc(var(--space-1) + var(--border-thin));
 }
 
 /* ================================================================
