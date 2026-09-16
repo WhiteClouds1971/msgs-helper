@@ -1,0 +1,7 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.iml
+.idea/
+
+# build.sh 后台常驻时写的进程号（日志目录 server/logs 已被根 .gitignore 的 logs 规则覆盖）
+server.pid

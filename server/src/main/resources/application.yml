@@ -1,0 +1,27 @@
+# 公共配置 —— 与环境无关的部分放这里，环境相关的放 application-{profile}.yml
+server:
+  port: 8081
+  servlet:
+    # 前端 APP_BASE_API=/api 即指此处：所有接口都挂在 /api 下，Controller 里不用再写前缀
+    context-path: /api
+
+spring:
+  application:
+    name: msgs-helper-server
+  profiles:
+    active: dev
+
+mybatis-plus:
+  configuration:
+    # 库表 snake_case ⇄ 实体 camelCase 自动映射
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      # 主键默认自增（雪花 / UUID 等按表单独覆盖）
+      id-type: auto
+  # XML 映射文件位置；现在还没有，先留好路径，写法仍是「能用注解就用注解」
+  mapper-locations: classpath*:/mapper/**/*.xml
+
+logging:
+  level:
+    com.msgshelper: debug
