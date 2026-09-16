@@ -11,6 +11,7 @@
 | 状态管理 | Pinia 3 |
 | CSS 预处理 | Less |
 | 代码规范 | ESLint 9 (flat config) + Prettier |
+| 后端 | Spring Boot 3.3.7 · Java 21 · MyBatis-Plus · Flyway · MySQL 8 |
 
 ## 目录结构
 
@@ -23,7 +24,8 @@ msgs-helper/
 ├── .prettierrc.json
 ├── DESIGN_SYSTEM.md
 ├── ANIMATION_SPECS.md
-├── build.sh
+├── start-dev.sh                     # 本地开发：一条命令起前后端（profile=dev + Vite）
+├── build.sh                         # 生产部署：dist + jar + systemd 重启后端
 ├── .env / .env.dev / .env.uat / .env.prod
 ├── public/
 │   └── favicon.svg
@@ -31,6 +33,7 @@ msgs-helper/
 │   ├── main.js
 │   ├── App.vue
 │   ├── style.css
+│   ├── api/                         # 接口封装（axios 统一出口见 utils/request.js）
 │   ├── assets/                      # 静态资源
 │   │   ├── css/                     # 全局样式（Design Token 定义）
 │   │   ├── icons/                   # SVG 图标
@@ -71,9 +74,11 @@ msgs-helper/
 │   │   ├── storageKeys.js           # localStorage Key 枚举（单一事实源）
 │   │   ├── tourKeys.js              # 导览 Key 枚举（单一事实源）
 │   │   └── tourSteps.js             # 导览步骤注册表（单一事实源）
-│   ├── pages/                       # 页面
+│   ├── pages/                       # 页面：一个菜单一个目录
+│   │   ├── home/                    # 主页（卡片堆叠）
 │   │   ├── demo/
-│   │   └── home/                    # 主页（卡片堆叠）
+│   │   ├── jiang-chi/               # 将池胜率统计（隐藏页；components/ 下每个模式一个表单）
+│   │   └── ji/ jx/ ol/ shzl/ yjcm/ jsrg/ jxtp/ mode/ mobile/ tool/   # 各扩展包页面
 │   ├── router/
 │   │   ├── index.js
 │   │   └── routes.js
@@ -82,13 +87,44 @@ msgs-helper/
 │   │   ├── localStorage.js          # 统一缓存 store（load/reset/clearPage/pageData）
 │   │   └── menuOrder.js             # 菜单访问顺序（主页卡片堆的展示顺序）
 │   └── utils/
+│       ├── request.js               # axios 实例：baseURL / 统一响应体拆包 / 错误提示
 │       ├── markdown.js              # Markdown 逐行切段 + 跳转锚点候选
+│       ├── highlight.js             # 搜索落地定位（按 section + 第几处命中认人）
 │       ├── pinyin.js                # 汉字 → 全拼 / 首字母
 │       ├── random.js                # 加权随机工具
 │       └── search.js                # Fuse 封装 + 命中片段高亮
+├── server/                          # 后端（Spring Boot，独立 Maven 工程）
+│   ├── pom.xml                      # Java 21 / Spring Boot 3.3.7
+│   ├── mvnw                         # Maven Wrapper —— 机器上不用装 Maven
+│   └── src/main/
+│       ├── java/com/msgshelper/server/
+│       │   ├── MsgsHelperServerApplication.java
+│       │   ├── controller/          # REST 入口（路径不写 /api，前缀来自 context-path）
+│       │   ├── service/             # JiangChiRecordService / RoleCounter（胜败场计数）
+│       │   ├── mapper/ entity/ dto/ # MyBatis-Plus Mapper / 实体 / 请求体
+│       │   └── common/              # Result 统一响应体 / 全局异常处理
+│       └── resources/
+│           ├── application.yml      # 端口 8081、context-path /api、MyBatis-Plus
+│           ├── application-dev.yml  # 本地 MySQL（profile=dev）
+│           ├── application-prod.yml # 生产库（profile=prod）；不入库，部署机手工放
+│           └── db/migration/        # Flyway 迁移脚本，应用启动时自动执行
 └── docs/
     └── superpowers/specs/
 ```
+
+## 后端 (server/)
+
+Spring Boot 3.3.7 · Java 21 · MyBatis-Plus · Flyway · MySQL 8。独立 Maven 工程，一律用 `./server/mvnw` 构建（机器上不用装 Maven）。
+
+| 项 | 说明 |
+|----|------|
+| 端口 / 前缀 | 8081，context-path `/api` —— Controller 里不写前缀；前端 `.env*` 的 `APP_BASE_API=/api` 即指此处 |
+| 启动 | 开发：`./start-dev.sh`（profile=dev，Vite 一起起）；生产：`./build.sh`（profile=prod，交给 systemd） |
+| 配置 | `application.yml` 公共 / `-dev.yml` 本机 MySQL / `-prod.yml` **不入库**（见 `server/.gitignore`），部署机手工放一份到 `server/src/main/resources/`；也可放 jar 工作目录，Spring Boot 外部配置优先级更高 |
+| 建表 | `resources/db/migration/*.sql` 由 Flyway 启动时执行 —— 改表加脚本，别手改库 |
+| 响应体 | `common/Result.java` `{ code, message, data }`，`code === 0` 为成功，异常由 `GlobalExceptionHandler` 兜底 —— 前端 `utils/request.js` 据此拆包、弹错 |
+| 现有接口 | `GET /api/ping`（探针）、`POST /api/jiang-chi/records`（记一局 / 只登记将池）、`GET /api/jiang-chi/heroes`（武将候选） |
+| 部署 | JDK 21、Node ≥ 22、nginx 把 `/api` 转发到 8081、systemd 单元 `msgs-helper.service`（入口是 build.sh 生成的 `server/app.jar` 软链）—— 完整步骤见 README「生产部署」 |
 
 ## Console 控制台
 
