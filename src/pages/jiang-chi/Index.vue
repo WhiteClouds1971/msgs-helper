@@ -9,6 +9,8 @@
   import { useLocalStorage } from '@/stores/localStorage';
   import { createRecord, exportRecords } from '@/api/jiang-chi';
   import { fileStamp, saveBlob } from '@/utils/download';
+  import exportIcon from '@/assets/icons/dao_chu.svg?raw';
+  import addIcon from '@/assets/icons/xin_zeng.svg?raw';
   import { addHeroToCache, loadHeroes, searchHeroes } from './data.js';
 
   // 将池胜率统计 —— 隐藏页
@@ -226,10 +228,33 @@
   <div class="jiang-chi">
     <!-- 内容限宽居中：本页是「表单 + 列表」的窄栏，桌面端不让控件横向摊开 -->
     <div class="jiang-chi__inner">
-      <!-- 提示：身份 / 对局留空是「登记所属将池」这条路，不是漏填 —— 放在最上方先说清楚 -->
-      <p class="jiang-chi__hint">
-        只输入「武将 + 将池」、不填身份与对局，可以修改该武将所在的将池
-      </p>
+      <!-- 顶部一行：提示 + 导出 ——
+           提示（身份 / 对局留空是「登记所属将池」这条路，不是漏填）先说清楚用法；
+           导出是全量报表的附带动作，不属于这张表单，所以挪到提示这一行的右端，
+           只留一枚线描图标，不与表单里的写操作抢视线 -->
+      <div class="jiang-chi__top">
+        <p class="jiang-chi__hint">
+          只输入「武将 + 将池」、不填身份与对局，可以修改该武将所在的将池
+        </p>
+
+        <!-- 图标按钮：不套 @/ui/Button（那是有底/有描边的按钮面），
+             只留图标本身，靠灰度与提示文字连成一体；无字可读，故给 aria-label -->
+        <button
+          class="jiang-chi__export"
+          :class="{ 'is-busy': exporting }"
+          type="button"
+          aria-label="导出武将胜率统计"
+          title="导出武将胜率统计"
+          :disabled="exporting"
+          @click="handleExport"
+        >
+          <span
+            class="jiang-chi__inline-icon"
+            aria-hidden="true"
+            v-html="exportIcon"
+          />
+        </button>
+      </div>
 
       <div class="jiang-chi__form">
         <!-- 第一行：模式 -->
@@ -279,22 +304,20 @@
         class="jiang-chi__mode-form"
       />
 
-      <!-- 操作区：表单之外的另一块，放这条记录的动作 -->
+      <!-- 操作区：本页唯一的写操作，单独占满一行 —— 加号图标 + 文字，
+           窄栏里拇指落在哪儿都按得到（导出已挪到页首提示那一行，这里不再分心） -->
       <div class="jiang-chi__actions">
         <Button
           class="jiang-chi__add"
           :disabled="submitting"
           @click="handleAdd"
         >
+          <span
+            class="jiang-chi__inline-icon"
+            aria-hidden="true"
+            v-html="addIcon"
+          />
           {{ submitting ? '记录中…' : '新增' }}
-        </Button>
-        <Button
-          class="jiang-chi__export"
-          variant="ghost"
-          :disabled="exporting"
-          @click="handleExport"
-        >
-          {{ exporting ? '导出中…' : '导出' }}
         </Button>
       </div>
 
@@ -323,13 +346,124 @@
     margin: 0 auto;
   }
 
-  /* 顶部提示：辅助标注的字号与颜色（同五禽戏页 .wqx__hint），只占一行、不与表单抢视线 */
+  /* 顶部一行：提示占满余宽 + 导出图标贴右端；行距由这一行统一给，
+     提示自己不再带下边距（否则两处留白会叠加） */
+  .jiang-chi__top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  /* 顶部提示：辅助标注的字号与颜色（同五禽戏页 .wqx__hint），不与表单抢视线 */
   .jiang-chi__hint {
-    margin: 0 0 var(--space-4);
+    /* 占满余宽并在必要时换行（min-width: 0 让长文本能压窄，不把图标顶出栏外） */
+    flex: 1;
+    min-width: 0;
+    margin: 0;
     font-size: var(--text-xs);
     line-height: var(--leading-relaxed);
     letter-spacing: 0.02em;
     color: var(--text-tertiary);
+  }
+
+  /* 导出 —— 页面级附带动作，故意不做成按钮：没有底色也没有描边，
+     图标取与提示同一档的灰度（--text-tertiary），看着像提示行的一部分；
+     只有 hover / 按下才浮到金色。焦点环与触控热区仍按设计系统 §3.6 / §3.8 给足 */
+  .jiang-chi__export {
+    /* 图标比按钮里的那档大一点：它旁边没有文字作陪，18px 在窄栏里显得空 */
+    --icon-size: 22px;
+
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: var(--text-tertiary);
+    background: none;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    -webkit-tap-highlight-color: var(--tap-highlight);
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+
+    /* 视觉 32px、热区 44px（四周各补 6px）—— 与 @/ui/Button 幽灵按钮同一笔法。
+       这一枚是「只有图标、没有文字」的按钮，热区不能省（§3.8）；
+       探出去的 6px 落在本页自己的 16px 页边距里，不会碰到旁边的提示文字 */
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+    }
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      color: var(--accent-gold);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.92);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--accent-gold);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      cursor: progress;
+    }
+  }
+
+  /* 导出在飞：图标淡淡地往下沉 —— 文字随旧按钮一起没了，这一下就是「还在跑」的信号 */
+  .jiang-chi__export.is-busy .jiang-chi__inline-icon {
+    animation: jiang-chi-export-drift 900ms var(--ease-in-out) infinite;
+  }
+
+  @keyframes jiang-chi-export-drift {
+    0%,
+    100% {
+      opacity: 0.4;
+      transform: translateY(-1px);
+    }
+
+    50% {
+      opacity: 1;
+      transform: translateY(1px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jiang-chi__export {
+      transition: none;
+    }
+
+    /* 动效归零后仍要能看出「在跑」，用一个静止的半透明态顶上 */
+    .jiang-chi__export.is-busy .jiang-chi__inline-icon {
+      animation: none;
+      opacity: 0.5;
+    }
+  }
+
+  /* 内联图标（导出的线描图标 + 新增里的加号）：颜色一律 currentColor ——
+     谁用就跟谁的文字色（v-html 进来的 svg 要靠 :deep 才够得着）。
+     尺寸走 --icon-size：默认 18px（按钮里与文字同高的一档），
+     页首那枚导出图标只有自己一个，单独调大一档，见 .jiang-chi__export */
+  .jiang-chi__inline-icon {
+    display: flex;
+    flex: none;
+    width: var(--icon-size, 18px);
+    height: var(--icon-size, 18px);
+
+    :deep(svg) {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   /* 表单：三行等距堆叠 */
@@ -359,21 +493,18 @@
     margin-bottom: var(--space-6);
   }
 
-  /* 操作区：独立成块（与表单隔开一段），动作靠右 */
+  /* 操作区：与表单隔开一段；父级保持 flex，
+     顺带吃掉模板里那个缩进用的空白文本节点（inline-flex 的按钮前面留个空格会多出一行） */
   .jiang-chi__actions {
     display: flex;
-    /* stretch：幽灵按钮（视觉 32px）被拉到与主按钮同高，一行两个按钮齐平 */
-    align-items: stretch;
-    justify-content: flex-end;
-    gap: var(--space-3);
     margin-top: var(--space-6);
   }
 
-  /* 两个按钮的尺寸与按压反馈都归 @/ui/Button，本页只给它们统一的宽度，
-     让「新增 / 导出」看着是一对 */
-  .jiang-chi__add,
-  .jiang-chi__export {
-    min-width: 72px;
+  /* 新增整行铺满：flex: 1 撑开这一行；图标与文字的间距、按压反馈都归
+     @/ui/Button（.btn--primary）与上面的 .jiang-chi__inline-icon，本页只补这一条 */
+  .jiang-chi__add {
+    flex: 1;
+    gap: var(--space-2);
   }
 
   /* ── 标题占同一列宽 ──
@@ -389,18 +520,19 @@
   }
 
   /* ── 收掉控件自带的触控热区外扩 ──
-     @/ui/Select 的触发框与 @/ui/Button 都靠一个绝对定位的 ::after 往上下各外扩 4px
-     （幽灵按钮是 6px），把热区从 36px 补到 44px（设计系统 §3.8 的下限），视觉上不可见。
+     @/ui/Select 的触发框与 @/ui/Button 都靠一个绝对定位的 ::after 往上下各外扩 4px，
+     把热区从 36px 补到 44px（设计系统 §3.8 的下限），视觉上不可见。
      本页是「一行一个控件、行距 16px」的窄栏，不需要这层外扩 —— 统一收进视觉框，
      行与行之间不再有看不见的 ±4 侵入。
      模式表单里的 @/ui/RadioGroup 本来就不带这层外扩，无需在此收。
      代价：这些控件的触控高度就是 36px，低于 §3.8 的下限，本页有意为之。
      （武将行的 SearchSelect 也外扩 4px，但那两条贴边窄条是「点外框外沿也能聚焦
-     输入框」的入口，不属于纯热区冗余，本页保留） */
+     输入框」的入口，不属于纯热区冗余，本页保留；
+     页首那枚导出图标反过来 —— 它只有图标、没有文字，热区照 §3.8 补足 44px，
+     见上面 .jiang-chi__export） */
   .jiang-chi__mode :deep(.select-field__trigger)::after,
   .jiang-chi__pool :deep(.select-field__trigger)::after,
-  .jiang-chi__add::after,
-  .jiang-chi__export::after {
+  .jiang-chi__add::after {
     inset: 0;
   }
 </style>

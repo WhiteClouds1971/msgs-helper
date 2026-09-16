@@ -1,0 +1,5 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="96" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 新增：一横一竖 -->
+  <path d="M512 192v640" />
+  <path d="M192 512h640" />
+</svg>
