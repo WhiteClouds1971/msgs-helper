@@ -21,7 +21,8 @@
    *                    「使用「xxx」」点一下即采纳，或直接回车 / 失焦采纳
    *                    （命中选项就采纳选项的 value，否则采纳原文）
    *
-   * 刚聚焦还没打字时给全量候选（方便浏览挑选），一旦开始打字就按输入过滤。
+   * 刚聚焦还没打字时给全量候选（方便浏览挑选），一旦开始打字就按输入过滤；
+   * 每次展开都会重新取一次，候选背后的数据在两次展开之间变了也看得见。
    * 清空输入框 = 清空取值。
    *
    * 结构契约（供测试与使用方布局引用）：
@@ -216,8 +217,10 @@
     if (props.disabled) return;
     open.value = true;
     dirty.value = false;
-    // 首次展开：远端列表还没拿过就先拉一批（keyword 为空 = 取全部/热门）
-    if (props.search && remoteList.value === null) scheduleSearch('', true);
+    // 每次展开都重新拉一遍（keyword 为空 = 取全部/热门）。
+    // 不能只在首次拉：候选背后可能是会变的数据（比如将池页刚记了一个新武将），
+    // 拉过一次就再也不刷的话，再点开看到的还是老列表，非得重新打字才更新。
+    if (props.search) scheduleSearch('', true);
   }
 
   function handleInput(event) {

@@ -15,6 +15,9 @@ public record Result<T>(int code, String message, T data) {
     /** 成功 */
     public static final int CODE_SUCCESS = 0;
 
+    /** 请求不合业务规矩：必填项为空、模式与身份对不上等 */
+    public static final int CODE_BAD_REQUEST = 400;
+
     /** 服务端异常 */
     public static final int CODE_ERROR = 500;
 

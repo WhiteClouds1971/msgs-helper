@@ -18,6 +18,16 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    /**
+     * 业务校验不通过 —— 通道是好的，是数据不合规矩。
+     * 仍回 HTTP 200，让前端统一按 code 判成败（见 src/utils/request.js）。
+     */
+    @ExceptionHandler(BizException.class)
+    public Result<Void> handleBiz(BizException e) {
+        log.warn("业务校验不通过: {}", e.getMessage());
+        return Result.fail(e.getCode(), e.getMessage());
+    }
+
     /** 路径没匹配上任何接口 —— 这是客户端的错，别一律报成 500 */
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

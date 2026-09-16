@@ -5,14 +5,20 @@
   import SearchSelect from '@/ui/SearchSelect/Index.vue';
   import Button from '@/ui/Button/Index.vue';
   import { usePageReady } from '@/composables/usePageReady';
+  import { useMessage } from '@/composables/useMessage';
   import { useLocalStorage } from '@/stores/localStorage';
-  import { searchHeroes } from './data.js';
+  import { createRecord } from '@/api/jiang-chi';
+  import { addHeroToCache, loadHeroes, searchHeroes } from './data.js';
 
   // 将池胜率统计 —— 隐藏页
   // · 不注册进 menus.js：主页无卡片、全局搜索也搜不到
   // · 路由含 6 位随机段（见 src/pages/index.js），防止无关人员直达
   // · 空白布局：无装饰、无教学导览
   usePageReady();
+
+  /* 进页面就把武将名单拉回来（一次会话只拉一次，见 ./data.js）——
+     等用户点开搜索框才拉的话，那一下会既等网络又等建索引 */
+  loadHeroes();
 
   /**
    * 将池模式 —— 单一事实源
@@ -91,7 +97,8 @@
   /* ── 本次要新增的这条记录 ──
    武将、身份/位置、对局结果都是随用随填、点「新增」后就该清空的东西，
    所以只是本地状态，不进页面数据（页面数据里只留「模式 / 将池」这种不用重挑的选择）。
-   字段都标了必填（只做标记，提交校验等「新增」落地时再一起做） */
+   模式 / 将池 / 武将 三项必填 —— 组件上的 required 只画那个朱砂星号，
+   真正的拦截在 handleAdd 里发请求之前 */
   const hero = ref('');
   /** 身份（斗地主 / 军争）或位置（团战）—— 各模式值域不同，变量名取中性的 role */
   const role = ref('');
@@ -104,12 +111,98 @@
     role.value = '';
     result.value = '';
   });
+
+  /* ── 提交 ── */
+
+  const message = useMessage();
+
+  /** 请求在飞 —— 按钮禁用，免得手快连点把一局记成两局 */
+  const submitting = ref(false);
+
+  /**
+   * 身份（位置）→ 中文名 + 返回体里那对字段的前缀
+   *
+   * key 就是各模式表单里的 value（稳定标识），前缀与后端 RoleCounter 的列前缀
+   * 一一对应（见 server/…/service/RoleCounter.java）—— 用来把接口返回的战绩
+   * 翻译成「3 胜 1 负」给用户看。
+   * 新增一个模式多一套身份时，这里要跟着补。
+   */
+  const ROLE_DISPLAY = Object.freeze({
+    landlord: { label: '地主', field: 'landlord' },
+    farmer: { label: '农民', field: 'farmer' },
+    lord: { label: '主公', field: 'lord' },
+    loyalist: { label: '忠臣', field: 'loyalist' },
+    rebel: { label: '反贼', field: 'rebel' },
+    traitor: { label: '内奸', field: 'traitor' },
+    1: { label: '一号位', field: 'seat1' },
+    2: { label: '二号位', field: 'seat2' },
+    3: { label: '三号位', field: 'seat3' },
+    4: { label: '四号位', field: 'seat4' },
+  });
+
+  /** 成功提示：记了一局就报这一局之后的总战绩；只登记归属就直说 */
+  function describeSaved(payload, record) {
+    const hero = record?.hero ?? payload.hero;
+    const display = ROLE_DISPLAY[payload.role];
+    if (!display) return `已登记「${hero}」的所属将池`;
+
+    const win = record?.[`${display.field}Win`] ?? 0;
+    const lose = record?.[`${display.field}Lose`] ?? 0;
+    const outcome = payload.result === 'lose' ? '输' : '赢';
+    return `${hero} · ${display.label} ${outcome}，累计 ${win} 胜 ${lose} 负`;
+  }
+
+  async function handleAdd() {
+    if (submitting.value) return;
+
+    // 标了必填的三项空着就不发请求：省一次往返，本地提示也比后端那句更贴上下文
+    const empty = [
+      [mode.value, '模式'],
+      [pool.value, '将池'],
+      [hero.value.trim(), '武将'],
+    ].find(([value]) => !value);
+    if (empty) {
+      message.warning(`请先选择${empty[1]}`);
+      return;
+    }
+
+    const payload = {
+      mode: mode.value,
+      pool: pool.value,
+      hero: hero.value.trim(),
+      role: role.value,
+      result: result.value,
+    };
+
+    submitting.value = true;
+    try {
+      const record = await createRecord(payload);
+      message.success(describeSaved(payload, record));
+
+      // 刚记下的武将并进候选缓存：不刷新页面也能立刻搜到（新武将插到最前）
+      addHeroToCache(record?.hero ?? payload.hero);
+
+      // 这一局的三个字段用完就清；模式与将池留着 —— 下一局多半还是它们
+      hero.value = '';
+      role.value = '';
+      result.value = '';
+    } catch {
+      // 失败提示由 @/utils/request 的拦截器统一弹（含后端返回的 400 文案），这里只管收尾
+    } finally {
+      submitting.value = false;
+    }
+  }
 </script>
 
 <template>
   <div class="jiang-chi">
     <!-- 内容限宽居中：本页是「表单 + 列表」的窄栏，桌面端不让控件横向摊开 -->
     <div class="jiang-chi__inner">
+      <!-- 提示：身份 / 对局留空是「登记所属将池」这条路，不是漏填 —— 放在最上方先说清楚 -->
+      <p class="jiang-chi__hint">
+        只输入「武将 + 将池」、不填身份与对局，可以修改该武将所在的将池
+      </p>
+
       <div class="jiang-chi__form">
         <!-- 第一行：模式 -->
         <Select
@@ -132,12 +225,15 @@
         />
 
         <!-- 第三行：可输入、可搜索、也可自己填值 -->
+        <!-- debounce 给 0：@/ui/SearchSelect 默认那 250ms 是留给网络请求的，
+             而这里是在本地缓存里搜（0.1ms），白等反而是拖手感 -->
         <SearchSelect
           v-model="hero"
           label="武将"
           required
           placeholder="搜索或直接输入武将"
           :search="searchHeroes"
+          :debounce="0"
         />
       </div>
 
@@ -157,7 +253,13 @@
 
       <!-- 操作区：表单之外的另一块，放这条记录的动作 -->
       <div class="jiang-chi__actions">
-        <Button class="jiang-chi__add">新增</Button>
+        <Button
+          class="jiang-chi__add"
+          :disabled="submitting"
+          @click="handleAdd"
+        >
+          {{ submitting ? '记录中…' : '新增' }}
+        </Button>
         <Button class="jiang-chi__export" variant="ghost">导出</Button>
       </div>
 
@@ -184,6 +286,15 @@
   .jiang-chi__inner {
     max-width: var(--max-width);
     margin: 0 auto;
+  }
+
+  /* 顶部提示：辅助标注的字号与颜色（同五禽戏页 .wqx__hint），只占一行、不与表单抢视线 */
+  .jiang-chi__hint {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-xs);
+    line-height: var(--leading-relaxed);
+    letter-spacing: 0.02em;
+    color: var(--text-tertiary);
   }
 
   /* 表单：三行等距堆叠 */

@@ -159,6 +159,31 @@ describe('SearchSelect', () => {
     ).toEqual(['结果-刘', '使用「刘」']);
   });
 
+  it('每次展开都重新取候选：两次展开之间数据变了也要看得见', async () => {
+    // 模拟「别处新增了一条」——比如将池页记完一局后把新武将并进缓存
+    let remote = ['关羽'];
+    const search = vi.fn(async () =>
+      remote.map(name => ({ label: name, value: name }))
+    );
+    const wrapper = mountSelect({ search, debounce: 0 });
+    const input = wrapper.find('.search-select__input');
+    const rows = () =>
+      wrapper.findAll('.search-select__option').map(el => el.text());
+
+    await input.trigger('focus');
+    await flush();
+    expect(rows()).toEqual(['关羽']);
+
+    remote = ['貂蝉', '关羽'];
+
+    await input.trigger('blur');
+    await input.trigger('focus');
+    await flush();
+
+    // 只拉过一次就再也不刷的话，这里还是老的 ['关羽']
+    expect(rows()).toEqual(['貂蝉', '关羽']);
+  });
+
   it('键盘：方向键移动高亮，回车选中', async () => {
     const wrapper = mountSelect();
     const input = wrapper.find('.search-select__input');
