@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import { describe, expect, it, vi } from 'vitest';
 import SearchSelect from './Index.vue';
 
@@ -10,6 +11,49 @@ const mountSelect = (props = {}, options = {}) =>
     attachTo: document.body,
     ...options,
   });
+
+/**
+ * 派发一个指针事件：带上坐标与 pointerId。
+ *
+ * 候选面板是滚动容器，点选靠「按下 → 抬手」的位移分辨（见组件里的 TAP_SLOP），
+ * 所以测试必须喂得出坐标，不能用 trigger('pointerdown') 那种不带坐标的空事件。
+ */
+const pointer = (
+  wrapperOrEl,
+  type,
+  { x = 0, y = 0, pointerId = 1, pointerType = 'touch' } = {}
+) => {
+  const el = wrapperOrEl.element ?? wrapperOrEl;
+  el.dispatchEvent(
+    new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y,
+      pointerId,
+      pointerType,
+      isPrimary: true,
+    })
+  );
+};
+
+/** 点一下：按下与抬手都在同一点 */
+const tap = async (wrapperOrEl, point = {}) => {
+  pointer(wrapperOrEl, 'pointerdown', point);
+  pointer(wrapperOrEl, 'pointerup', point);
+  await nextTick();
+};
+
+/** 拖着滚：按住后位移超过阈值，再抬手 */
+const drag = async (wrapperOrEl, from = {}, to = {}) => {
+  pointer(wrapperOrEl, 'pointerdown', from);
+  pointer(wrapperOrEl, 'pointerup', {
+    x: from.x ?? 0,
+    y: from.y ?? 0,
+    ...to,
+  });
+  await nextTick();
+};
 
 /** 让 setTimeout(0) 的防抖与 Promise 回调跑完 */
 const flush = async () => {
@@ -76,11 +120,98 @@ describe('SearchSelect', () => {
     const input = wrapper.find('.search-select__input');
 
     await input.trigger('focus');
-    await wrapper.findAll('.search-select__option')[1].trigger('pointerdown');
+    await tap(wrapper.findAll('.search-select__option')[1]);
 
     expect(lastEmit(wrapper)).toBe('风');
     expect(wrapper.find('.search-select__input').element.value).toBe('风');
     expect(wrapper.find('.search-select__panel').exists()).toBe(false);
+  });
+
+  it('拖着滚列表（位移超过阈值）不选中、不收起 —— 触屏划列表不能被当成点选', async () => {
+    const wrapper = mountSelect();
+    const input = wrapper.find('.search-select__input');
+
+    await input.trigger('focus');
+    await drag(
+      wrapper.findAll('.search-select__option')[1],
+      { y: 120 },
+      { y: 60 }
+    );
+
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(wrapper.find('.search-select__panel').exists()).toBe(true);
+    expect(wrapper.find('.search-select__input').element.value).toBe('');
+  });
+
+  it('按下与抬手不在同一行（手指滑到别的条目上才抬）→ 不算点选', async () => {
+    const wrapper = mountSelect();
+    const input = wrapper.find('.search-select__input');
+
+    await input.trigger('focus');
+    const options = wrapper.findAll('.search-select__option');
+    pointer(options[1], 'pointerdown', { y: 40 });
+    pointer(options[2], 'pointerup', { y: 80 });
+    await nextTick();
+
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(wrapper.find('.search-select__panel').exists()).toBe(true);
+  });
+
+  it('指针被浏览器收去做滚动手势（pointercancel）→ 本次按下作废', async () => {
+    const wrapper = mountSelect();
+    const input = wrapper.find('.search-select__input');
+
+    await input.trigger('focus');
+    const option = wrapper.findAll('.search-select__option')[1];
+    pointer(option, 'pointerdown', { y: 40 });
+    pointer(option, 'pointercancel', { y: 45 });
+    pointer(option, 'pointerup', { y: 45 });
+    await nextTick();
+
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(wrapper.find('.search-select__panel').exists()).toBe(true);
+  });
+
+  it('手指按在候选上时来的 blur 是「碰面板」带出来的，不收面板（真机滚列表不被这一下打断）', async () => {
+    const wrapper = mountSelect();
+    const input = wrapper.find('.search-select__input');
+
+    await input.trigger('focus');
+    // 有的浏览器不认 pointerdown 上的 preventDefault，照样把焦点从输入框收走
+    pointer(wrapper.findAll('.search-select__option')[1], 'pointerdown', {
+      y: 40,
+    });
+    await input.trigger('blur');
+
+    expect(wrapper.find('.search-select__panel').exists()).toBe(true);
+
+    // 抬手仍落在同一行同一点：这一下才作数
+    pointer(wrapper.findAll('.search-select__option')[1], 'pointerup', {
+      y: 40,
+    });
+    await nextTick();
+
+    expect(lastEmit(wrapper)).toBe('风');
+  });
+
+  it('鼠标划过条目才跟着高亮：触屏拖动改高亮会跟滚动抢位置', async () => {
+    const wrapper = mountSelect();
+    const input = wrapper.find('.search-select__input');
+
+    await input.trigger('focus');
+    const options = wrapper.findAll('.search-select__option');
+
+    pointer(options[2], 'pointermove', { pointerType: 'touch' });
+    await nextTick();
+    expect(
+      wrapper.findAll('.search-select__option')[2].attributes('data-active')
+    ).toBeUndefined();
+
+    pointer(options[2], 'pointermove', { pointerType: 'mouse' });
+    await nextTick();
+    expect(
+      wrapper.findAll('.search-select__option')[2].attributes('data-active')
+    ).toBeDefined();
   });
 
   it('候选外的内容也能用：末行「使用「xxx」」，点它即采纳原文', async () => {
@@ -94,7 +225,7 @@ describe('SearchSelect', () => {
     expect(rows.at(-1).text()).toBe('使用「自制将池」');
     expect(rows.at(-1).classes()).toContain('is-custom');
 
-    await rows.at(-1).trigger('pointerdown');
+    await tap(rows.at(-1));
 
     expect(lastEmit(wrapper)).toBe('自制将池');
     expect(wrapper.find('.search-select__input').element.value).toBe(

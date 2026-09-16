@@ -7,7 +7,8 @@
   import { usePageReady } from '@/composables/usePageReady';
   import { useMessage } from '@/composables/useMessage';
   import { useLocalStorage } from '@/stores/localStorage';
-  import { createRecord } from '@/api/jiang-chi';
+  import { createRecord, exportRecords } from '@/api/jiang-chi';
+  import { fileStamp, saveBlob } from '@/utils/download';
   import { addHeroToCache, loadHeroes, searchHeroes } from './data.js';
 
   // 将池胜率统计 —— 隐藏页
@@ -192,6 +193,33 @@
       submitting.value = false;
     }
   }
+
+  /* ── 导出 ── */
+
+  /** 导出在飞 —— 与「新增」同样的道理：连着点几下别导出好几份 */
+  const exporting = ref(false);
+
+  /**
+   * 导出全量武将胜率统计（后端填好的 xlsx）
+   *
+   * 不挑模式 / 将池：模板里「将池」本身就是一列，一个武将在一个将池下算一条，
+   * 整张表就是一份完整报表 —— 在后端筛反而会漏掉别家将池的武将。
+   */
+  async function handleExport() {
+    if (exporting.value) return;
+
+    exporting.value = true;
+    try {
+      // 文件名在前端起：导出接口回的是裸文件流，按 blob 取不到响应头里的
+      // Content-Disposition（见 @/utils/request 的拆包规则），后端那份名字只是给直链用的
+      saveBlob(await exportRecords(), `武将胜率统计-${fileStamp()}.xlsx`);
+      message.success('已导出武将胜率统计');
+    } catch {
+      // 失败提示由 @/utils/request 的拦截器统一弹，这里只管收尾
+    } finally {
+      exporting.value = false;
+    }
+  }
 </script>
 
 <template>
@@ -260,7 +288,14 @@
         >
           {{ submitting ? '记录中…' : '新增' }}
         </Button>
-        <Button class="jiang-chi__export" variant="ghost">导出</Button>
+        <Button
+          class="jiang-chi__export"
+          variant="ghost"
+          :disabled="exporting"
+          @click="handleExport"
+        >
+          {{ exporting ? '导出中…' : '导出' }}
+        </Button>
       </div>
 
       <main class="jiang-chi__body" />

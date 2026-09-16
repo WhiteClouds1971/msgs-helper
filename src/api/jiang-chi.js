@@ -40,3 +40,17 @@ export function createRecord(payload) {
 export function listHeroes(options = {}) {
   return request.get('/jiang-chi/heroes', options);
 }
+
+/**
+ * 导出武将胜率统计 Excel —— 后端把记录表全量填进模板，把文件流直接回给我们
+ *
+ * 走 responseType: 'blob'：这条回的是二进制附件，不是统一响应体，
+ * @/utils/request 的拦截器见响应体里没有 code 就原样交出，所以这里拿到的就是 Blob。
+ * 失败时后端回的仍是统一响应体（HTTP 5xx + JSON），拦截器照常弹提示、并 reject。
+ *
+ * @returns {Promise<Blob>} xlsx 的内容；文件名得调用方自己起 ——
+ *   按 blob 取不到响应头里的 Content-Disposition（见 @/utils/request 的拆包规则）
+ */
+export function exportRecords() {
+  return request.get('/jiang-chi/export', { responseType: 'blob' });
+}

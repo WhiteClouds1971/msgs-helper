@@ -25,6 +25,10 @@
    * 每次展开都会重新取一次，候选背后的数据在两次展开之间变了也看得见。
    * 清空输入框 = 清空取值。
    *
+   * 候选面板是滚动容器（条目多时靠划），所以「点一下」与「拖着滚」必须分得开：
+   * 按下只记落点，抬手时位移没超过阈值（TAP_SLOP）才算选中 —— 真机上一碰就选中
+   * 会让列表永远滚不动，还会顺手 blur 掉输入框（软键盘跟着退）。
+   *
    * 结构契约（供测试与使用方布局引用）：
    *   .search-select            —— 根元素（标题 + 输入框 的横向组合）
    *   .search-select__label     —— 字段标题（不传 label 则不渲染）
@@ -212,6 +216,63 @@
     commit(row.value);
   }
 
+  /* ── 候选面板上的指针手势 ──────────────────────────────────────
+   手指在候选列表上划是在滚列表，不是挑条目 —— 两者都从「按在某个条目上」起步，
+   只能靠抬手时的位移分辨。按下就选中（原先是 @pointerdown.prevent="pick(row)"）
+   在真机上有两个后果：列表永远滚不动；一碰就 pick → 收起候选 + blur 输入框，
+   软键盘跟着一起退。浏览器的做法是滚动手势一开始就把指针标成 pointercancel
+   （那时直接作废），但这不保证每家都发，所以抬手时再核一次位移兜底。 */
+  /** 抬手位移不超过这么多像素，才算「点了一下」；超过就是在滚列表 */
+  const TAP_SLOP = 8;
+  /** 本次按下的落点：哪一行、哪根指针、从哪儿起手（抬手时据此判是不是同一次点选） */
+  let press = null;
+  /** 面板上正按着指针（按下还没抬）——此刻的 blur 是「碰面板」带出来的，不是离开组件 */
+  let panelTouched = false;
+
+  function handlePanelPointerDown() {
+    panelTouched = true;
+  }
+
+  /** 抬手 / 指针被浏览器收走做滚动手势：本次按下作废 */
+  function endPanelGesture() {
+    press = null;
+    panelTouched = false;
+  }
+
+  function handleOptionPointerDown(event, index) {
+    // 面板上的按下记两次（这里一次、面板自己一次）：Vue 会按挂载时间戳跳过
+    // 「祖先元素上、挂载时间晚于本次事件」的监听，冒泡那一次有可能收不到
+    panelTouched = true;
+    press = {
+      index,
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    };
+  }
+
+  function handleOptionPointerUp(event, row, index) {
+    const start = press;
+    // 抬手即作废本次按下：选不选中，这次面板交互都结束了
+    press = null;
+    // 起手与抬手不在同一行（手指滑到别的条目上才抬）或换了根手指 → 不是点选
+    if (!start || start.index !== index || start.pointerId !== event.pointerId)
+      return;
+    if (
+      Math.abs(event.clientX - start.x) > TAP_SLOP ||
+      Math.abs(event.clientY - start.y) > TAP_SLOP
+    )
+      return;
+    pick(row);
+  }
+
+  /** 鼠标划过才跟着高亮：触屏没有 hover，拖动途中改高亮会顺手把条目 scrollIntoView
+      进可视区，跟手指抢滚动位置 */
+  function handleOptionPointerMove(event, index) {
+    if (event.pointerType === 'touch' || event.pointerType === 'pen') return;
+    activeIndex.value = index;
+  }
+
   /* ── 交互 ── */
   function handleFocus() {
     if (props.disabled) return;
@@ -234,6 +295,10 @@
 
   function handleBlur() {
     if (pickingBlur) return;
+    // 手指正按在候选面板上：这一下 blur 是「碰面板」带出来的（有的浏览器不认
+    // pointerdown 上的 preventDefault，照样按老规矩把焦点收走），不是「离开组件」。
+    // 面板照旧开着 —— 否则本想滚列表，却把候选和软键盘一起关了
+    if (panelTouched) return;
     open.value = false;
     activeIndex.value = -1;
     const text = keyword.value.trim();
@@ -323,9 +388,13 @@
     open.value = false;
   }
 
-  onMounted(() =>
-    document.addEventListener('pointerdown', handleDocumentPointerDown, true)
-  );
+  onMounted(() => {
+    document.addEventListener('pointerdown', handleDocumentPointerDown, true);
+    // 抬手落在条目之外（面板边缘、页面别处）也要把本次按下作废：否则 press 一直挂着，
+    // 之后每一次 blur 都会被当成「碰面板」放过去。冒泡阶段加，才晚于条目自己的 pointerup
+    document.addEventListener('pointerup', endPanelGesture);
+    document.addEventListener('pointercancel', endPanelGesture);
+  });
 
   onBeforeUnmount(() => {
     document.removeEventListener(
@@ -333,6 +402,8 @@
       handleDocumentPointerDown,
       true
     );
+    document.removeEventListener('pointerup', endPanelGesture);
+    document.removeEventListener('pointercancel', endPanelGesture);
     clearTimeout(searchTimer);
   });
 </script>
@@ -392,7 +463,16 @@
         </svg>
       </span>
 
-      <ul v-if="open" :id="listId" class="search-select__panel" role="listbox">
+      <!-- 面板本身就是滚动容器（max-height + overflow-y）：按下时不许改焦点，
+           否则有的浏览器会当场 blur 掉输入框，列表还没滚就塌了 -->
+      <ul
+        v-if="open"
+        :id="listId"
+        class="search-select__panel"
+        role="listbox"
+        @pointerdown="handlePanelPointerDown"
+        @mousedown.prevent
+      >
         <li
           v-for="(row, index) in rows"
           :id="`${listId}-${index}`"
@@ -402,8 +482,9 @@
           role="option"
           :aria-selected="index === activeIndex"
           :data-active="index === activeIndex || undefined"
-          @pointerdown.prevent="pick(row)"
-          @pointermove="activeIndex = index"
+          @pointerdown.prevent="handleOptionPointerDown($event, index)"
+          @pointerup="handleOptionPointerUp($event, row, index)"
+          @pointermove="handleOptionPointerMove($event, index)"
         >
           {{ row.custom ? `使用「${row.label}」` : row.label }}
         </li>

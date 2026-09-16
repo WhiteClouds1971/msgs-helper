@@ -1,7 +1,14 @@
 package com.msgshelper.server.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.msgshelper.server.common.Result;
 import com.msgshelper.server.dto.JiangChiRecordRequest;
 import com.msgshelper.server.entity.JiangChiRecord;
+import com.msgshelper.server.service.JiangChiExportService;
 import com.msgshelper.server.service.JiangChiRecordService;
 
 /** 将池战绩 —— 实际路径是 /api/jiang-chi/records（/api 来自 server.servlet.context-path） */
@@ -18,10 +26,19 @@ import com.msgshelper.server.service.JiangChiRecordService;
 @RequestMapping("/jiang-chi")
 public class JiangChiRecordController {
 
-    private final JiangChiRecordService service;
+    /** xlsx 的 MIME，Excel 与 WPS 都认这个 */
+    private static final MediaType XLSX = MediaType
+            .parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-    public JiangChiRecordController(JiangChiRecordService service) {
+    /** 附件名里的时间戳：导两次不会互相覆盖，也一眼看得出是哪天导的 */
+    private static final DateTimeFormatter FILE_STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
+
+    private final JiangChiRecordService service;
+    private final JiangChiExportService exportService;
+
+    public JiangChiRecordController(JiangChiRecordService service, JiangChiExportService exportService) {
         this.service = service;
+        this.exportService = exportService;
     }
 
     /**
@@ -47,5 +64,27 @@ public class JiangChiRecordController {
     @GetMapping("/heroes")
     public Result<List<String>> listHeroes() {
         return Result.ok(service.listHeroes());
+    }
+
+    /**
+     * 导出武将胜率统计 Excel（全量记录按模板填好）。
+     *
+     * <p>这条<b>不走 {@link Result} 统一响应体</b>：客户端要的是一个附件，不是 JSON。
+     * 前端 {@code src/utils/request.js} 见响应体里没有 code 就原样交出，拿到的正是二进制流。
+     * 出错时仍由 GlobalExceptionHandler 兜底（5xx + JSON），前端按「下载失败」提示。
+     *
+     * <p>文件名放响应头里（RFC 5987 的 {@code filename*}），前端也可以自己起名 ——
+     * 它按 blob 取不到响应头，实际用的是自己那份名字。
+     */
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export() {
+        String filename = "武将胜率统计-" + LocalDateTime.now().format(FILE_STAMP) + ".xlsx";
+        // 响应头只能是 ASCII：中文名百分号编码；filename 给不认识 filename* 的老客户端兜底
+        String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+        return ResponseEntity.ok()
+                .contentType(XLSX)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + encoded + "\"; filename*=UTF-8''" + encoded)
+                .body(exportService.export());
     }
 }

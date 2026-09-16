@@ -54,6 +54,14 @@
       <artifactId>flyway-mysql</artifactId>
     </dependency>
 
+    <!-- Excel 导出：按模板填充（template/武将胜率统计模版.xlsx）。
+         4.x 自带 POI 5.2.5 —— 3.x 那版还钉在 POI 4.1.2 上，在 Java 21 上跑着不踏实 -->
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>easyexcel</artifactId>
+      <version>4.0.3</version>
+    </dependency>
+
     <!-- 实体 / DTO 的样板代码，只参与编译，不进运行期 -->
     <dependency>
       <groupId>org.projectlombok</groupId>
