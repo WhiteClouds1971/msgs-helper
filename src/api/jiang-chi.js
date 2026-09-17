@@ -42,6 +42,25 @@ export function listHeroes(options = {}) {
 }
 
 /**
+ * 某个将池下，各身份（位置）的胜率 —— 前端「身份 / 位置」每个选项后面那个百分比（如「58.3%」）
+ *
+ * 统计范围就是传进来的这个将池，且不分武将：同一将池下各武将的战绩合在一起看，
+ * 于是选项上那个数是「这个将池里这个身份打得怎么样」。三个模式一次全给
+ * （条数是死的：模式 × 身份），切模式不用再请求，切将池才要。
+ * 分母的口径在后端（斗地主的农民不拿自己的总场当分母等，见 JiangChiRoleStatService），
+ * 前端只管把 rate 画出来 —— 自己拿 win 除会算错。
+ *
+ * @param {string} pool 将池，取页面 POOLS 的 value —— 必传：没选将池就没有口径可言
+ * @param {object} [options] 透传给 axios 的配置；{ silent: true } 表示失败不弹提示
+ * @returns {Promise<Array<{ mode: string, role: string, win: number, lose: number,
+ *   games: number, rate: number|null }>>} rate 是 0~100 的胜率，
+ *   该将池该模式一局都没打过时为 null
+ */
+export function listRoleStats(pool, options = {}) {
+  return request.get('/jiang-chi/role-stats', { ...options, params: { pool } });
+}
+
+/**
  * 导出武将胜率统计 Excel —— 后端把记录表全量填进模板，把文件流直接回给我们
  *
  * 走 responseType: 'blob'：这条回的是二进制附件，不是统一响应体，

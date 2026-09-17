@@ -23,6 +23,8 @@
    *   .radio-field__option   —— 单个选项（按钮面；选中挂 .is-checked，禁用挂 .is-disabled）
    *   .radio-field__input    —— 原生 radio（视觉隐藏）
    *   .radio-field__text     —— 选项文字
+   *   .radio-field__hint     —— 选项的补充说明（选项带 hint 才渲染，写成「（说明）」，
+   *                             跟在选项名后面同一行）
    *
    * 与 @/ui/Select 同高（--control-height），也不额外用伪元素外扩触控热区：
    * 一行一个控件、行距 16px 的窄栏里，那层看不见的外扩只会让相邻行互相侵入。
@@ -30,11 +32,15 @@
    *
    * 选项一律排一行、等分宽度：一行放不下时文字省略（与 @/ui/Select 的取值文字同一套处理），
    * 不折行 —— 折行会让落在第二行的那一枚独占整行，看着像被选中了。
+   *
+   * 选项可以带一句补充说明（hint，如身份后面的胜率），画成跟在选项名后面的「（说明）」。
+   * 带说明的选项组改成两列网格（不带说明的照旧一行等分）：一排四枚时单枚只有 70 来像素，
+   * 「主公（66.7%）」必然被截成省略号 —— 宁可多占一行，也不让文字换行或截断。
    */
   const props = defineProps({
     /** v-model 绑定值；空值（'' / undefined）即未选择 */
     modelValue: { type: [String, Number], default: undefined },
-    /** 选项：[{ label, value, disabled? }] */
+    /** 选项：[{ label, value, disabled?, hint? }] —— hint 是补充说明，写成「（说明）」跟在选项名后面 */
     options: { type: Array, default: () => [] },
     /** 字段标题；留空则不渲染标题行 */
     label: { type: String, default: '' },
@@ -55,6 +61,14 @@
   /** 同组 input 的同名标识：不传 name 就按实例生成 */
   const groupName = computed(() => props.name || fieldId);
 
+  /**
+   * 这一组里有没有带补充说明的选项 —— 有就整组换成两列（见模板上的 .is-hinted）。
+   *
+   * 按组判断而不是按枚：一排里有的带说明有的不带，宽度一宽一窄反而更乱；
+   * 整组一起换，行与行之间才是齐的。
+   */
+  const hasHint = computed(() => props.options.some(option => option.hint));
+
   /** 该选项是否选中；空值（未选择）时任何选项都不算选中 */
   function isChecked(option) {
     const value = props.modelValue;
@@ -74,6 +88,7 @@
 
     <div
       class="radio-field__options"
+      :class="{ 'is-hinted': hasHint }"
       role="radiogroup"
       :aria-labelledby="label ? labelId : undefined"
       :aria-required="required ? 'true' : undefined"
@@ -99,6 +114,10 @@
         />
 
         <span class="radio-field__text">{{ option.label }}</span>
+        <!-- 说明紧跟在名字后面（flex 容器会吃掉两段之间的空白节点，不会多出一个空格） -->
+        <span v-if="option.hint" class="radio-field__hint">
+          （{{ option.hint }}）
+        </span>
       </label>
     </div>
   </div>
@@ -224,6 +243,36 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+
+  /* ── 带补充说明的选项组（如身份 + 胜率）：整组换成两列网格 ──
+     说明跟在名字后面同一行（「主公（66.7%）」），而一排四枚时单枚只有 70 来像素，
+     整句必然被截成省略号 —— 那就别再挤一排：换成两列，单枚 150px 上下，整句放得下。
+     只动带说明的这一组：不带说明的（对局那一行）照旧一行等分，两行控件看着才是一套。
+
+     列的宽度 = minmax(max(8em, 两列平分), 1fr)：正常就是两列；窄到两列各自不足 8em
+     （「一号位（100%）」这类最长的一句实测约 117px，留出余量取 128px）时自动收成一列 ——
+     宁可一个按钮独占一行，也不把括号里的胜率截断。
+     不写成媒体查询：看的是这块地方还剩多少宽，不是屏幕多宽（本页 480px 就在一列）。
+     减 1px 是为了让「刚好两列」的边界稳稳落在两列这边（不然整除误差会把它挤成一列） */
+  .radio-field__options.is-hinted {
+    display: grid;
+    grid-template-columns:
+      repeat(auto-fit,
+        minmax(max(8em, calc((100% - var(--space-2)) / 2 - 1px)), 1fr));
+  }
+
+  /* 补充说明（如胜率）—— 比选项名低一档的信息：小一号字、退到次文字色。
+     flex: none 让它保持整句、不被选项名挤扁（名字那边自带省略号兜底）。
+     不用 --text-tertiary：那一档留给水印与 placeholder，浅色模式下读起来太淡（设计系统 §4.1） */
+  .radio-field__hint {
+    flex: none;
+    white-space: nowrap;
+    font-size: var(--text-xs);
+    letter-spacing: 0.02em;
+    /* 数字等宽：相邻两枚选项的百分比位数不同也对得齐 */
+    font-variant-numeric: var(--font-nums);
+    color: var(--text-secondary);
   }
 
   /* 原生 radio：视觉隐藏（1px 透明贴在按钮面左上角），

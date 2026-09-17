@@ -102,6 +102,7 @@ msgs-helper/
 │       │   ├── controller/          # REST 入口（路径不写 /api，前缀来自 context-path）
 │       │   ├── service/             # JiangChiRecordService / RoleCounter（胜败场计数）
 │       │   │                        # JiangChiExportService + JiangChiStatRow（Excel 导出）
+│       │   │                        # JiangChiRoleStatService（各身份/位置的胜率）
 │       │   ├── mapper/ entity/ dto/ # MyBatis-Plus Mapper / 实体 / 请求体
 │       │   └── common/              # Result 统一响应体 / 全局异常处理
 │       └── resources/
@@ -124,7 +125,7 @@ Spring Boot 3.3.7 · Java 21 · MyBatis-Plus · Flyway · MySQL 8。独立 Maven
 | 配置 | `application.yml` 公共 / `-dev.yml` 本机 MySQL / `-prod.yml` **不入库**（见 `server/.gitignore`），部署机手工放一份到 `server/src/main/resources/`；也可放 jar 工作目录，Spring Boot 外部配置优先级更高 |
 | 建表 | `resources/db/migration/*.sql` 由 Flyway 启动时执行 —— 改表加脚本，别手改库 |
 | 响应体 | `common/Result.java` `{ code, message, data }`，`code === 0` 为成功，异常由 `GlobalExceptionHandler` 兜底 —— 前端 `utils/request.js` 据此拆包、弹错 |
-| 现有接口 | `GET /api/ping`（探针）、`POST /api/jiang-chi/records`（记一局 / 只登记将池）、`GET /api/jiang-chi/heroes`（武将候选）、`GET /api/jiang-chi/export`（导出武将胜率统计 xlsx —— **不走 Result 统一响应体**，直接回文件流） |
+| 现有接口 | `GET /api/ping`（探针）、`POST /api/jiang-chi/records`（记一局 / 只登记将池）、`GET /api/jiang-chi/heroes`（武将候选）、`GET /api/jiang-chi/role-stats?pool=`（该将池下各身份/位置的胜率 —— 分母是该将池该模式「每局唯一身份」的局长）、`GET /api/jiang-chi/export`（导出武将胜率统计 xlsx —— **不走 Result 统一响应体**，直接回文件流） |
 | Excel 导出 | EasyExcel 4.0.3（POI 5.2.5）按模板填充：模板 `resources/template/武将胜率统计模版.xlsx` **第三行是列表行**，格子内容是 `{.字段名}` 占位符，字段由 `service/JiangChiStatRow.toMap()` 提供；加列 = 模板加占位符 + 那里多 put 一个 key |
 | 部署 | JDK 21、Node ≥ 22、nginx 把 `/api` 转发到 8081、systemd 单元 `msgs-helper.service`（入口是 build.sh 生成的 `server/app.jar` 软链）—— 完整步骤见 README「生产部署」 |
 
@@ -216,6 +217,7 @@ import guiZeCunGuiMd from '@/assets/md/gui-ze-cun-gui.md?raw'
 - RadioGroup 每个选项是一枚按钮面，选中态＝金描边 + 淡金底 + 金辉光 + 半档字重（**不靠金色写字**：Light 模式下 `--accent-gold` 只有 3.0:1，见设计系统 §4.1）
 - 单选语义整个交给原生 `<input type="radio">`：同组自动同名（不传 `name` 按实例生成，一页放几组也不串台），方向键切换、表单提交、屏幕阅读器都是白拿的；按钮面只是它的 `label`
 - 选项一律排一行、等分宽度；一行放不下时文字省略而不折行（折行会让第二行那枚独占整行，看着像被选中）
+- 选项可带一句补充说明 `hint`（如将池页身份后面的胜率）：画成跟在名称后面的「（说明）」（说明小一号、退到次文字色）；带说明的**整组**换成两列网格 —— 一排四枚时单枚只有 70 来像素，「主公（66.7%）」必被截成省略号，宁可多占一行；不带说明的照旧一行等分
 - 组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
 - SearchSelect 的候选浮层是**滚动容器**（条目多时靠手指划），所以「点一下」与「拖着滚」必须分得开：按下只记落点，抬手位移 ≤ TAP_SLOP（8px）才算选中。按下就选中会同时踩两个坑 —— 列表永远滚不动，且一碰就 pick（收起候选 + blur 输入框，软键盘跟着退）。拖动期间还要保住输入框的焦点：条目 pointerdown 上 preventDefault（规范保证它拦不住滚动，只拦复合鼠标事件）＋「面板上正按着指针时来的 blur 不当成失焦」兜底
 - `@/ui/Select` 的选项少（模式 3 项、将池 8 项），面板不溢出、无需滚动；真出现长列表再照 SearchSelect 那套改写

@@ -13,13 +13,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.msgshelper.server.common.Result;
 import com.msgshelper.server.dto.JiangChiRecordRequest;
+import com.msgshelper.server.dto.RoleStat;
 import com.msgshelper.server.entity.JiangChiRecord;
 import com.msgshelper.server.service.JiangChiExportService;
 import com.msgshelper.server.service.JiangChiRecordService;
+import com.msgshelper.server.service.JiangChiRoleStatService;
 
 /** 将池战绩 —— 实际路径是 /api/jiang-chi/records（/api 来自 server.servlet.context-path） */
 @RestController
@@ -35,10 +38,14 @@ public class JiangChiRecordController {
 
     private final JiangChiRecordService service;
     private final JiangChiExportService exportService;
+    private final JiangChiRoleStatService roleStatService;
 
-    public JiangChiRecordController(JiangChiRecordService service, JiangChiExportService exportService) {
+    public JiangChiRecordController(JiangChiRecordService service,
+                                    JiangChiExportService exportService,
+                                    JiangChiRoleStatService roleStatService) {
         this.service = service;
         this.exportService = exportService;
+        this.roleStatService = roleStatService;
     }
 
     /**
@@ -64,6 +71,22 @@ public class JiangChiRecordController {
     @GetMapping("/heroes")
     public Result<List<String>> listHeroes() {
         return Result.ok(service.listHeroes());
+    }
+
+    /**
+     * 某个将池下，各身份（位置）的胜率 —— 前端「身份 / 位置」每个选项后面那个百分比。
+     *
+     * <p>按将池汇总（不分武将），三个模式一次全给：条数是死的（模式 × 身份），
+     * 前端切模式时不用再请求一次，切将池才要。
+     *
+     * <p>分母的口径（斗地主的农民不拿自己的总场当分母等）见 {@link JiangChiRoleStatService}。
+     *
+     * @param pool 将池，取前端 POOLS 的 value —— 口径就是某个将池，不给（或给空）
+     *             由 service 抛业务异常（不是 400/500：走统一响应体，前端照常弹那句文案）
+     */
+    @GetMapping("/role-stats")
+    public Result<List<RoleStat>> listRoleStats(@RequestParam(required = false) String pool) {
+        return Result.ok(roleStatService.list(pool));
     }
 
     /**

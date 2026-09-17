@@ -7,11 +7,12 @@
   import { usePageReady } from '@/composables/usePageReady';
   import { useMessage } from '@/composables/useMessage';
   import { useLocalStorage } from '@/stores/localStorage';
-  import { createRecord, exportRecords } from '@/api/jiang-chi';
+  import { createRecord, exportRecords, listRoleStats } from '@/api/jiang-chi';
   import { fileStamp, saveBlob } from '@/utils/download';
   import exportIcon from '@/assets/icons/dao_chu.svg?raw';
   import addIcon from '@/assets/icons/xin_zeng.svg?raw';
   import { addHeroToCache, loadHeroes, searchHeroes } from './data.js';
+  import { roleHints } from './rates.js';
 
   // 将池胜率统计 —— 隐藏页
   // · 不注册进 menus.js：主页无卡片、全局搜索也搜不到
@@ -115,6 +116,54 @@
     result.value = '';
   });
 
+  /* ── 身份（位置）胜率 ──
+     模式表单里「身份 / 位置」每个选项后面那个百分比（如「58.3%」）。
+     口径是「当前将池下、这个模式里、这个身份」—— 同一将池下各武将的战绩合在一起看，
+     换个将池就是另一套数，所以拉数据这件事挂在将池上；分母怎么算（斗地主的农民用
+     地主的局长当分母等）全在后端，这里只把当前模式那几个写成文字（见 ./rates.js）。 */
+  const roleStats = ref([]);
+
+  /** 已经问过第几次 —— 慢响应回来时用户可能早换了将池，只认最后一次的结果 */
+  let statsSeq = 0;
+
+  /**
+   * 按当前将池拉一次汇总。
+   *
+   * 没选将池就没有口径可言：清空、也不发请求（选项上就不画胜率）。
+   * 失败同样清空 —— 留着上一个将池的数是错的，宁可什么都没有。
+   *
+   * @param {object} [options]
+   * @param {boolean} [options.silent] 失败不弹提示。记完一局后的自动刷新走静默
+   *        （那是后台动作，与用户刚看到的「已记录」提示叠在一起只会添乱）；
+   *        首屏与换将池不静默 —— 那是用户自己触发的，得让他知道为什么选项上没数了
+   */
+  async function refreshRoleStats({ silent = false } = {}) {
+    const seq = ++statsSeq;
+    const currentPool = pool.value;
+
+    if (!currentPool) {
+      roleStats.value = [];
+      return;
+    }
+
+    try {
+      const stats = await listRoleStats(currentPool, { silent });
+      if (seq === statsSeq) roleStats.value = stats;
+    } catch {
+      // 失败提示（不静默时）由 @/utils/request 的拦截器弹，这里只管收尾
+      if (seq === statsSeq) roleStats.value = [];
+    }
+  }
+
+  /* 首屏：将池是从页面数据里恢复的，记住过就立刻拉一次 */
+  refreshRoleStats();
+
+  /* 换将池 = 换一套口径，必须重拉 */
+  watch(pool, () => refreshRoleStats());
+
+  /** 当前模式下「身份（位置）→ 胜率文字」的对照；没选模式 / 没选将池时是空的 */
+  const roleRates = computed(() => roleHints(roleStats.value, mode.value));
+
   /* ── 提交 ── */
 
   const message = useMessage();
@@ -181,6 +230,10 @@
     try {
       const record = await createRecord(payload);
       message.success(describeSaved(payload, record));
+
+      // 刚记下的这一局会改变当前将池的胜率（也可能带出一个新身份）：静默重拉一遍，
+      // 模式表单里那几行百分比跟着动，不用刷新页面
+      refreshRoleStats({ silent: true });
 
       // 刚记下的武将并进候选缓存：不刷新页面也能立刻搜到（新武将插到最前）
       addHeroToCache(record?.hero ?? payload.hero);
@@ -294,13 +347,15 @@
       <hr class="jiang-chi__divider" />
 
       <!-- 模式专属表单：每个模式一个组件，跟着「模式」切换挂载
-           （:key 让换模式时整块重挂载，各模式自己的字段不会串味） -->
+           （:key 让换模式时整块重挂载，各模式自己的字段不会串味）；
+           rates 是当前模式各身份的胜率文字，由模式表单画在「身份 / 位置」选项上 -->
       <component
         :is="modeForm"
         v-if="modeForm"
         :key="mode"
         v-model:role="role"
         v-model:result="result"
+        :rates="roleRates"
         class="jiang-chi__mode-form"
       />
 

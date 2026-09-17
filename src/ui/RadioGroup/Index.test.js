@@ -35,6 +35,39 @@ describe('RadioGroup', () => {
     ]);
   });
 
+  it('选项可带补充说明（如胜率）：写成「（说明）」跟在选项名后面，整组挂 is-hinted', () => {
+    const wrapper = mountRadioGroup({
+      options: [
+        { label: '地主', value: 'landlord', hint: '58.3%' },
+        { label: '农民', value: 'farmer' },
+      ],
+    });
+
+    // 括号由组件补：调用方只管给内容（58.3%）
+    expect(
+      wrapper.findAll('.radio-field__hint').map(node => node.text())
+    ).toEqual(['（58.3%）']);
+    // 说明不混进选项名：两段文字各是一个 span，字号 / 颜色才分得开
+    expect(
+      wrapper.findAll('.radio-field__text').map(node => node.text())
+    ).toEqual(['地主', '农民']);
+    // 无障碍：radio 的可读名 = 所在 label 的全部文字，说明也在里面
+    expect(
+      wrapper.findAll('.radio-field__option')[0].text().replace(/\s+/g, '')
+    ).toBe('地主（58.3%）');
+
+    // 标在整组上（样式据此换成两列）—— 一排里有的带说明有的不带，也一起换
+    expect(wrapper.find('.radio-field__options').classes()).toContain(
+      'is-hinted'
+    );
+  });
+
+  it('没人带说明的选项组不挂 is-hinted（照旧一行等分）', () => {
+    expect(
+      mountRadioGroup().find('.radio-field__options').classes()
+    ).not.toContain('is-hinted');
+  });
+
   it('值命中的那枚才是选中态，其余不选', () => {
     const wrapper = mountRadioGroup({ modelValue: 'farmer' });
     const options = wrapper.findAll('.radio-field__option');

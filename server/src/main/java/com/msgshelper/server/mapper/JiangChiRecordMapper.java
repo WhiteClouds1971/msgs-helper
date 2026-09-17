@@ -1,6 +1,7 @@
 package com.msgshelper.server.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
@@ -39,6 +40,37 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
     int increaseCounter(@Param("pool") String pool,
                         @Param("hero") String hero,
                         @Param("column") String column);
+
+    /**
+     * 某个将池下按身份（位置）汇总胜败场 —— 「身份（位置）胜率」的数据源
+     * （见 {@link com.msgshelper.server.service.JiangChiRoleStatService}）。
+     *
+     * <p>一条 SQL 把所有身份的两列一起加起来，按将池过滤、不按武将：选项后面那个数是
+     * 「这个将池里这个身份打得怎么样」——换将池就换一套数，同一将池里各武将的战绩合在一起看。
+     *
+     * <p>没有 GROUP BY，所以永远只回一行，将池下一条记录都没有也一样
+     * （SUM 得 NULL，被 COALESCE 兜成 0）。
+     *
+     * <p>列名同样用 ${} 拼，但只认调用方从 {@link com.msgshelper.server.service.RoleCounter}
+     * 取来的白名单前缀（与 {@link #increaseCounter} 同一套信任模型），绝不接受外部字符串。
+     *
+     * @param pool     将池，取前端 POOLS 的 value
+     * @param prefixes 身份（位置）的列前缀，如 landlord / seat1 —— 传
+     *                 {@link com.msgshelper.server.service.RoleCounter#columnPrefixes()}
+     * @return 一行数据：key 是 {@code <前缀>_win} / {@code <前缀>_lose}，
+     *         值是数值（SUM 出来通常是 BigDecimal，没数据时是 0）—— 取值时按 Number 收，别认死类型
+     */
+    @Select("<script>"
+            + " SELECT "
+            + " <foreach item='prefix' collection='prefixes' separator=','>"
+            + " COALESCE(SUM(${prefix}_win), 0) AS ${prefix}_win,"
+            + " COALESCE(SUM(${prefix}_lose), 0) AS ${prefix}_lose"
+            + " </foreach>"
+            + " FROM jiang_chi_record"
+            + " WHERE pool = #{pool}"
+            + "</script>")
+    Map<String, Object> sumCounters(@Param("pool") String pool,
+                                    @Param("prefixes") List<String> prefixes);
 
     /**
      * 武将名单 —— 记录表里出现过的武将名，去重。
