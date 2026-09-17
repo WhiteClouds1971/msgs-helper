@@ -7,7 +7,13 @@
   import { usePageReady } from '@/composables/usePageReady';
   import { useLocalStorage } from '@/stores/localStorage';
   import { listHeroStats, listRoleStats } from '@/api/jiang-chi';
-  import { MODE_OPTIONS, POOL_OPTIONS, labelOf, roleLabelOf, rolesOf } from '@/pages/jiang-chi/modes.js';
+  import {
+    MODE_OPTIONS,
+    POOL_OPTIONS,
+    labelOf,
+    roleLabelOf,
+    rolesOf,
+  } from '@/pages/jiang-chi/modes.js';
   import { formatRate } from '@/pages/jiang-chi/rates.js';
 
   /**
@@ -237,7 +243,7 @@
                   {{ roleRate }}
                 </span>
                 （{{ currentStat.win }} 胜 {{ currentStat.lose }} 负，共
-                {{ currentStat.games }} 场，含已离开该将池的武将）
+                {{ currentStat.games }} 将次，含已离开该将池的武将）
               </template>
               <template v-else>
                 「{{ roleLabel }}」在该将池下还没有战绩，暂无历史胜率
@@ -260,20 +266,15 @@
             </Table>
 
             <p class="sheng-lv-bang__note">
-              表内只列目前仍在将池中的武将（换过将池的不算）；总场数 =
-              该武将在该身份下的胜场 + 败场，胜率 = 胜场 ÷ 总场数。
+              表内只列目前仍在将池中的武将；总场数 = 该武将在该身份下的胜场 +
+              败场，胜率 = 胜场 ÷ 总场数。
             </p>
           </div>
         </template>
       </Tabs>
 
       <!-- 没挑模式就没身份可切：不画空页签条，直说要先做什么 -->
-      <p
-        v-else
-        class="sheng-lv-bang__placeholder"
-      >
-        请先选择模式与将池
-      </p>
+      <p v-else class="sheng-lv-bang__placeholder">请先选择模式与将池</p>
     </div>
   </div>
 </template>
