@@ -105,6 +105,9 @@ public final class JiangChiStatRow {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("hero", record.getHero());
         row.put("pool", PoolCatalog.labelOf(record.getPool()));
+        // 紧跟在「将池」后面：光看将池那一列分不出这条战绩属于的池子是不是武将现在待着的那个，
+        // 「是」的那一行才是。没写死的记录（还没落库的对象）按 0 处理，与列默认值一致
+        row.put("inPool", Boolean.TRUE.equals(record.getInPool()) ? "是" : "否");
         row.put("bestRoleTotal", bestRoleTotal);
         row.put("bestRole", best == null ? null : best.label());
         row.put("bestRate", bestRate);

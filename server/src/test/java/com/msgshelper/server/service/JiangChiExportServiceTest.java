@@ -29,8 +29,11 @@ class JiangChiExportServiceTest {
     /** 列表占位符 {.字段名} */
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\.([A-Za-z0-9]+)}");
 
-    /** 模板一共 38 列：7 个汇总列 + 10 个身份（位置）× 胜场 / 败场 / 胜率 + 最后更新时间 */
-    private static final int COLUMNS = 38;
+    /**
+     * 模板一共 39 列：武将 / 将池 / 是否在将池中 + 6 个汇总列
+     * + 10 个身份（位置）× 胜场 / 败场 / 胜率 + 最后更新时间
+     */
+    private static final int COLUMNS = 39;
 
     /** 只测「模板 + 填充」这一段，用不着数据库，mapper 传 null */
     private final JiangChiExportService service = new JiangChiExportService(null);
@@ -42,6 +45,7 @@ class JiangChiExportServiceTest {
         guanyu.setLandlordWin(1);
         guanyu.setLandlordLose(1);      // 地主 1 胜 1 负 → 50%，这一档 2 场（全场最高）
         guanyu.setFarmerLose(2);        // 农民 0 胜 2 负 → 0%
+        guanyu.setInPool(true);
         guanyu.setUpdatedAt(LocalDateTime.of(2026, 9, 16, 17, 13, 45));
 
         byte[] xlsx = service.fillTemplate(List.of(
@@ -54,32 +58,38 @@ class JiangChiExportServiceTest {
             // 模板原有的两行没被动过：第一行升降级规则说明、第二行表头
             assertThat(text(sheet, 0, 0)).startsWith("若最高胜率总场数");
             assertThat(text(sheet, 1, 0)).isEqualTo("武将");
-            assertThat(text(sheet, 1, 2)).isEqualTo("最高胜率总场数");
-            assertThat(text(sheet, 1, 36)).isEqualTo("四号位胜率");
+            assertThat(text(sheet, 1, 1)).isEqualTo("将池");
+            assertThat(text(sheet, 1, 2)).isEqualTo("是否在将池中");
+            assertThat(text(sheet, 1, 3)).isEqualTo("最高胜率总场数");
+            assertThat(text(sheet, 1, 37)).isEqualTo("四号位胜率");
             assertThat(text(sheet, 1, COLUMNS - 1)).isEqualTo("最后更新时间");
 
             // 第一条数据落在模板的第三行（列表行）
             assertThat(text(sheet, 2, 0)).isEqualTo("关羽");
             assertThat(text(sheet, 2, 1)).isEqualTo("将池1");
+            // 是否在将池中：紧跟将池那一列，写的是「是 / 否」而不是 true / false
+            assertThat(text(sheet, 2, 2)).isEqualTo("是");
             // 最高胜率总场数 = 胜率最高那一档（地主）自己的 1 + 1 场，不是全部加起来
-            assertThat(number(sheet, 2, 2)).isEqualTo(2);
-            assertThat(text(sheet, 2, 3)).isEqualTo("地主");
-            assertThat(number(sheet, 2, 4)).isEqualTo(50);
-            assertThat(text(sheet, 2, 5)).isEqualTo("农民");
-            assertThat(number(sheet, 2, 6)).isEqualTo(0);
-            assertThat(number(sheet, 2, 7)).isEqualTo(1);
+            assertThat(number(sheet, 2, 3)).isEqualTo(2);
+            assertThat(text(sheet, 2, 4)).isEqualTo("地主");
+            assertThat(number(sheet, 2, 5)).isEqualTo(50);
+            assertThat(text(sheet, 2, 6)).isEqualTo("农民");
+            assertThat(number(sheet, 2, 7)).isEqualTo(0);
             assertThat(number(sheet, 2, 8)).isEqualTo(1);
-            assertThat(number(sheet, 2, 9)).isEqualTo(50);
-            assertThat(number(sheet, 2, 10)).isEqualTo(0);
-            assertThat(number(sheet, 2, 12)).isEqualTo(0);
+            assertThat(number(sheet, 2, 9)).isEqualTo(1);
+            assertThat(number(sheet, 2, 10)).isEqualTo(50);
+            assertThat(number(sheet, 2, 11)).isEqualTo(0);
+            assertThat(number(sheet, 2, 13)).isEqualTo(0);
             // 最后更新时间：精确到分钟，秒不进报表
             assertThat(text(sheet, 2, COLUMNS - 1)).isEqualTo("2026-09-16 17:13");
 
             // 第二条接着往下长
             assertThat(text(sheet, 3, 0)).isEqualTo("张飞");
-            assertThat(number(sheet, 3, 2)).isEqualTo(0);
+            // 没标过「在池」的那条写「否」，不是空格子（这一列 NOT NULL DEFAULT 0）
+            assertThat(text(sheet, 3, 2)).isEqualTo("否");
+            assertThat(number(sheet, 3, 3)).isEqualTo(0);
             // 一场没打的档留的是空格子，不是 0
-            assertThat(sheet.getRow(3).getCell(4).getCellType()).isEqualTo(CellType.BLANK);
+            assertThat(sheet.getRow(3).getCell(5).getCellType()).isEqualTo(CellType.BLANK);
             // 样式跟着模板那一行走：边框还在
             assertThat(sheet.getRow(3).getCell(0).getCellStyle().getBorderTop())
                     .isEqualTo(BorderStyle.THIN);

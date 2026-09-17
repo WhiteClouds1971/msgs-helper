@@ -32,6 +32,16 @@ public class JiangChiRecord {
     /** 武将 */
     private String hero;
 
+    /**
+     * 是否还在将池中：该武将当前待着的将池为 true，其余（历史将池）都是 false。
+     *
+     * <p>一个武将可以在多个将池下各留一条记录，但任一时刻只待在一个池子里，
+     * 所以这个标记是「按武将」算的、不是「按 (将池, 武将) 行」算的 ——
+     * 同一武将的记录里最多只有一条为 true。维护它的地方见
+     * {@link com.msgshelper.server.mapper.JiangChiRecordMapper#markInPool}。
+     */
+    private Boolean inPool;
+
     private Integer landlordWin;
     private Integer landlordLose;
     private Integer farmerWin;

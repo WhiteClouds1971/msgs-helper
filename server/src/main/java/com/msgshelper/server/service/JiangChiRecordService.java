@@ -27,11 +27,14 @@ public class JiangChiRecordService {
      * <p>两种情况走的是同一条路径，只差最后一步：
      * <ol>
      *   <li>先确保 (将池, 武将) 这条在 —— 不在就建一条全 0 的，已在就把更新日期推到现在；</li>
+     *   <li>把「是否还在将池中」重新点一遍：本次这个将池为是，该武将其余记录全部为否；</li>
      *   <li>带了身份和对局结果 → 对应的那一列 +1；没带 → 到此为止，只是登记 / 刷新归属。</li>
      * </ol>
      *
      * <p>「武将换将池」不是搬记录，而是在目标将池下新起一条 —— 老将池的战绩原样留着，
-     * 两个将池各算各的。
+     * 两个将池各算各的。所以第 2 步两个分支都要走：不填身份与对局的那条路
+     * （前端页面顶上写着的「只输入武将 + 将池，可以修改该武将所在的将池」）
+     * 正是换将池的入口，漏了它，报表上这个武将就会同时挂在两个将池里、或者哪个都不挂。
      *
      * @throws BizException 必填项为空，或身份 / 对局结果只给了一个，或模式与身份对不上
      */
@@ -49,6 +52,7 @@ public class JiangChiRecordService {
         }
 
         mapper.ensureExists(pool, hero);
+        mapper.markInPool(pool, hero);
 
         if (role != null) {
             mapper.increaseCounter(pool, hero, RoleCounter.of(mode, role).columnOf(result));

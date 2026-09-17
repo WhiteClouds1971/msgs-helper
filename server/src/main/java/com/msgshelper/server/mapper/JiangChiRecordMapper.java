@@ -28,6 +28,27 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
     int ensureExists(@Param("pool") String pool, @Param("hero") String hero);
 
     /**
+     * 把「是否还在将池中」重新点一遍：这个武将的这一条为 1，其余全部为 0。
+     *
+     * <p>一条语句干完两件事，是因为它本来就是一件事 ——「武将现在待在哪个将池」是唯一的，
+     * 点亮一条就等于把别的都灭了。先全清再单点会有中间态（并发下还能留下两条 1）。
+     *
+     * <p>{@code in_pool = (pool = #{pool})}：MySQL 里比较的结果就是 1 / 0，
+     * 正好是这一列要的值。
+     *
+     * <p>末尾 {@code updated_at = updated_at} 不是废话：updated_at 带 ON UPDATE CURRENT_TIMESTAMP，
+     * 被清掉的那几条这一列的值确实变了，不显式赋一次的话时间戳会跟着被刷成现在 ——
+     * 报表里「最后更新时间」会变成「换将池的那天」，而且「当前将池 = 更新日期最大的那条」
+     * 这条不变量也会被自己破坏掉。显式赋值能压住自动更新。
+     *
+     * @param pool 这次记的将池 —— 它才是该武将的当前将池
+     * @param hero 武将
+     */
+    @Update("UPDATE jiang_chi_record SET in_pool = (pool = #{pool}), updated_at = updated_at "
+            + "WHERE hero = #{hero}")
+    int markInPool(@Param("pool") String pool, @Param("hero") String hero);
+
+    /**
      * 某个身份（位置）的胜场或败场 +1，并把「更新日期」推到现在。
      *
      * <p>column 用 ${} 直接拼进 SQL 而不是走 #{}

@@ -108,6 +108,20 @@ class JiangChiStatRowTest {
     }
 
     @Test
+    @DisplayName("是否在将池中：在池写「是」，历史将池写「否」")
+    void inPoolIsWrittenAsYesOrNo() {
+        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        // 列是 NOT NULL DEFAULT 0：还没落库的对象（null）按 0 算，与库里默认值一致
+        assertThat(row(record).get("inPool")).isEqualTo("否");
+
+        record.setInPool(true);
+        assertThat(row(record).get("inPool")).isEqualTo("是");
+
+        record.setInPool(false);
+        assertThat(row(record).get("inPool")).isEqualTo("否");
+    }
+
+    @Test
     @DisplayName("最后更新时间：写成 yyyy-MM-dd HH:mm，没更新过就留空")
     void updatedAtIsFormattedToMinute() {
         JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
