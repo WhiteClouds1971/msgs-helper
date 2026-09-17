@@ -54,6 +54,21 @@ export const ThemeColor = Object.freeze({
 
 const menus = [
   {
+    code: 'sheng-lv-bang',
+    name: '胜率榜',
+    route: '/tool/sheng-lv-bang',
+    component: () => import('@/pages/tool/ShengLvBang/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
+    cover: { title: '胜率榜', subtitle: '明辨强弱 择将而战' },
+    themeColor: ThemeColor.STEEL_BLUE,
+    packageName: PackageName.TOOL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：本页的口径与常见叫法
+    tags: ['胜率', '排行', '武将统计', '将池'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）；有页面数据（模式 / 将池存 route.fullPath）
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
     code: 'gui-ze-cun-gui',
     name: '规则&村规',
     route: '/tool/gui-ze-cun-gui',
@@ -524,21 +539,6 @@ const menus = [
     // 补充检索标签（全局搜索用，也显示在结果行）：涅槃卡面上的另外三个技能名
     tags: ['八阵', '火计', '看破'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
-    layout: MenuLayout.BLANK,
-    orientation: 'vertical',
-  },
-  {
-    code: 'sheng-lv-bang',
-    name: '胜率榜',
-    route: '/tool/sheng-lv-bang',
-    component: () => import('@/pages/tool/ShengLvBang/Index.vue'),
-    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
-    cover: { title: '胜率榜', subtitle: '明辨强弱 择将而战' },
-    themeColor: ThemeColor.STEEL_BLUE,
-    packageName: PackageName.TOOL,
-    // 补充检索标签（全局搜索用，也显示在结果行）：本页的口径与常见叫法
-    tags: ['胜率', '排行', '武将统计', '将池'],
-    // 空白布局：无装饰、无教学导览（不配 tourKey）；有页面数据（模式 / 将池存 route.fullPath）
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
