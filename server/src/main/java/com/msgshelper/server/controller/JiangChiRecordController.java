@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.msgshelper.server.common.Result;
+import com.msgshelper.server.dto.HeroStat;
 import com.msgshelper.server.dto.JiangChiRecordRequest;
 import com.msgshelper.server.dto.RoleStat;
 import com.msgshelper.server.entity.JiangChiRecord;
 import com.msgshelper.server.service.JiangChiExportService;
+import com.msgshelper.server.service.JiangChiHeroStatService;
 import com.msgshelper.server.service.JiangChiRecordService;
 import com.msgshelper.server.service.JiangChiRoleStatService;
 
@@ -39,13 +41,16 @@ public class JiangChiRecordController {
     private final JiangChiRecordService service;
     private final JiangChiExportService exportService;
     private final JiangChiRoleStatService roleStatService;
+    private final JiangChiHeroStatService heroStatService;
 
     public JiangChiRecordController(JiangChiRecordService service,
                                     JiangChiExportService exportService,
-                                    JiangChiRoleStatService roleStatService) {
+                                    JiangChiRoleStatService roleStatService,
+                                    JiangChiHeroStatService heroStatService) {
         this.service = service;
         this.exportService = exportService;
         this.roleStatService = roleStatService;
+        this.heroStatService = heroStatService;
     }
 
     /**
@@ -88,6 +93,33 @@ public class JiangChiRecordController {
     @GetMapping("/role-stats")
     public Result<List<RoleStat>> listRoleStats(@RequestParam(required = false) String pool) {
         return Result.ok(roleStatService.list(pool));
+    }
+
+    /**
+     * 某个将池 + 某个模式 + 某个身份（位置）下的武将胜率 —— 胜率榜页那张表。
+     *
+     * <p>口径：每个武将各算各的 —— 胜率 = 该武将在<b>这个身份</b>下的胜场 ÷ 它自己在这个身份下的
+     * 场数（胜 + 败）。同一个武将的地主场次不会混进农民那档，别的武将、别的身份、别的将池也都
+     * 不参与（见 {@link JiangChiHeroStatService}）。
+     *
+     * <p>范围内只留<b>现在还待在这个将池里</b>的武将：换过池子的武将在旧池子留下的是历史战绩。
+     *
+     * <p>三项都是必给：换将池换一套数据，换模式换一套身份，换身份换一套分子分母 ——
+     * 少一个都答不出「这个身份下谁最能打」。缺项或模式 / 身份对不上号时，由 service 抛业务异常
+     * （走统一响应体，前端照常弹那句文案）。
+     *
+     * @param pool  将池，取前端 POOLS 的 value
+     * @param mode  模式：dou-di-zhu / jun-zheng / tuan-zhan
+     * @param role  身份（斗地主、军争）或位置（团战），取前端各模式表单的 value
+     * @param limit 最多回几条；不传（或给 0 / 负数）就把该身份下的武将<b>全部</b>回过来
+     * @return 按胜率从高到低排好的武将战绩；一场没打的武将不在里面
+     */
+    @GetMapping("/hero-stats")
+    public Result<List<HeroStat>> listHeroStats(@RequestParam(required = false) String pool,
+                                                @RequestParam(required = false) String mode,
+                                                @RequestParam(required = false) String role,
+                                                @RequestParam(required = false) Integer limit) {
+        return Result.ok(heroStatService.list(pool, mode, role, limit));
     }
 
     /**

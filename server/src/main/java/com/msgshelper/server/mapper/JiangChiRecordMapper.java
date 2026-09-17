@@ -94,6 +94,51 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
                                     @Param("prefixes") List<String> prefixes);
 
     /**
+     * 某个将池 + 某个身份（位置）下，各武将的战绩 —— 胜率榜的数据源
+     * （见 {@link com.msgshelper.server.service.JiangChiHeroStatService}）。
+     *
+     * <p>一个武将一行，只数它在这<b>一个身份</b>上的胜败场：同一行的地主场次不会混进农民那档，
+     * 换个身份就是另一套数 —— 与 {@link #sumCounters} 同一套口径，只是这边按武将分组。
+     *
+     * <p><b>只算现在还待在这个将池里的武将</b>（{@code in_pool = 1}）：换过将池的武将在这个池子里
+     * 留下的都是历史战绩，它的「当前强度」得在当前池子里看 —— 那些行留着是给导出报表对账用的
+     * （见 {@link com.msgshelper.server.entity.JiangChiRecord#getInPool}），不该混进这份战力表。
+     *
+     * <p>排序：胜率高的在前，场数多的次之（同为 100% 时，打了 10 场的排在 1 场的前面），
+     * 再并列就按武将名 —— 同一份数据每次查出来顺序都一样。一场没打的武将被
+     * {@code HAVING} 挡在外面（0 场没有胜率可言，塞进去就是一行空胜率）。
+     *
+     * <p>列名同样用 ${} 拼，但只认调用方从 {@link com.msgshelper.server.service.RoleCounter}
+     * 取来的白名单列名（与 {@link #increaseCounter} 同一套信任模型），绝不接受外部字符串。
+     *
+     * @param pool       将池，取前端 POOLS 的 value
+     * @param winColumn  胜场列名，如 landlord_win —— 取
+     *                   {@link com.msgshelper.server.service.RoleCounter#columnOf}
+     * @param loseColumn 败场列名，同上
+     * @param limit      最多回几条；<b>null = 不截断，该池该身份下的武将一个不落</b>
+     *                   （口径已被将池与身份框住，条数最多就是该将池的武将数）
+     * @return 一行一个武将：key 是 {@code hero} / {@code win_count} / {@code lose_count}，
+     *         值是数值（SUM 出来通常是 BigDecimal）—— 取值时按 Number 收，别认死类型
+     */
+    @Select("<script>"
+            + " SELECT hero,"
+            + " COALESCE(SUM(${winColumn}), 0) AS win_count,"
+            + " COALESCE(SUM(${loseColumn}), 0) AS lose_count"
+            + " FROM jiang_chi_record"
+            + " WHERE pool = #{pool} AND in_pool = 1"
+            + " GROUP BY hero"
+            + " HAVING SUM(${winColumn}) + SUM(${loseColumn}) > 0"
+            + " ORDER BY SUM(${winColumn}) / SUM(${winColumn} + ${loseColumn}) DESC,"
+            + " SUM(${winColumn} + ${loseColumn}) DESC,"
+            + " hero ASC"
+            + " <if test='limit != null'> LIMIT #{limit} </if>"
+            + "</script>")
+    List<Map<String, Object>> heroStats(@Param("pool") String pool,
+                                        @Param("winColumn") String winColumn,
+                                        @Param("loseColumn") String loseColumn,
+                                        @Param("limit") Integer limit);
+
+    /**
      * 武将名单 —— 记录表里出现过的武将名，去重。
      *
      * <p>没有单独的武将主数据表：记一局就自然多一个武将，名单跟着记录长。

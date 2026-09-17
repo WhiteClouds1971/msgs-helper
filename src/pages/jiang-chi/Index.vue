@@ -12,6 +12,7 @@
   import exportIcon from '@/assets/icons/dao_chu.svg?raw';
   import addIcon from '@/assets/icons/xin_zeng.svg?raw';
   import { addHeroToCache, loadHeroes, searchHeroes } from './data.js';
+  import { MODE_OPTIONS, POOL_OPTIONS } from './modes.js';
   import { roleHints } from './rates.js';
 
   // 将池胜率统计 —— 隐藏页
@@ -25,51 +26,31 @@
   loadHeroes();
 
   /**
-   * 将池模式 —— 单一事实源
+   * 模式 —— 值域（label / value）是公共常量，见 ./modes.js，这里只把「该模式专属的表单组件」挂上去
    *
-   * value    持久化用的稳定标识（改 label 不影响已存的数据），label 才是给人看的；
-   *          顺序即下拉列表顺序。
-   * component 该模式专属的表单组件 —— 懒加载，只有选中它时才会去下载那一块。
-   *          必须用 defineAsyncComponent 包一层：模板里 <component :is> 拿到裸函数会
-   *          当成「函数式组件」去渲染（返回 Promise 直接渲染不出来），而不是异步加载器。
-   *          新增一个模式：这里补一条，再去 components/ 建同名组件，别处不用改。
+   * component 懒加载，只有选中它时才会去下载那一块。必须用 defineAsyncComponent 包一层：
+   * 模板里 <component :is> 拿到裸函数会当成「函数式组件」去渲染（返回 Promise 直接渲染不出来），
+   * 而不是异步加载器。新增一个模式：./modes.js 补一条值域，这里补同名组件，别处不用改。
    */
-  const MODES = Object.freeze([
-    {
-      label: '斗地主',
-      value: 'dou-di-zhu',
-      component: defineAsyncComponent(
-        () => import('./components/DouDiZhuForm.vue')
-      ),
-    },
-    {
-      label: '军争',
-      value: 'jun-zheng',
-      component: defineAsyncComponent(
-        () => import('./components/JunZhengForm.vue')
-      ),
-    },
-    {
-      label: '团战',
-      value: 'tuan-zhan',
-      component: defineAsyncComponent(
-        () => import('./components/TuanZhanForm.vue')
-      ),
-    },
-  ]);
+  const MODE_COMPONENTS = {
+    'dou-di-zhu': defineAsyncComponent(
+      () => import('./components/DouDiZhuForm.vue')
+    ),
+    'jun-zheng': defineAsyncComponent(
+      () => import('./components/JunZhengForm.vue')
+    ),
+    'tuan-zhan': defineAsyncComponent(
+      () => import('./components/TuanZhanForm.vue')
+    ),
+  };
 
-  /**
-   * 将池 —— 暂时是占位名（将池1 ~ 将池8），等真实划分定下来再替换
-   *
-   * 与 MODES 同一套规矩：value 是稳定标识、label 才是给人看的 ——
-   * 以后换成「标准 / 风 / 火…」时只改 label，已存数据里的 value 不受影响。
-   */
-  const POOLS = Object.freeze(
-    Array.from({ length: 8 }, (_, index) => ({
-      label: `将池${index + 1}`,
-      value: `jiang-chi-${index + 1}`,
-    }))
-  );
+  const MODES = MODE_OPTIONS.map(option => ({
+    ...option,
+    component: MODE_COMPONENTS[option.value],
+  }));
+
+  /** 将池 —— 值域同样在 ./modes.js（占位名，等真实划分定下来再换） */
+  const POOLS = POOL_OPTIONS;
 
   const route = useRoute();
   const ls = useLocalStorage();

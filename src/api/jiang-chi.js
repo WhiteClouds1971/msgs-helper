@@ -61,6 +61,36 @@ export function listRoleStats(pool, options = {}) {
 }
 
 /**
+ * 某个将池 + 某个模式 + 某个身份（位置）下的武将胜率 —— 胜率榜页那张表
+ *
+ * 口径与 `listRoleStats` 是同一套的两个方向：那个是「这个将池里这个身份打得怎么样」（跨武将汇总），
+ * 这个是「这个身份下某个武将打得怎么样」—— 胜率 = 该武将在<b>这个身份</b>下的胜场 ÷
+ * 它自己在这个身份下的场数（胜 + 败），各武将各算各的，不借别人的场数当分母。
+ * 三样都给才问得出数：换将池换一套数据，换模式换一套身份，换身份换一套分子分母。
+ *
+ * 范围内<b>只留现在还待在这个将池里的武将</b>：换过池子的武将在旧池子留下的是历史战绩，
+ * 不该拿来和新池子的现任比。
+ *
+ * 排序与截断都在后端（胜率高的在前、场数多的次之），前端拿到即是排好的序；
+ * 一场没打的武将不在结果里（0 场没有胜率可言）。
+ *
+ * @param {object} query
+ * @param {string} query.pool  将池，取页面 POOLS 的 value —— 必传
+ * @param {string} query.mode  模式：dou-di-zhu / jun-zheng / tuan-zhan —— 必传
+ * @param {string} query.role  身份（斗地主、军争）或位置（团战）—— 必传
+ * @param {number} [query.limit] 最多要几条；不传就是<b>全部</b>（口径已被将池与身份框住，条数本来就少）
+ * @param {object} [options] 透传给 axios 的配置；{ silent: true } 表示失败不弹提示
+ * @returns {Promise<Array<{ hero: string, win: number, lose: number, games: number,
+ *   rate: number|null }>>} games 是该武将在该身份下的总场数（胜 + 败），也是 rate 的分母
+ */
+export function listHeroStats({ pool, mode, role, limit } = {}, options = {}) {
+  return request.get('/jiang-chi/hero-stats', {
+    ...options,
+    params: { pool, mode, role, limit },
+  });
+}
+
+/**
  * 导出武将胜率统计 Excel —— 后端把记录表全量填进模板，把文件流直接回给我们
  *
  * 走 responseType: 'blob'：这条回的是二进制附件，不是统一响应体，

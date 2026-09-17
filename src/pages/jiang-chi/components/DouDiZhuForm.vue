@@ -1,6 +1,7 @@
 <script setup>
   import { computed } from 'vue';
   import RadioGroup from '@/ui/RadioGroup/Index.vue';
+  import { rolesOf } from '../modes.js';
 
   /**
    * 斗地主 —— 模式专属表单
@@ -23,11 +24,8 @@
     rates: { type: Object, default: () => ({}) },
   });
 
-  /** 身份 —— value 是稳定标识（改 label 不影响已存数据），label 才是给人看的 */
-  const ROLES = Object.freeze([
-    { label: '地主', value: 'landlord' },
-    { label: '农民', value: 'farmer' },
-  ]);
+  /** 身份（位置）—— 值域是公共常量（见 ../modes.js），与后端 RoleCounter 同一套标识 */
+  const ROLES = rolesOf('dou-di-zhu');
 
   /** 身份选项带上胜率：@/ui/RadioGroup 把 hint（胜率）画在身份名下面一行 */
   const roleOptions = computed(() =>

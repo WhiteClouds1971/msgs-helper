@@ -56,6 +56,8 @@ msgs-helper/
 │   │   ├── Select/                       # 单选下拉框（reka-ui 封装）
 │   │   ├── SkillCard/                    # 单个三国杀技能展示（居中技能名 + 标签 + 规则）
 │   │   ├── SplashScreen/                 # 启动画面
+│   │   ├── Table/                        # 数据表格（columns + rows，单元格走插槽）
+│   │   ├── Tabs/                         # 页签切换（reka-ui 封装，内容只挂当前这一枚）
 │   │   └── Tooltip/                      # 悬停提示
 │   ├── layout/                      # 布局容器
 │   │   ├── BackgroundLayout.vue          # 背景全屏布局：墨洇动态背景 + 内容插槽
@@ -77,7 +79,10 @@ msgs-helper/
 │   ├── pages/                       # 页面：一个菜单一个目录
 │   │   ├── home/                    # 主页（卡片堆叠）
 │   │   ├── demo/
-│   │   ├── jiang-chi/               # 将池胜率统计（隐藏页；components/ 下每个模式一个表单）
+│   │   ├── jiang-chi/               # 将池胜率统计（隐藏页；components/ 下每个模式一个表单；
+│   │   │                            #   modes.js 是与后端 RoleCounter / PoolCatalog 对应的公共值域）
+│   │   ├── tool/ShengLvBang/        # 胜率榜（菜单页：模式 + 将池 + 身份页签 → 该身份下全部武将的场数与胜率；
+│   │   │                            #   整页不滚，武将多了滚表格自己 —— Tabs/Table 的 fill）
 │   │   └── ji/ jx/ ol/ shzl/ yjcm/ jsrg/ jxtp/ mode/ mobile/ tool/   # 各扩展包页面
 │   ├── router/
 │   │   ├── index.js
@@ -125,7 +130,7 @@ Spring Boot 3.3.7 · Java 21 · MyBatis-Plus · Flyway · MySQL 8。独立 Maven
 | 配置 | `application.yml` 公共 / `-dev.yml` 本机 MySQL / `-prod.yml` **不入库**（见 `server/.gitignore`），部署机手工放一份到 `server/src/main/resources/`；也可放 jar 工作目录，Spring Boot 外部配置优先级更高 |
 | 建表 | `resources/db/migration/*.sql` 由 Flyway 启动时执行 —— 改表加脚本，别手改库 |
 | 响应体 | `common/Result.java` `{ code, message, data }`，`code === 0` 为成功，异常由 `GlobalExceptionHandler` 兜底 —— 前端 `utils/request.js` 据此拆包、弹错 |
-| 现有接口 | `GET /api/ping`（探针）、`POST /api/jiang-chi/records`（记一局 / 只登记将池）、`GET /api/jiang-chi/heroes`（武将候选）、`GET /api/jiang-chi/role-stats?pool=`（该将池下各身份/位置的胜率 —— 该身份胜场 ÷ 该身份自己的场数，各身份各算各的）、`GET /api/jiang-chi/export`（导出武将胜率统计 xlsx —— **不走 Result 统一响应体**，直接回文件流） |
+| 现有接口 | `GET /api/ping`（探针）、`POST /api/jiang-chi/records`（记一局 / 只登记将池）、`GET /api/jiang-chi/heroes`（武将候选）、`GET /api/jiang-chi/role-stats?pool=`（该将池下各身份/位置的胜率 —— 该身份胜场 ÷ 该身份自己的场数，各身份各算各的）、`GET /api/jiang-chi/hero-stats?pool=&mode=&role=[&limit=]`（该将池 + 该模式 + 该身份下的武将战绩，胜率从高到低；**不传 limit 就全都给**。只算**现在还留在该将池里**的武将（`in_pool = 1`，换过池的留下的是历史战绩）；一场没打的不在里面 —— 胜率 = 该武将在**这个身份**下的胜场 ÷ 它自己在这个身份下的场数，各武将各算各的）、`GET /api/jiang-chi/export`（导出武将胜率统计 xlsx —— **不走 Result 统一响应体**，直接回文件流） |
 | Excel 导出 | EasyExcel 4.0.3（POI 5.2.5）按模板填充：模板 `resources/template/武将胜率统计模版.xlsx` **第三行是列表行**，格子内容是 `{.字段名}` 占位符，字段由 `service/JiangChiStatRow.toMap()` 提供；加列 = 模板加占位符 + 那里多 put 一个 key |
 | 部署 | JDK 21、Node ≥ 22、nginx 把 `/api` 转发到 8081、systemd 单元 `msgs-helper.service`（入口是 build.sh 生成的 `server/app.jar` 软链）—— 完整步骤见 README「生产部署」 |
 
