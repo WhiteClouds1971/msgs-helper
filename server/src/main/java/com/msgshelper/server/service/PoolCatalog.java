@@ -8,7 +8,8 @@ package com.msgshelper.server.service;
  * <b>改将池名要同时改这里和那里</b>。之所以不把中文名存进库，是因为它是展示口径，
  * 将来真把将池换成「标准 / 风 / 火…」时，只需要动这两处映射，历史数据一行都不用改。
  *
- * <p>眼下是占位名（将池1 ~ 将池8），与前端同一套。
+ * <p>前八个是占位名（将池1 ~ 将池8），往后接真实将池（王战2026），与前端同一套。
+ * 顺序与前端 POOL_OPTIONS 一致 —— 前端那份是下拉的展示顺序，这里跟着排。
  */
 public enum PoolCatalog {
 
@@ -19,7 +20,10 @@ public enum PoolCatalog {
     POOL_5("jiang-chi-5", "将池5"),
     POOL_6("jiang-chi-6", "将池6"),
     POOL_7("jiang-chi-7", "将池7"),
-    POOL_8("jiang-chi-8", "将池8");
+    POOL_8("jiang-chi-8", "将池8"),
+
+    /** 王者之战（王战）2026 —— 赛事将池 */
+    WANG_ZHAN_2026("wang-zhan-2026", "王战2026");
 
     private final String value;
     private final String label;

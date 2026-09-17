@@ -24,19 +24,27 @@ export const MODE_OPTIONS = Object.freeze([
 ]);
 
 /**
- * 将池 —— 暂时是占位名（将池1 ~ 将池8），等真实划分定下来再替换
+ * 将池 —— 前八个是占位名（将池1 ~ 将池8），往后接真实将池（王战2026）
  *
- * 与 MODE_OPTIONS 同一套规矩：以后换成「标准 / 风 / 火…」时只改 label，
- * 已存数据里的 value 不受影响，后端 PoolCatalog 那份对照改一处即可。
+ * 与 MODE_OPTIONS 同一套规矩：改 label 不影响已存数据（库里存的是 value），
+ * 后端 PoolCatalog 那份对照跟着改一处即可。
+ *
+ * 占位名那八个的 value 是序号（jiang-chi-1 ~ 8）—— 它们本来就只是先把位置占住，
+ * 迟早要换成真实划分。真实将池别再沿用这个套路：value 取「拼音 + 年份」，
+ * 序号式的标识换过一轮之后就认不出原本是哪个池子了。
+ *
+ * 顺序即下拉的展示顺序：占位的八个别动（已有战绩挂在它们的 value 上），新池往后追加。
  */
-export const POOL_OPTIONS = Object.freeze(
-  Array.from({ length: 8 }, (_, index) =>
+export const POOL_OPTIONS = Object.freeze([
+  ...Array.from({ length: 8 }, (_, index) =>
     Object.freeze({
       label: `将池${index + 1}`,
       value: `jiang-chi-${index + 1}`,
     })
-  )
-);
+  ),
+  /** 王者之战（王战）2026 —— 赛事将池 */
+  Object.freeze({ label: '王战2026', value: 'wang-zhan-2026' }),
+]);
 
 /**
  * 每个模式的身份（斗地主 / 军争）或位置（团战）—— 键就是 MODE_OPTIONS 的 value

@@ -19,7 +19,9 @@ describe('modes.js — 公共值域', () => {
   });
 
   it('三套身份（位置）的 value 互不重复 —— (模式, 身份) 才能唯一定到记录表里那一对列', () => {
-    const all = Object.values(MODE_ROLES).flat().map(role => role.value);
+    const all = Object.values(MODE_ROLES)
+      .flat()
+      .map(role => role.value);
     expect(new Set(all).size).toBe(all.length);
   });
 
@@ -29,8 +31,8 @@ describe('modes.js — 公共值域', () => {
     }
   });
 
-  it('将池是八个占位名，value 与后端 PoolCatalog 一致', () => {
-    expect(POOL_OPTIONS).toHaveLength(8);
+  it('将池是八个占位名 + 王战2026，value 与后端 PoolCatalog 一致', () => {
+    expect(POOL_OPTIONS).toHaveLength(9);
     expect(POOL_OPTIONS.map(pool => pool.value)).toEqual([
       'jiang-chi-1',
       'jiang-chi-2',
@@ -40,7 +42,15 @@ describe('modes.js — 公共值域', () => {
       'jiang-chi-6',
       'jiang-chi-7',
       'jiang-chi-8',
+      'wang-zhan-2026',
     ]);
+    // 中文名两边各有一份对照（后端 PoolCatalog），这边认一下王战那条的名字
+    expect(labelOf(POOL_OPTIONS, 'wang-zhan-2026')).toBe('王战2026');
+  });
+
+  it('将池的 value 互不重复 —— 下拉里两个选项指着同一个池子就没法记录了', () => {
+    const values = POOL_OPTIONS.map(pool => pool.value);
+    expect(new Set(values).size).toBe(values.length);
   });
 
   it('labelOf / roleLabelOf 取值的中文名，对不上号时给空串', () => {

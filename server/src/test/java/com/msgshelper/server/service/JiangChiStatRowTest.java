@@ -17,6 +17,7 @@ class JiangChiStatRowTest {
     @DisplayName("将池写成中文名；没登记过的将池原样带出去")
     void poolLabel() {
         assertThat(row(newRecord("关羽", "jiang-chi-3")).get("pool")).isEqualTo("将池3");
+        assertThat(row(newRecord("关羽", "wang-zhan-2026")).get("pool")).isEqualTo("王战2026");
         assertThat(row(newRecord("关羽", "jiang-chi-x")).get("pool")).isEqualTo("jiang-chi-x");
     }
 
