@@ -125,7 +125,7 @@ Spring Boot 3.3.7 · Java 21 · MyBatis-Plus · Flyway · MySQL 8。独立 Maven
 | 配置 | `application.yml` 公共 / `-dev.yml` 本机 MySQL / `-prod.yml` **不入库**（见 `server/.gitignore`），部署机手工放一份到 `server/src/main/resources/`；也可放 jar 工作目录，Spring Boot 外部配置优先级更高 |
 | 建表 | `resources/db/migration/*.sql` 由 Flyway 启动时执行 —— 改表加脚本，别手改库 |
 | 响应体 | `common/Result.java` `{ code, message, data }`，`code === 0` 为成功，异常由 `GlobalExceptionHandler` 兜底 —— 前端 `utils/request.js` 据此拆包、弹错 |
-| 现有接口 | `GET /api/ping`（探针）、`POST /api/jiang-chi/records`（记一局 / 只登记将池）、`GET /api/jiang-chi/heroes`（武将候选）、`GET /api/jiang-chi/role-stats?pool=`（该将池下各身份/位置的胜率 —— 分母是该将池该模式「每局唯一身份」的局长）、`GET /api/jiang-chi/export`（导出武将胜率统计 xlsx —— **不走 Result 统一响应体**，直接回文件流） |
+| 现有接口 | `GET /api/ping`（探针）、`POST /api/jiang-chi/records`（记一局 / 只登记将池）、`GET /api/jiang-chi/heroes`（武将候选）、`GET /api/jiang-chi/role-stats?pool=`（该将池下各身份/位置的胜率 —— 该身份胜场 ÷ 该身份自己的场数，各身份各算各的）、`GET /api/jiang-chi/export`（导出武将胜率统计 xlsx —— **不走 Result 统一响应体**，直接回文件流） |
 | Excel 导出 | EasyExcel 4.0.3（POI 5.2.5）按模板填充：模板 `resources/template/武将胜率统计模版.xlsx` **第三行是列表行**，格子内容是 `{.字段名}` 占位符，字段由 `service/JiangChiStatRow.toMap()` 提供；加列 = 模板加占位符 + 那里多 put 一个 key |
 | 部署 | JDK 21、Node ≥ 22、nginx 把 `/api` 转发到 8081、systemd 单元 `msgs-helper.service`（入口是 build.sh 生成的 `server/app.jar` 软链）—— 完整步骤见 README「生产部署」 |
 

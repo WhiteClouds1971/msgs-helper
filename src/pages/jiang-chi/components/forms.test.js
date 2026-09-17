@@ -24,36 +24,36 @@ const roleOptions = wrapper =>
 describe('将池页各模式表单的身份（位置）胜率', () => {
   it('斗地主：地主 / 农民各自的胜率画在各自选项上', () => {
     const wrapper = mountForm(DouDiZhuForm, {
-      landlord: '75%',
-      farmer: '25%',
+      landlord: '75.00%',
+      farmer: '25.00%',
     });
 
-    expect(roleOptions(wrapper)).toEqual(['地主（75%）', '农民（25%）']);
+    expect(roleOptions(wrapper)).toEqual(['地主（75.00%）', '农民（25.00%）']);
   });
 
   it('军争：四个身份各取各的，没打过（rates 里没有）的那枚只显示身份名', () => {
     const wrapper = mountForm(JunZhengForm, {
-      lord: '40%',
-      loyalist: '50%',
-      rebel: '60%',
+      lord: '40.00%',
+      loyalist: '50.00%',
+      rebel: '60.00%',
     });
 
     expect(roleOptions(wrapper)).toEqual([
-      '主公（40%）',
-      '忠臣（50%）',
-      '反贼（60%）',
+      '主公（40.00%）',
+      '忠臣（50.00%）',
+      '反贼（60.00%）',
       '内奸',
     ]);
   });
 
   it('团战：位置的 value 是 "1" 这样的字符串，照样取得到', () => {
-    const wrapper = mountForm(TuanZhanForm, { 1: '75%', 4: '100%' });
+    const wrapper = mountForm(TuanZhanForm, { 1: '75.00%', 4: '100.00%' });
 
     expect(roleOptions(wrapper)).toEqual([
-      '一号位（75%）',
+      '一号位（75.00%）',
       '二号位',
       '三号位',
-      '四号位（100%）',
+      '四号位（100.00%）',
     ]);
   });
 
@@ -69,7 +69,10 @@ describe('将池页各模式表单的身份（位置）胜率', () => {
   });
 
   it('「对局」那一行不带胜率', () => {
-    const wrapper = mountForm(DouDiZhuForm, { landlord: '75%', farmer: '25%' });
+    const wrapper = mountForm(DouDiZhuForm, {
+      landlord: '75.00%',
+      farmer: '25.00%',
+    });
 
     const outcomes = wrapper.findAll('.radio-field')[1];
     expect(outcomes.findAll('.radio-field__hint')).toHaveLength(0);

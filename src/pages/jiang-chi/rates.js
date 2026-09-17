@@ -6,19 +6,20 @@
  * 切模式不用再请求，切将池才要（页面按池拉取见 ../Index.vue 的 refreshRoleStats）。
  * 这里只做两件事：挑出当前模式的、把数字写成给人看的百分比文字。
  *
- * **分母一律由后端算**（rate 字段），前端不自己拿 win + lose 除 ——
- * 斗地主的农民、军争的其余身份、团战的其余位置，分母都是该将池、该模式里「每局必然出现、
- * 且只出现一次」那个身份的局长（地主 / 主公 / 一号位）。前端自己算，农民的胜率会少一半。
+ * **胜率一律由后端算**（rate 字段）：该身份的胜场 ÷ 该身份自己的场数（胜 + 负），
+ * 各身份各算各的（斗地主的农民不拿地主的场数除）。前端只管显示，不自己拿 win + lose 除 ——
+ * 口径散在两地，将来一改就对不上。
  */
 
 /**
- * 胜率文字：一位小数（58.3%）
+ * 胜率文字：精确到小数点后两位（58.33%）
  *
- * 后端给的是 0~100 的两位小数，显示收成一位 —— 窄栏里一行最多排四枚按钮，
- * 「58.33%」比「58.3%」宽出一个字符；整数不拖那个 .0（50% 比 50.0% 短一截）。
+ * 后端算出来的就是两位小数（见 server 的 RoleStat#rate），这里只补一个 %。
+ * 两位小数一律写全（100.00% 也一样），不为了短一截就省掉 —— 一排按钮里各枚的
+ * 字符数一致，等宽数字下才对得齐，也才看得出 33.33 与 33.30 的差别。
  *
  * @param {number} rate 0~100 的胜率
- * @returns {string} 如 '58.3%'；值不可用时给空串（调用方据此不画那一行）
+ * @returns {string} 如 '58.33%'；值不可用时给空串（调用方据此不画那一行）
  */
 export function formatRate(rate) {
   // null / undefined / 空串都当「没有这个数」——直接喂 Number() 会得到 0，画出一个假的 0%
@@ -26,7 +27,7 @@ export function formatRate(rate) {
 
   const value = Number(rate);
   if (!Number.isFinite(value)) return '';
-  return `${Number.isInteger(value) ? value : value.toFixed(1)}%`;
+  return `${value.toFixed(2)}%`;
 }
 
 /**
@@ -34,7 +35,7 @@ export function formatRate(rate) {
  *
  * @param {Array<{ mode: string, role: string, rate: number|null }>} stats 后端回的汇总
  * @param {string} mode 当前模式；没选模式时是空串
- * @returns {Record<string, string>} 如 { landlord: '58.3%', farmer: '83.3%' }；
+ * @returns {Record<string, string>} 如 { landlord: '58.33%', farmer: '83.33%' }；
  *   该模式一局没打过的身份不在里面（rate 为 null）—— 选项上就不画那一行
  */
 export function roleHints(stats, mode) {

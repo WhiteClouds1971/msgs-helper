@@ -79,7 +79,8 @@ public class JiangChiRecordController {
      * <p>按将池汇总（不分武将），三个模式一次全给：条数是死的（模式 × 身份），
      * 前端切模式时不用再请求一次，切将池才要。
      *
-     * <p>分母的口径（斗地主的农民不拿自己的总场当分母等）见 {@link JiangChiRoleStatService}。
+     * <p>口径：该身份的胜场 ÷ 该身份自己的场数（胜 + 负），各身份各算各的 —— 见
+     * {@link JiangChiRoleStatService}。
      *
      * @param pool 将池，取前端 POOLS 的 value —— 口径就是某个将池，不给（或给空）
      *             由 service 抛业务异常（不是 400/500：走统一响应体，前端照常弹那句文案）

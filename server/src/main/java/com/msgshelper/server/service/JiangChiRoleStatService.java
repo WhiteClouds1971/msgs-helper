@@ -1,7 +1,6 @@
 package com.msgshelper.server.service;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,14 +18,12 @@ import com.msgshelper.server.mapper.JiangChiRecordMapper;
  * 选项上那个数是「这个将池里这个身份打得怎么样」，同一将池下各武将的战绩合在一起看；
  * 换个将池就是另一套数。
  *
- * <p><b>分母的口径</b>（三种模式各一条，共同点是「分子都是该身份自己的胜场」）：
- * <ul>
- *   <li>局长 = 该将池、该模式里每局必然出现、且只出现一次的那个身份的胜场 + 败场
- *       （斗地主的地主 / 军争的主公 / 团战的一号位，见 {@link RoleCounter#perGame()}）；</li>
- *   <li>斗地主的农民<b>不</b>拿自己的总场数当分母 —— 一局两个农民，农民的总场是局数的两倍，
- *       拿它当分母，胜率会算成真实值的一半。<b>同一个模式下每个身份共用一个分母</b>，
- *       军争的忠臣 / 反贼 / 内奸、团战的二三四号位同理。</li>
- * </ul>
+ * <p><b>口径就一条</b>：该身份的胜场 ÷ 该身份自己的场数（胜场 + 败场）。
+ * 每个身份各算各的，谁也不借谁的场数当分母 —— 斗地主的农民不拿地主的场数除，
+ * 军争的忠臣 / 反贼 / 内奸、团战的二三四号位同理。
+ *
+ * <p>该身份在这个将池下<b>一场没打</b>（场数为 0）时没有胜率可言，{@link RoleStat#rate()} 给 null，
+ * 前端那一格留空（写 0% 会像是「打了全输」）。
  */
 @Service
 public class JiangChiRoleStatService {
@@ -54,18 +51,9 @@ public class JiangChiRoleStatService {
 
         Map<String, Object> sums = mapper.sumCounters(pool.trim(), RoleCounter.columnPrefixes());
 
-        // 分母一个模式算一次就够：它是「每局唯一身份」的总场，同模式的每个身份共用
-        Map<String, Long> games = new HashMap<>();
-        for (RoleCounter counter : RoleCounter.values()) {
-            if (counter.perGame()) {
-                games.put(counter.mode(), count(sums, counter, "win") + count(sums, counter, "lose"));
-            }
-        }
-
         return Arrays.stream(RoleCounter.values())
                 .map(counter -> RoleStat.of(counter.mode(), counter.role(),
-                        count(sums, counter, "win"), count(sums, counter, "lose"),
-                        games.getOrDefault(counter.mode(), 0L)))
+                        count(sums, counter, "win"), count(sums, counter, "lose")))
                 .toList();
     }
 

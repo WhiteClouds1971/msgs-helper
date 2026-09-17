@@ -11,18 +11,18 @@ package com.msgshelper.server.dto;
  * @param role  身份（斗地主、军争）或位置（团战），取前端各模式表单的 value
  * @param win   该身份的胜场合计
  * @param lose  该身份的败场合计
- * @param games 该将池下、该模式的总局数，也就是胜率的分母 —— 每局必然出现、且只出现一次的
- *              那个身份（斗地主的地主 / 军争的主公 / 团战的一号位）的胜场 + 败场。
- *              农民这类「一局有好几个」的身份不当分母；同一模式下每个身份拿到的是同一个数
- * @param rate  胜率（0~100，两位小数）= win / games；该模式一局都没打过时为 {@code null}，
- *              前端那一格留空（0 局没有胜率可言，写 0% 会像是「打了全输」）
+ * @param games 该身份的场数 = 胜场 + 败场，也就是胜率的分母。每个身份各算各的，
+ *              不借别的身份（如地主）的场数
+ * @param rate  胜率（0~100，两位小数）= win / games；该身份在这个将池下一场没打时为
+ *              {@code null}，前端那一格留空（0 场没有胜率可言，写 0% 会像是「打了全输」）
  */
 public record RoleStat(String mode, String role, long win, long lose, long games, Double rate) {
 
     /**
-     * 由三个场数拼一条 —— 分母换算成胜率这一步收在这里，别处不用再关心「分母是哪个身份」。
+     * 由胜场与败场拼一条 —— 场数与胜率都在这儿一次算好，调用方只管把两个数喂进来。
      */
-    public static RoleStat of(String mode, String role, long win, long lose, long games) {
+    public static RoleStat of(String mode, String role, long win, long lose) {
+        long games = win + lose;
         return new RoleStat(mode, role, win, lose, games, rate(win, games));
     }
 

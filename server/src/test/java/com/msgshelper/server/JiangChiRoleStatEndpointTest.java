@@ -27,9 +27,9 @@ import com.msgshelper.server.service.RoleCounter;
 /**
  * 走真实链路把「身份（位置）胜率」接口跑一遍：HTTP → Controller → 汇总 SQL → JSON。
  *
- * <p>期望值在 Java 里把记录表整个拉下来、<b>按将池分别</b>加一遍 —— 与 SQL 那句 SUM
- * 是两条互不相干的路，于是这条测试既验接口形状，也验那句动态拼列名的 SQL
- * 加的确实是每一列自己的数，且确实只算了问的那个将池。
+ * <p>期望值在 Java 里把记录表整个拉下来、<b>按将池、按身份</b>各加一遍（与 SQL 那句 SUM
+ * 是两条互不相干的路），于是这条测试既验接口形状，也验那句动态拼列名的 SQL
+ * 加的确实是每一列自己的数、且确实只算了问的那个将池。
  *
  * <p>要连着本地 MySQL（与 {@link MsgsHelperServerApplicationTests} 同一个前提，
  * 见 resources/application-dev.yml）。
@@ -51,7 +51,7 @@ class JiangChiRoleStatEndpointTest {
     private JiangChiRecordMapper mapper;
 
     @Test
-    @DisplayName("GET /jiang-chi/role-stats?pool=… 只算这个将池，分母是该将池该模式「每局唯一身份」的局长")
+    @DisplayName("GET /jiang-chi/role-stats?pool=… 只算这个将池，每个身份的胜率各用各的场数当分母")
     void listsRoleRatesOfPool() throws Exception {
         Map<String, Map<RoleCounter, long[]>> expected = sumByHandByPool();
         assertThat(expected).isNotEmpty();
@@ -59,7 +59,7 @@ class JiangChiRoleStatEndpointTest {
         for (Map.Entry<String, Map<RoleCounter, long[]>> entry : expected.entrySet()) {
             assertPool(entry.getKey(), entry.getValue());
         }
-        // 空将池：条数照旧（模式 × 身份），只是局长为 0、胜率留空
+        // 空将池：条数照旧（模式 × 身份），只是场数为 0、胜率留空
         assertPool(UNKNOWN_POOL, emptySums());
     }
 
@@ -93,7 +93,8 @@ class JiangChiRoleStatEndpointTest {
             RoleCounter counter = RoleCounter.of(mode, role);
             long win = expected.get(counter)[0];
             long lose = expected.get(counter)[1];
-            long games = gamesOf(expected, mode);
+            // 分母是这个身份自己的场数：斗地主的农民不拿地主的场数除
+            long games = win + lose;
 
             assertThat(node.path("win").asLong()).isEqualTo(win);
             assertThat(node.path("lose").asLong()).isEqualTo(lose);
@@ -101,7 +102,7 @@ class JiangChiRoleStatEndpointTest {
 
             JsonNode rate = node.path("rate");
             if (games == 0) {
-                // 一局没打过：没有胜率可言，给 null（写 0% 会像是「打了全输」）
+                // 一场没打：没有胜率可言，给 null（写 0% 会像是「打了全输」）
                 assertThat(rate.isNull()).isTrue();
             } else {
                 assertThat(rate.asDouble())
@@ -117,16 +118,6 @@ class JiangChiRoleStatEndpointTest {
         return new ObjectMapper()
                 .readTree(result.getResponse().getContentAsString(StandardCharsets.UTF_8))
                 .path("data");
-    }
-
-    /** 某将池下某模式打了多少局 = 该将池里「每局必然出现、且只出现一次」那个身份的胜场 + 败场 */
-    private static long gamesOf(Map<RoleCounter, long[]> expected, String mode) {
-        for (RoleCounter counter : RoleCounter.values()) {
-            if (counter.perGame() && counter.mode().equals(mode)) {
-                return expected.get(counter)[0] + expected.get(counter)[1];
-            }
-        }
-        throw new AssertionError("这个模式没有「每局唯一身份」：" + mode);
     }
 
     /** 期望值：记录表全拉下来，按 {@link RoleCounter} 的两列在 Java 里自己按将池加一遍 */

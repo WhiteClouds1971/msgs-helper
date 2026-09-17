@@ -15,7 +15,7 @@
   const result = defineModel('result', { type: String, default: '' });
 
   /**
-   * 各身份的胜率文字（如 58.3%），按 role 的 value 给 —— 页面拉完后端汇总整理好的
+   * 各身份的胜率文字（如 58.33%），按 role 的 value 给 —— 页面拉完后端汇总整理好的
    * （见 ../Index.vue 的 roleRates 与 ../rates.js）。拉不到时是空对象，
    * 选项上就只显示身份名，不留空位。
    */
