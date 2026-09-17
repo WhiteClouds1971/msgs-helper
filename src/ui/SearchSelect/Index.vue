@@ -28,6 +28,8 @@
    * 候选面板是滚动容器（条目多时靠划），所以「点一下」与「拖着滚」必须分得开：
    * 按下只记落点，抬手时位移没超过阈值（TAP_SLOP）才算选中 —— 真机上一碰就选中
    * 会让列表永远滚不动，还会顺手 blur 掉输入框（软键盘跟着退）。
+   * 抬手选中之后，浏览器补发的那一下兼容 click 还要再吃掉（见 swallowGhostClick）——
+   * 否则面板一收起，那一下会砸在原本被面板盖住的按钮上。
    *
    * 结构契约（供测试与使用方布局引用）：
    *   .search-select            —— 根元素（标题 + 输入框 的横向组合）
@@ -202,8 +204,14 @@
     emit('update:modelValue', value);
   }
 
-  /** 选中一行（候选或「使用原文」）：回填文字、收起、交出焦点（收键盘） */
-  function pick(row) {
+  /**
+   * 选中一行（候选或「使用原文」）：回填文字、收起、交出焦点（收键盘）
+   *
+   * @param {object} row 选中的那一行
+   * @param {{x: number, y: number}} [point] 抬手落点（触屏 / 笔才有）——
+   *   给了它就顺手埋下幽灵点击的拦截，见 swallowGhostClick
+   */
+  function pick(row, point) {
     keyword.value = row.label;
     dirty.value = false;
     open.value = false;
@@ -214,6 +222,7 @@
     inputRef.value?.blur();
     pickingBlur = false;
     commit(row.value);
+    if (point) swallowGhostClick(point);
   }
 
   /* ── 候选面板上的指针手势 ──────────────────────────────────────
@@ -263,7 +272,53 @@
       Math.abs(event.clientY - start.y) > TAP_SLOP
     )
       return;
-    pick(row);
+    // 落点一并交给 pick：紧随其后的补发 click 要靠它认（见 swallowGhostClick）
+    pick(row, { x: event.clientX, y: event.clientY });
+  }
+
+  /* ── 幽灵点击（ghost click）──────────────────────────────────────
+   抬手选中之后，浏览器还会照老规矩补发一串兼容鼠标事件
+   （mousedown / mouseup / click），落点是「补发的那一刻，这个坐标下面是谁」——
+   而我们在 pointerup 就已经把面板收掉了，于是这一串会砸在面板原本盖住的按钮上：
+   记录页上就是「选好了武将，下面的身份 / 对局 / 新增也跟着被点了一下」。
+   条目 pointerdown 上的 preventDefault 能压住多数浏览器的补发（Chrome 上实测连
+   click 都不会发），但 WebKit 不保证认这条 —— 所以抬手选中的同时，
+   在捕获阶段埋一次性的 click 拦截兜底。
+
+   只认「落点与抬手点重合、且 500ms 以内」的第一下：补发的那一下坐标与抬手点几乎
+   重合，而用户真要接着去点别处，坐标差着几十上百像素，不会被误吃；
+   点回本组件自己的（比如又点了一下输入框）也照常放行。 */
+  /** 认领半径（px）：抬手点周围这么大一圈内的下一击，才当成补发 */
+  const GHOST_SLOP = 16;
+  /** 认领时限（ms）：超过这么久就不再怀疑是补发 */
+  const GHOST_WINDOW = 500;
+
+  /**
+   * 吃掉紧接着补发的那一下 click
+   *
+   * @param {{x: number, y: number}} point 抬手时的落点（视口坐标）
+   */
+  function swallowGhostClick(point) {
+    let timer = null;
+
+    function release() {
+      clearTimeout(timer);
+      document.removeEventListener('click', handler, true);
+    }
+
+    function handler(event) {
+      const near =
+        Math.abs(event.clientX - point.x) <= GHOST_SLOP &&
+        Math.abs(event.clientY - point.y) <= GHOST_SLOP;
+      release();
+      if (!near || boxRef.value?.contains(event.target)) return;
+      // 压住默认行为（label 会据此激活它关联的单选框），也别让它再往上冒
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    document.addEventListener('click', handler, true);
+    timer = setTimeout(release, GHOST_WINDOW);
   }
 
   /** 鼠标划过才跟着高亮：触屏没有 hover，拖动途中改高亮会顺手把条目 scrollIntoView

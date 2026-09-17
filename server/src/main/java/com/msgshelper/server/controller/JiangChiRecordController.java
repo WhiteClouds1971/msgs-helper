@@ -68,6 +68,21 @@ public class JiangChiRecordController {
     }
 
     /**
+     * 撤回一局 —— 与 {@link #record} 反着走：把那一场的胜/败场 -1。
+     *
+     * <p>请求体与 {@code /records} 同形，但 role 与 result <b>必填</b>：撤回的是某一场对局，
+     * 光有「武将 + 将池」减不掉任何东西（只登记归属的那种记录不进撤回列表）。
+     *
+     * <p>与新增一样不碰武将的将池归属 —— 见 {@link JiangChiRecordService#undo}。
+     *
+     * <p>返回这条记录的最新全貌（前端显示「3 胜 1 负」用）。
+     */
+    @PostMapping("/records/undo")
+    public Result<JiangChiRecord> undo(@RequestBody JiangChiRecordRequest request) {
+        return Result.ok(service.undo(request));
+    }
+
+    /**
      * 武将名单 —— 前端搜索框的候选来源。
      *
      * <p>内容是记录表里出现过的武将名去重（最近用过的排前面），没有单独的武将主数据表：

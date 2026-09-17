@@ -15,4 +15,7 @@ export const StorageKeys = Object.freeze({
 
   /** 应用版本号 */
   APP_VERSION: 'msgs-app-version',
+
+  /** 将池战绩的记录历史 — 对象 { entries: [] }，最近记的几局（可撤回），最多 50 条 */
+  JIANG_CHI_HISTORY: 'msgs-jiang-chi-history',
 })

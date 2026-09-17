@@ -29,6 +29,28 @@ export function createRecord(payload) {
 }
 
 /**
+ * 撤回一局 —— 把 {@link createRecord} 记下的那一场减回去
+ *
+ * 请求体与新增同形，但 role 与 result <b>必填</b>：撤回的是某一场对局，
+ * 光有「武将 + 将池」减不掉任何东西（那种只登记归属的记录也不进撤回列表）。
+ * 后端把对应的胜场或败场 -1（见 JiangChiRecordService#undo），
+ * 同样不碰武将的将池归属 —— 撤回历史战绩不该把用户后来换的池子改回去。
+ *
+ * @param {object} payload
+ * @param {string} payload.mode   模式：dou-di-zhu / jun-zheng / tuan-zhan
+ * @param {string} payload.pool   将池
+ * @param {string} payload.hero   武将
+ * @param {string} payload.role   身份（斗地主 / 军争）或位置（团战）
+ * @param {string} payload.result 对局结果：win / lose
+ *
+ * @returns {Promise<object>} 这条记录减完之后的<b>最新</b>全貌（各胜败场 + 创建 / 更新日期）；
+ *   失败由 request 拦截器统一弹提示并 reject，这里不用再判 code
+ */
+export function undoRecord(payload) {
+  return request.post('/jiang-chi/records/undo', payload);
+}
+
+/**
  * 全量武将名单 —— 记录表里出现过的武将名去重
  *
  * 名单没有单独的主数据表：记一局就自然多一个武将。

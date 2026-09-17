@@ -4,14 +4,22 @@
   import Select from '@/ui/Select/Index.vue';
   import SearchSelect from '@/ui/SearchSelect/Index.vue';
   import Button from '@/ui/Button/Index.vue';
+  import ConfirmDialog from '@/ui/ConfirmDialog/Index.vue';
   import { usePageReady } from '@/composables/usePageReady';
   import { useMessage } from '@/composables/useMessage';
   import { useLocalStorage } from '@/stores/localStorage';
-  import { createRecord, exportRecords, listRoleStats } from '@/api/jiang-chi';
+  import {
+    createRecord,
+    exportRecords,
+    listRoleStats,
+    undoRecord,
+  } from '@/api/jiang-chi';
   import { fileStamp, saveBlob } from '@/utils/download';
   import exportIcon from '@/assets/icons/dao_chu.svg?raw';
   import addIcon from '@/assets/icons/xin_zeng.svg?raw';
+  import RecordHistory from './components/RecordHistory.vue';
   import { addHeroToCache, loadHeroes, searchHeroes } from './data.js';
+  import { entryPoolLabel, entrySummary, useRecordHistory } from './history.js';
   import { MODE_OPTIONS, POOL_OPTIONS } from './modes.js';
   import { roleHints } from './rates.js';
 
@@ -213,6 +221,10 @@
       const record = await createRecord(payload);
       message.success(describeSaved(payload, record));
 
+      // 这一局进历史（能撤回的才进）：撤的时候按它认到「减哪一列」。
+      // 武将名用后端回来的那份 —— 前端手填的名字由后端定稿，两边存成一样才认得准
+      remember({ ...payload, hero: record?.hero ?? payload.hero });
+
       // 刚记下的这一局会改变当前将池的胜率（也可能带出一个新身份）：静默重拉一遍，
       // 模式表单里那几行百分比跟着动，不用刷新页面
       refreshRoleStats({ silent: true });
@@ -228,6 +240,88 @@
       // 失败提示由 @/utils/request 的拦截器统一弹（含后端返回的 400 文案），这里只管收尾
     } finally {
       submitting.value = false;
+    }
+  }
+
+  /* ── 记录历史与撤回 ──
+     后端那张表只有「一个武将在一个将池下的累计胜败场」，没有逐局流水，
+     所以「刚记了哪几局」这份清单由本页自己留（见 ./history.js）：
+     记一局就往里放一条，撤回时按这条把对应的那一列 -1，撤完再把这条抹掉。
+
+     只留能撤回的：模式 / 将池 / 武将 / 身份 / 对局结果齐全的那几条。
+     只登记将池归属（不填身份与对局）的那条路不进历史 —— 它没动任何计数，
+     想改重新登记一次就行，没有「撤回」可言。 */
+  const { entries, remember, forget } = useRecordHistory();
+
+  /** 等着被确认的那一条；null = 当前没有待确认的撤回 */
+  const pendingUndo = ref(null);
+
+  /** 二次确认弹窗的开合 */
+  const confirmOpen = ref(false);
+
+  /** 撤回在飞 —— 与新增同样的道理：连着点几下别把同一局撤两遍 */
+  const undoing = ref(false);
+
+  /** 点了历史列表里的某一条：先问一句，不直接动手 */
+  function askUndo(entry) {
+    pendingUndo.value = entry;
+    confirmOpen.value = true;
+  }
+
+  /** 弹窗收起（取消 / Esc）：待确认的那条跟着作废，免得下次开出来还是旧的 */
+  watch(confirmOpen, open => {
+    if (!open) pendingUndo.value = null;
+  });
+
+  /** 确认框里那句话：这一下会动到哪条记录的哪个数 */
+  const undoDescription = computed(() => {
+    const entry = pendingUndo.value;
+    if (!entry) return '';
+    const pool = entryPoolLabel(entry);
+    return `将从${pool ? `「${pool}」的 ` : ''}${entry.hero} 记录里减去这 1 场（${entrySummary(entry)}），这条历史记录同时删除。`;
+  });
+
+  /** 撤回成功后的提示：与新增同一句式，只是「累计」是减完之后的那份数 */
+  function describeUndone(entry, record) {
+    const display = ROLE_DISPLAY[entry.role];
+    const hero = record?.hero ?? entry.hero;
+    if (!display) return `已撤回「${hero}」的这条记录`;
+
+    const win = record?.[`${display.field}Win`] ?? 0;
+    const lose = record?.[`${display.field}Lose`] ?? 0;
+    const outcome = entry.result === 'lose' ? '输' : '赢';
+    return `已撤回 ${hero} · ${display.label} ${outcome}，累计 ${win} 胜 ${lose} 负`;
+  }
+
+  async function handleUndoConfirm() {
+    if (undoing.value) return;
+
+    // 待确认的那条先拿在手上：下面 await 期间它可能被弹窗的收起逻辑清掉
+    const entry = pendingUndo.value;
+    if (!entry) return;
+
+    undoing.value = true;
+    try {
+      const record = await undoRecord({
+        mode: entry.mode,
+        pool: entry.pool,
+        hero: entry.hero,
+        role: entry.role,
+        result: entry.result,
+      });
+
+      // 撤掉了就把这条历史抹掉 —— 留着它只会在列表里骗人（再点一次就把那列减成负数）
+      forget(entry.id);
+      message.success(describeUndone(entry, record));
+
+      // 少了一场，身份胜率跟着变：与新增一样静默重拉一遍
+      refreshRoleStats({ silent: true });
+
+      confirmOpen.value = false;
+    } catch {
+      // 失败提示由 @/utils/request 的拦截器统一弹；弹窗留着不关，用户可以再点一次
+    } finally {
+      undoing.value = false;
     }
   }
 
@@ -263,10 +357,10 @@
   <div class="jiang-chi">
     <!-- 内容限宽居中：本页是「表单 + 列表」的窄栏，桌面端不让控件横向摊开 -->
     <div class="jiang-chi__inner">
-      <!-- 顶部一行：提示 + 导出 ——
+      <!-- 顶部一行：提示 + 两枚附带动作 ——
            提示（身份 / 对局留空是「登记所属将池」这条路，不是漏填）先说清楚用法；
-           导出是全量报表的附带动作，不属于这张表单，所以挪到提示这一行的右端，
-           只留一枚线描图标，不与表单里的写操作抢视线 -->
+           右端两枚线描图标：导出（全量报表）与历史（可撤回的记录），
+           都不属于这张表单，只留图标本身，不与表单里的写操作抢视线 -->
       <div class="jiang-chi__top">
         <p class="jiang-chi__hint">
           只输入「武将 + 将池」、不填身份与对局，可以修改该武将所在的将池
@@ -289,6 +383,11 @@
             v-html="exportIcon"
           />
         </button>
+
+        <!-- 历史（可撤回）：排在导出图标右边（最右端），点开就从它左侧摊出一份
+             「刚记了哪几局」的浮动列表 —— 列表右缘对齐它、向左伸展，
+             选一条走二次确认再撤回 -->
+        <RecordHistory :entries="entries" @undo="askUndo" />
       </div>
 
       <div class="jiang-chi__form">
@@ -359,6 +458,21 @@
       </div>
 
       <main class="jiang-chi__body" />
+
+      <!-- 撤回前的二次确认 —— 独立组件（@/ui/ConfirmDialog，底层是 reka 的 AlertDialog）。
+           确认按钮不自己关弹窗：等接口回来由 handleUndoConfirm 收，
+           期间按钮转成「撤回中…」，失败则留着不关、用户可以再点一次 -->
+      <ConfirmDialog
+        v-model:open="confirmOpen"
+        title="撤回这条记录？"
+        tone="danger"
+        confirm-text="确认撤回"
+        loading-text="撤回中…"
+        :loading="undoing"
+        @confirm="handleUndoConfirm"
+      >
+        {{ undoDescription }}
+      </ConfirmDialog>
     </div>
   </div>
 </template>
@@ -383,12 +497,15 @@
     margin: 0 auto;
   }
 
-  /* 顶部一行：提示占满余宽 + 导出图标贴右端；行距由这一行统一给，
-     提示自己不再带下边距（否则两处留白会叠加） */
+  /* 顶部一行：提示占满余宽 + 右端两枚图标；行距由这一行统一给，
+     提示自己不再带下边距（否则两处留白会叠加）。
+     行距取 --space-2（8px）而不是标准的那一档：两枚图标各自往左右还探出 6px 不可见热区，
+     间距再大，两枚图标看着就散了；8px 下两枚的热区最多在缝里叠 4px，
+     压不到彼此按钮身上，不会点歪 */
   .jiang-chi__top {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     margin-bottom: var(--space-4);
   }
 
@@ -397,7 +514,9 @@
     /* 占满余宽并在必要时换行（min-width: 0 让长文本能压窄，不把图标顶出栏外） */
     flex: 1;
     min-width: 0;
-    margin: 0;
+    /* 右边补回 4px：这一行的行距压到 8px 是为了让两枚图标挨近些，
+       提示与图标之间仍是原来的 12px（8 + 4），文字那一段的留白不变 */
+    margin: 0 var(--space-1) 0 0;
     font-size: var(--text-xs);
     line-height: var(--leading-relaxed);
     letter-spacing: 0.02em;

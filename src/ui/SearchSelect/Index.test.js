@@ -315,6 +315,83 @@ describe('SearchSelect', () => {
     expect(rows()).toEqual(['貂蝉', '关羽']);
   });
 
+  it('抬手选中后补发的那一下 click 被吃掉，不会穿透到面板下面的按钮', async () => {
+    const wrapper = mountSelect();
+    const input = wrapper.find('.search-select__input');
+
+    await input.trigger('focus');
+    // 触屏 / 笔：抬手的同时浏览器还会在同一个坐标补发一下 click，
+    // 而此刻面板已经收起，那一下原本会砸在面板盖住的按钮上
+    await tap(wrapper.findAll('.search-select__option')[1], { x: 100, y: 200 });
+
+    const ghost = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      clientX: 100,
+      clientY: 200,
+    });
+    document.dispatchEvent(ghost);
+
+    expect(lastEmit(wrapper)).toBe('风');
+    // 默认行为被压住 —— 落在 label（单选按钮）上就不会顺带把它选中
+    expect(ghost.defaultPrevented).toBe(true);
+  });
+
+  it('同一次点选只吃一下，且离得远的那一下照常放行（接着点别处不受影响）', async () => {
+    const wrapper = mountSelect();
+    const input = wrapper.find('.search-select__input');
+
+    await input.trigger('focus');
+    await tap(wrapper.findAll('.search-select__option')[1], { x: 100, y: 200 });
+
+    const nearby = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      clientX: 104,
+      clientY: 208,
+    });
+    const elsewhere = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      clientX: 260,
+      clientY: 480,
+    });
+    document.dispatchEvent(nearby);
+    document.dispatchEvent(elsewhere);
+
+    expect(nearby.defaultPrevented).toBe(true);
+    // 认领只认第一下，且认的是「抬手点附近」—— 离得远的那一下原样放行
+    expect(elsewhere.defaultPrevented).toBe(false);
+  });
+
+  it('认领有时限：隔得久了再来的 click 不再被当成补发', async () => {
+    vi.useFakeTimers();
+    try {
+      const wrapper = mountSelect();
+      const input = wrapper.find('.search-select__input');
+
+      await input.trigger('focus');
+      await tap(wrapper.findAll('.search-select__option')[1], {
+        x: 100,
+        y: 200,
+      });
+
+      vi.advanceTimersByTime(600);
+
+      const later = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        clientX: 100,
+        clientY: 200,
+      });
+      document.dispatchEvent(later);
+
+      expect(later.defaultPrevented).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('键盘：方向键移动高亮，回车选中', async () => {
     const wrapper = mountSelect();
     const input = wrapper.find('.search-select__input');

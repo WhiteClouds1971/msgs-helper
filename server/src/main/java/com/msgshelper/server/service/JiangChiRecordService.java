@@ -64,6 +64,38 @@ public class JiangChiRecordService {
     }
 
     /**
+     * 撤回一局 —— 把 {@link #record} 记下的那一场减回去。
+     *
+     * <p>与 {@code record} 的差别只有两处，都是「撤回」这件事本身要求的：
+     * <ol>
+     *   <li>最后一步从 +1 变成 -1（见 {@code JiangChiRecordMapper#decreaseCounter}）；</li>
+     *   <li>不碰 (将池, 武将) 那条的归属 —— 既不 {@code ensureExists} 也不 {@code markInPool}。
+     *       撤回的是一条<b>历史</b>记录，而武将现在待在哪个池子里是之后可能又改过的事，
+     *       按历史把归属改回去等于悄悄撤销用户后来的操作。</li>
+     * </ol>
+     *
+     * <p>要撤回的是「哪一场」由调用方给全：模式 + 身份（位置）定到那一列，结果定到胜或败。
+     * 三项缺一不可 —— 光有「武将 + 将池」减不掉任何东西（那种记录本来就不该出现在撤回列表里）。
+     *
+     * @return 该武将在这条将池下的最新全貌（前端想显示「3 胜 1 负」就不用再查一次）
+     * @throws BizException 必填项为空，或模式与身份对不上，或结果不是 win / lose
+     */
+    @Transactional
+    public JiangChiRecord undo(JiangChiRecordRequest request) {
+        String mode = requireText(request.mode(), "模式");
+        String pool = requireText(request.pool(), "将池");
+        String hero = requireText(request.hero(), "武将");
+        String role = requireText(request.role(), "身份（位置）");
+        String result = requireText(request.result(), "对局结果");
+
+        mapper.decreaseCounter(pool, hero, RoleCounter.of(mode, role).columnOf(result));
+
+        return mapper.selectOne(new LambdaQueryWrapper<JiangChiRecord>()
+                .eq(JiangChiRecord::getPool, pool)
+                .eq(JiangChiRecord::getHero, hero));
+    }
+
+    /**
      * 武将名单 —— 供前端搜索框做候选。
      *
      * <p>就是记录表里出现过的武将名去重（最近用过的排前面），没有单独的武将主数据表。

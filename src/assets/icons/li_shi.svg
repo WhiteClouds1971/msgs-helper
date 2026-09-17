@@ -1,0 +1,11 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="84" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 历史：逆时针回溯的箭头 + 钟面圆环（左上留缺口）
+       取自 Lucide「rotate-ccw」（ISC 许可，https://lucide.dev/icons/rotate-ccw），
+       按本项目的 1024 视框整份等比放大：24 → 1024，线宽 2 → 84（与 dao_chu.svg 同一档）。
+       钟面里不放指针：Lucide 的 history 原稿那两根手（12 点 + 4 点半、长短不一）
+       都伸向钟面右上，22px 的小块头里看着没画在正中；改成对称的「10:10」更别扭。
+       干脆去掉 —— 圆环 + 回溯箭头本身就是「历史 / 撤回」这两层意思，
+       没有内部细节，也就没有「正不正」的问题 -->
+  <path d="M128 512a384 384 0 1 0 384-384 416 416 0 0 0-287.57 116.91L128 341.33" />
+  <path d="M128 128v213.33h213.33" />
+</svg>

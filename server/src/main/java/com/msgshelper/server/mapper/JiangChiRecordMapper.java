@@ -63,6 +63,25 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
                         @Param("column") String column);
 
     /**
+     * 某个身份（位置）的胜场或败场 -1，并把「更新日期」推到现在 —— 撤回上一条记录用。
+     *
+     * <p>与 {@link #increaseCounter} 是同一条语句的两个方向，列名的信任模型也一样
+     * （只认 {@link com.msgshelper.server.service.RoleCounter} 这个白名单枚举）。
+     *
+     * <p>用 {@code GREATEST(..., 0)} 兜底：撤回的是「前端历史里的那一条」，
+     * 万一数据被别处改过（或同一局被撤了两次），宁可停在 0 也不要在列里留下负数 ——
+     * 负数会顺着导出报表与胜率一路算下去，比「这次撤回没生效」难收拾得多。
+     *
+     * <p>注意这里<b>不</b>碰 {@code in_pool}：撤回一局战绩不该顺手把武将的将池归属改回去
+     * （那条记录可能是用户后来主动换的池子，见 {@link #markInPool}）。
+     */
+    @Update("UPDATE jiang_chi_record SET ${column} = GREATEST(${column} - 1, 0), updated_at = NOW() "
+            + "WHERE pool = #{pool} AND hero = #{hero}")
+    int decreaseCounter(@Param("pool") String pool,
+                        @Param("hero") String hero,
+                        @Param("column") String column);
+
+    /**
      * 某个将池下按身份（位置）汇总胜败场 —— 「身份（位置）胜率」的数据源
      * （见 {@link com.msgshelper.server.service.JiangChiRoleStatService}）。
      *
