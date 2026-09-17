@@ -73,7 +73,10 @@
 
   /* ── 历史胜率（该将池下各身份，一次全拉） ──
    口径与记录页「身份 / 位置」选项后面那个百分比完全一致：该身份的胜场 ÷
-   该身份自己的场数，各身份各算各的（见 @/pages/jiang-chi/rates.js 与后端 JiangChiRoleStatService） */
+   该身份自己的场数，各身份各算各的（见 @/pages/jiang-chi/rates.js 与后端 JiangChiRoleStatService）。
+
+   **这是历史口径**：不按 in_pool 过滤 —— 换过将池的武将在这个池子里留下的对局照样算进去。
+   与下方表格（只列仍在将池中的武将）是两套范围，数字对不上是正常的，别去「对齐」它们 */
   const roleStats = ref([]);
 
   /** 已经问过第几次 —— 慢响应回来时用户可能早换了将池，只认最后一次的结果 */
@@ -122,7 +125,10 @@
 
   /* ── 武将战绩（按 将池 + 模式 + 身份 问，切页签重问一次） ──
    不传 limit：这个口径下有多少武将就要多少（后端默认不截断），
-   条数本来就被「某个将池 + 某个身份」框住了 */
+   条数本来就被「某个将池 + 某个身份」框住了。
+
+   **只列现在还待在这个将池里的武将**（后端按 in_pool = 1 过滤）：换过将池的武将
+   在这个池子留下的是历史战绩，拿来和池子里的现任比没有意义 —— 那些场次只进上面那行历史胜率 */
   const heroes = ref([]);
   const loading = ref(false);
 
@@ -221,7 +227,9 @@
       >
         <template #default>
           <div class="sheng-lv-bang__panel">
-            <!-- 先交代这个身份在这个将池下打得怎么样：历史胜率与原始战绩 -->
+            <!-- 先交代这个身份在这个将池下打得怎么样：历史胜率与原始战绩。
+                 这个数是**历史累计**（role-stats 不按 in_pool 过滤）——
+                 换过将池的武将留在这里的对局照样算进去，与下方表格的口径不同，故写明 -->
             <p class="sheng-lv-bang__rate">
               <template v-if="roleRate">
                 {{ poolLabel }} · {{ modeLabel }} 的「{{ roleLabel }}」历史胜率
@@ -229,7 +237,7 @@
                   {{ roleRate }}
                 </span>
                 （{{ currentStat.win }} 胜 {{ currentStat.lose }} 负，共
-                {{ currentStat.games }} 场）
+                {{ currentStat.games }} 场，含已离开该将池的武将）
               </template>
               <template v-else>
                 「{{ roleLabel }}」在该将池下还没有战绩，暂无历史胜率
@@ -252,7 +260,8 @@
             </Table>
 
             <p class="sheng-lv-bang__note">
-              只统计目前仍在将池中的武将；总场数 = 该武将在该身份下的胜场 + 败场，胜率 = 胜场 ÷ 总场数。
+              表内只列目前仍在将池中的武将（换过将池的不算）；总场数 =
+              该武将在该身份下的胜场 + 败场，胜率 = 胜场 ÷ 总场数。
             </p>
           </div>
         </template>

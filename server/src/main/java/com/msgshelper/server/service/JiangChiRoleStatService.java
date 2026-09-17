@@ -24,6 +24,11 @@ import com.msgshelper.server.mapper.JiangChiRecordMapper;
  *
  * <p>该身份在这个将池下<b>一场没打</b>（场数为 0）时没有胜率可言，{@link RoleStat#rate()} 给 null，
  * 前端那一格留空（写 0% 会像是「打了全输」）。
+ *
+ * <p><b>这是历史口径</b>：这个将池下记过的对局全都算 —— 换过将池的武将留在这里的战绩
+ * 也照样计入，<b>不</b>按 {@code in_pool} 过滤。要「现在还待在这个池子里的武将分别打得怎么样」
+ * 是另一回事，见 {@link JiangChiHeroStatService}（那个按 {@code in_pool = 1} 过滤）。
+ * 两个数对不上是正常的，别去「对齐」它们。
  */
 @Service
 public class JiangChiRoleStatService {

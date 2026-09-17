@@ -104,6 +104,18 @@ describe('胜率榜页', () => {
     expect(rate).toContain('地主');
     expect(rate).toContain('60.00%');
     expect(rate).toContain('3胜2负，共5场');
+    // 历史口径：这个数把已离开该将池的武将也算在内（与表内只列在池武将不同），界面上写明
+    expect(rate).toContain('含已离开该将池的武将');
+  });
+
+  it('表下脚注把「只列在池武将」限定在这张表上，不牵连上面那行历史胜率', async () => {
+    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    const wrapper = mountPage();
+    await flushPromises();
+
+    const note = wrapper.find('.sheng-lv-bang__note').text().replace(/\s+/g, '');
+    expect(note).toContain('表内只列目前仍在将池中的武将');
+    expect(note).toContain('总场数=该武将在该身份下的胜场+败场');
   });
 
   it('该身份一场没打过时直说没有历史胜率，不画一个假的 0%', async () => {
