@@ -542,6 +542,25 @@ const menus = [
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
+  {
+    code: 'da-qiao-xiao-qiao-luo-yan',
+    name: '大乔＆小乔 落雁',
+    route: '/jx/da-qiao-xiao-qiao-luo-yan',
+    component: () => import('@/pages/jx/DaQiaoXiaoQiaoLuoYan/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/将星-大乔小乔-落雁.webp',
+      focalX: 50,
+      focalY: 50,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.ROSE,
+    packageName: PackageName.JX,
+    // 补充检索标签（全局搜索用，也显示在结果行）：落雁卡面上的两个技能名
+    tags: ['天香', '流离'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
 ];
 
 export default menus;
