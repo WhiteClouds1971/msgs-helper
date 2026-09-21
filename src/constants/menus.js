@@ -86,13 +86,30 @@ const menus = [
     orientation: 'vertical',
   },
   {
+    code: 'kan-wu',
+    name: '勘误',
+    route: '/tool/kan-wu',
+    component: () => import('@/pages/tool/KanWu/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
+    cover: { title: '勘误', subtitle: '拾遗订讹 正本清源' },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.TOOL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：纠错的常见叫法 + 每条勘误的叫法。
+    // 图下那行字（如「勘误 将星 徐氏」）没有 md 正文可索引，就靠这里进搜索；
+    // 本页条目在页面数据里，加一条时同步往这里补一个叫法
+    tags: ['纠错'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
     code: 'dou-di-zhu',
     name: '斗地主',
     route: '/mode/dou-di-zhu',
     component: () => import('@/pages/mode/DouDiZhu/Index.vue'),
     // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
     cover: { title: '斗地主', subtitle: '一主二农 斗智斗勇' },
-    themeColor: ThemeColor.EMBER,
+    themeColor: ThemeColor.JADE,
     packageName: PackageName.MODE,
     // 补充检索标签（全局搜索用，也显示在结果行）
     tags: [],
@@ -557,6 +574,63 @@ const menus = [
     packageName: PackageName.JX,
     // 补充检索标签（全局搜索用，也显示在结果行）：落雁卡面上的两个技能名
     tags: ['天香', '流离'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'zhang-hu-yue-lin-xi-jue',
+    name: '张虎&乐綝 袭爵',
+    route: '/ol/zhang-hu-yue-lin-xi-jue',
+    component: () => import('@/pages/ol/ZhangHuYueLinXiJue/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/OL-张虎乐綝-袭爵.webp',
+      focalX: 50,
+      focalY: 38,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.ORCHID,
+    packageName: PackageName.OL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：袭爵卡面上的两个技能名
+    tags: ['突袭', '骁果'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'jie-jiang-wei-tiao-xin',
+    name: '界姜维 挑衅',
+    route: '/jxtp/jie-jiang-wei-tiao-xin',
+    component: () => import('@/pages/jxtp/JieJiangWeiTiaoXin/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/界限突破-姜维-挑衅.webp',
+      focalX: 51,
+      focalY: 54,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.FOREST,
+    packageName: PackageName.JXTP,
+    // 补充检索标签（全局搜索用，也显示在结果行）：姜维的常用别称
+    tags: ['幼麟'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'jie-zhu-ge-liang-guan-xing',
+    name: '界诸葛亮 观星',
+    route: '/jxtp/jie-zhu-ge-liang-guan-xing',
+    component: () => import('@/pages/jxtp/JieZhuGeLiangGuanXing/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/界限突破-诸葛亮-观星.webp',
+      focalX: 41,
+      focalY: 46,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.JXTP,
+    // 补充检索标签（全局搜索用，也显示在结果行）：诸葛亮的常用别称
+    tags: ['卧龙'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
