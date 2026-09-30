@@ -1,0 +1,14 @@
+-- 胜率统计：记录表改名（原 jiang_chi_record）
+--
+-- 这个模块的语义是「胜率统计」，不是「将池」—— 旧名是历史遗留，本次连同前后端
+-- （目录 / 路由 / 类名 / 接口前缀 / localStorage Key）一并订正，表名跟着改。
+--
+-- 为什么是新增一条脚本、而不是回头改 V1 / V2：
+--   那两条已经在库上跑过了，Flyway 按「版本号 + 校验和」认它们 ——
+--   改内容会让 checksum 对不上、启动直接失败；连文件名里的描述一起改也不行。
+--   所以 V1 / V2 一字不动，改名只走这一条。它们的注释里仍写着旧类名
+--   （JiangChiRecordService），那是当时的事实，不再追改。
+--
+-- 存量数据原样保留：RENAME TABLE 只换表名，行、索引、自增计数器都不动。
+-- 新库按 V1 → V2 → V3 顺序跑下来同样得到 sheng_lv_tong_ji_record，两边最终状态一致。
+RENAME TABLE `jiang_chi_record` TO `sheng_lv_tong_ji_record`;
