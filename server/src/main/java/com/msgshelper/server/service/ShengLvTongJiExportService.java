@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.msgshelper.server.entity.JiangChiRecord;
-import com.msgshelper.server.mapper.JiangChiRecordMapper;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
+import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 
 /**
  * 武将胜率统计 Excel 导出 —— 把记录表全量填进 resources/template 下的模板。
@@ -24,18 +24,18 @@ import com.msgshelper.server.mapper.JiangChiRecordMapper;
  *
  * <p><b>模板与数据的约定</b>：模板第一行是规则说明（合并单元格），第二行是表头，
  * 第三行是<b>列表行</b> —— 里面全是 {@code {.字段}} 形式（列表占位符，点号开头）的占位符，
- * EasyExcel 照着这一行的样式按数据条数往下复制。字段名见 {@link JiangChiStatRow#toMap()}，
+ * EasyExcel 照着这一行的样式按数据条数往下复制。字段名见 {@link ShengLvTongJiStatRow#toMap()}，
  * 加一列 = 模板加一个占位符 + 那边多 put 一个 key，两边必须同时改。
  */
 @Service
-public class JiangChiExportService {
+public class ShengLvTongJiExportService {
 
     /** 模板路径（classpath，中文名照抄）；包内可见是给单测读占位符用的 */
     static final String TEMPLATE = "template/武将胜率统计模版.xlsx";
 
-    private final JiangChiRecordMapper mapper;
+    private final ShengLvTongJiRecordMapper mapper;
 
-    public JiangChiExportService(JiangChiRecordMapper mapper) {
+    public ShengLvTongJiExportService(ShengLvTongJiRecordMapper mapper) {
         this.mapper = mapper;
     }
 
@@ -46,11 +46,11 @@ public class JiangChiExportService {
      * 整张表正好是一份完整报表。顺序按将池、武将排，同一份数据每次导出的行序都一样。
      */
     public byte[] export() {
-        List<JiangChiRecord> records = mapper.selectList(Wrappers.<JiangChiRecord>lambdaQuery()
-                .orderByAsc(JiangChiRecord::getPool)
-                .orderByAsc(JiangChiRecord::getHero));
+        List<ShengLvTongJiRecord> records = mapper.selectList(Wrappers.<ShengLvTongJiRecord>lambdaQuery()
+                .orderByAsc(ShengLvTongJiRecord::getPool)
+                .orderByAsc(ShengLvTongJiRecord::getHero));
         List<Map<String, Object>> rows = records.stream()
-                .map(record -> new JiangChiStatRow(record).toMap())
+                .map(record -> new ShengLvTongJiStatRow(record).toMap())
                 .toList();
         return fillTemplate(rows);
     }

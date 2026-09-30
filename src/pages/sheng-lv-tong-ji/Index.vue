@@ -13,7 +13,7 @@
     exportRecords,
     listRoleStats,
     undoRecord,
-  } from '@/api/jiang-chi';
+  } from '@/api/sheng-lv-tong-ji';
   import { fileStamp, saveBlob } from '@/utils/download';
   import exportIcon from '@/assets/icons/dao_chu.svg?raw';
   import addIcon from '@/assets/icons/xin_zeng.svg?raw';
@@ -23,7 +23,7 @@
   import { MODE_OPTIONS, POOL_OPTIONS } from './modes.js';
   import { roleHints } from './rates.js';
 
-  // 将池胜率统计 —— 隐藏页
+  // 胜率统计 —— 隐藏页
   // · 不注册进 menus.js：主页无卡片、全局搜索也搜不到
   // · 路由含 6 位随机段（见 src/pages/index.js），防止无关人员直达
   // · 空白布局：无装饰、无教学导览
@@ -354,22 +354,22 @@
 </script>
 
 <template>
-  <div class="jiang-chi">
+  <div class="sheng-lv-tong-ji">
     <!-- 内容限宽居中：本页是「表单 + 列表」的窄栏，桌面端不让控件横向摊开 -->
-    <div class="jiang-chi__inner">
+    <div class="sheng-lv-tong-ji__inner">
       <!-- 顶部一行：提示 + 两枚附带动作 ——
            提示（身份 / 对局留空是「登记所属将池」这条路，不是漏填）先说清楚用法；
            右端两枚线描图标：导出（全量报表）与历史（可撤回的记录），
            都不属于这张表单，只留图标本身，不与表单里的写操作抢视线 -->
-      <div class="jiang-chi__top">
-        <p class="jiang-chi__hint">
+      <div class="sheng-lv-tong-ji__top">
+        <p class="sheng-lv-tong-ji__hint">
           只输入「武将 + 将池」、不填身份与对局，可以修改该武将所在的将池
         </p>
 
         <!-- 图标按钮：不套 @/ui/Button（那是有底/有描边的按钮面），
              只留图标本身，靠灰度与提示文字连成一体；无字可读，故给 aria-label -->
         <button
-          class="jiang-chi__export"
+          class="sheng-lv-tong-ji__export"
           :class="{ 'is-busy': exporting }"
           type="button"
           aria-label="导出武将胜率统计"
@@ -378,7 +378,7 @@
           @click="handleExport"
         >
           <span
-            class="jiang-chi__inline-icon"
+            class="sheng-lv-tong-ji__inline-icon"
             aria-hidden="true"
             v-html="exportIcon"
           />
@@ -390,11 +390,11 @@
         <RecordHistory :entries="entries" @undo="askUndo" />
       </div>
 
-      <div class="jiang-chi__form">
+      <div class="sheng-lv-tong-ji__form">
         <!-- 第一行：模式 -->
         <Select
           v-model="mode"
-          class="jiang-chi__mode"
+          class="sheng-lv-tong-ji__mode"
           label="模式"
           required
           placeholder="请选择模式"
@@ -404,7 +404,7 @@
         <!-- 第二行：只能从这 8 个里挑（占位名，等真实划分定下来再换） -->
         <Select
           v-model="pool"
-          class="jiang-chi__pool"
+          class="sheng-lv-tong-ji__pool"
           label="将池"
           required
           placeholder="请选择将池"
@@ -425,7 +425,7 @@
       </div>
 
       <!-- 横线：把通用表单与模式专属表单分开（金渐变装饰线，与斗地主页标题下那条同版式） -->
-      <hr class="jiang-chi__divider" />
+      <hr class="sheng-lv-tong-ji__divider" />
 
       <!-- 模式专属表单：每个模式一个组件，跟着「模式」切换挂载
            （:key 让换模式时整块重挂载，各模式自己的字段不会串味）；
@@ -437,19 +437,19 @@
         v-model:role="role"
         v-model:result="result"
         :rates="roleRates"
-        class="jiang-chi__mode-form"
+        class="sheng-lv-tong-ji__mode-form"
       />
 
       <!-- 操作区：本页唯一的写操作，单独占满一行 —— 加号图标 + 文字，
            窄栏里拇指落在哪儿都按得到（导出已挪到页首提示那一行，这里不再分心） -->
-      <div class="jiang-chi__actions">
+      <div class="sheng-lv-tong-ji__actions">
         <Button
-          class="jiang-chi__add"
+          class="sheng-lv-tong-ji__add"
           :disabled="submitting"
           @click="handleAdd"
         >
           <span
-            class="jiang-chi__inline-icon"
+            class="sheng-lv-tong-ji__inline-icon"
             aria-hidden="true"
             v-html="addIcon"
           />
@@ -457,7 +457,7 @@
         </Button>
       </div>
 
-      <main class="jiang-chi__body" />
+      <main class="sheng-lv-tong-ji__body" />
 
       <!-- 撤回前的二次确认 —— 独立组件（@/ui/ConfirmDialog，底层是 reka 的 AlertDialog）。
            确认按钮不自己关弹窗：等接口回来由 handleUndoConfirm 收，
@@ -478,7 +478,7 @@
 </template>
 
 <style scoped lang="less">
-  .jiang-chi {
+  .sheng-lv-tong-ji {
     /* #app 是 overflow: hidden 的固定高度壳：滚动改由本页承担 */
     height: 100%;
     /* 页边距：左右 = --content-padding（设计系统页面左右留白）；
@@ -492,7 +492,7 @@
   }
 
   /* 窄栏：宽度取设计系统的移动端上限（--max-width），桌面端居中不外扩 */
-  .jiang-chi__inner {
+  .sheng-lv-tong-ji__inner {
     max-width: var(--max-width);
     margin: 0 auto;
   }
@@ -502,7 +502,7 @@
      行距取 --space-2（8px）而不是标准的那一档：两枚图标各自往左右还探出 6px 不可见热区，
      间距再大，两枚图标看着就散了；8px 下两枚的热区最多在缝里叠 4px，
      压不到彼此按钮身上，不会点歪 */
-  .jiang-chi__top {
+  .sheng-lv-tong-ji__top {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -510,7 +510,7 @@
   }
 
   /* 顶部提示：辅助标注的字号与颜色（同五禽戏页 .wqx__hint），不与表单抢视线 */
-  .jiang-chi__hint {
+  .sheng-lv-tong-ji__hint {
     /* 占满余宽并在必要时换行（min-width: 0 让长文本能压窄，不把图标顶出栏外） */
     flex: 1;
     min-width: 0;
@@ -526,7 +526,7 @@
   /* 导出 —— 页面级附带动作，故意不做成按钮：没有底色也没有描边，
      图标取与提示同一档的灰度（--text-tertiary），看着像提示行的一部分；
      只有 hover / 按下才浮到金色。焦点环与触控热区仍按设计系统 §3.6 / §3.8 给足 */
-  .jiang-chi__export {
+  .sheng-lv-tong-ji__export {
     /* 图标比按钮里的那档大一点：它旁边没有文字作陪，18px 在窄栏里显得空 */
     --icon-size: 22px;
 
@@ -577,11 +577,11 @@
   }
 
   /* 导出在飞：图标淡淡地往下沉 —— 文字随旧按钮一起没了，这一下就是「还在跑」的信号 */
-  .jiang-chi__export.is-busy .jiang-chi__inline-icon {
-    animation: jiang-chi-export-drift 900ms var(--ease-in-out) infinite;
+  .sheng-lv-tong-ji__export.is-busy .sheng-lv-tong-ji__inline-icon {
+    animation: sheng-lv-tong-ji-export-drift 900ms var(--ease-in-out) infinite;
   }
 
-  @keyframes jiang-chi-export-drift {
+  @keyframes sheng-lv-tong-ji-export-drift {
     0%,
     100% {
       opacity: 0.4;
@@ -595,12 +595,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .jiang-chi__export {
+    .sheng-lv-tong-ji__export {
       transition: none;
     }
 
     /* 动效归零后仍要能看出「在跑」，用一个静止的半透明态顶上 */
-    .jiang-chi__export.is-busy .jiang-chi__inline-icon {
+    .sheng-lv-tong-ji__export.is-busy .sheng-lv-tong-ji__inline-icon {
       animation: none;
       opacity: 0.5;
     }
@@ -609,8 +609,8 @@
   /* 内联图标（导出的线描图标 + 新增里的加号）：颜色一律 currentColor ——
      谁用就跟谁的文字色（v-html 进来的 svg 要靠 :deep 才够得着）。
      尺寸走 --icon-size：默认 18px（按钮里与文字同高的一档），
-     页首那枚导出图标只有自己一个，单独调大一档，见 .jiang-chi__export */
-  .jiang-chi__inline-icon {
+     页首那枚导出图标只有自己一个，单独调大一档，见 .sheng-lv-tong-ji__export */
+  .sheng-lv-tong-ji__inline-icon {
     display: flex;
     flex: none;
     width: var(--icon-size, 18px);
@@ -623,7 +623,7 @@
   }
 
   /* 表单：三行等距堆叠 */
-  .jiang-chi__form {
+  .sheng-lv-tong-ji__form {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -631,7 +631,7 @@
 
   /* 横线：竹简编绳意象的金渐变（--decorative-line），宽度收到 60% 居中，
      与斗地主页「模式专属武将技能」标题下那条同一个版式 */
-  .jiang-chi__divider {
+  .sheng-lv-tong-ji__divider {
     width: 60%;
     height: var(--border-medium);
     margin: var(--space-6) auto;
@@ -642,7 +642,7 @@
   /* 模式专属表单：字段样式归 @/ui/RadioGroup（身份 / 位置 / 对局 值域都只有两三枚，
      摊成一行按钮比收进下拉少点一下），这里只给整块的排布 ——
      各模式组件只画字段，行距与上下留白统一由页面给 */
-  .jiang-chi__mode-form {
+  .sheng-lv-tong-ji__mode-form {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -651,14 +651,14 @@
 
   /* 操作区：与表单隔开一段；父级保持 flex，
      顺带吃掉模板里那个缩进用的空白文本节点（inline-flex 的按钮前面留个空格会多出一行） */
-  .jiang-chi__actions {
+  .sheng-lv-tong-ji__actions {
     display: flex;
     margin-top: var(--space-6);
   }
 
   /* 新增整行铺满：flex: 1 撑开这一行；图标与文字的间距、按压反馈都归
-     @/ui/Button（.btn--primary）与上面的 .jiang-chi__inline-icon，本页只补这一条 */
-  .jiang-chi__add {
+     @/ui/Button（.btn--primary）与上面的 .sheng-lv-tong-ji__inline-icon，本页只补这一条 */
+  .sheng-lv-tong-ji__add {
     flex: 1;
     gap: var(--space-2);
   }
@@ -669,9 +669,9 @@
      这里把标题的下限统一到 3em（在 --text-sm 下约 42px，容得下「两字 + 星号」），
      整页所有字段的控件左边线就齐了。
      只是下限不是定宽：将来出现更长的标题，它会自己长出去，不会挤坏文字 */
-  .jiang-chi__inner :deep(.select-field__label),
-  .jiang-chi__inner :deep(.search-select__label),
-  .jiang-chi__inner :deep(.radio-field__label) {
+  .sheng-lv-tong-ji__inner :deep(.select-field__label),
+  .sheng-lv-tong-ji__inner :deep(.search-select__label),
+  .sheng-lv-tong-ji__inner :deep(.radio-field__label) {
     min-width: 3em;
   }
 
@@ -685,10 +685,10 @@
      （武将行的 SearchSelect 也外扩 4px，但那两条贴边窄条是「点外框外沿也能聚焦
      输入框」的入口，不属于纯热区冗余，本页保留；
      页首那枚导出图标反过来 —— 它只有图标、没有文字，热区照 §3.8 补足 44px，
-     见上面 .jiang-chi__export） */
-  .jiang-chi__mode :deep(.select-field__trigger)::after,
-  .jiang-chi__pool :deep(.select-field__trigger)::after,
-  .jiang-chi__add::after {
+     见上面 .sheng-lv-tong-ji__export） */
+  .sheng-lv-tong-ji__mode :deep(.select-field__trigger)::after,
+  .sheng-lv-tong-ji__pool :deep(.select-field__trigger)::after,
+  .sheng-lv-tong-ji__add::after {
     inset: 0;
   }
 </style>

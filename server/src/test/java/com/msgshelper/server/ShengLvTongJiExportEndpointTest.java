@@ -23,8 +23,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.msgshelper.server.entity.JiangChiRecord;
-import com.msgshelper.server.mapper.JiangChiRecordMapper;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
+import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 
 /**
  * 走真实链路把导出接口跑一遍：HTTP → Controller → 查库 → 填模板 → 文件流。
@@ -34,18 +34,18 @@ import com.msgshelper.server.mapper.JiangChiRecordMapper;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-class JiangChiExportEndpointTest {
+class ShengLvTongJiExportEndpointTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private JiangChiRecordMapper mapper;
+    private ShengLvTongJiRecordMapper mapper;
 
     @Test
-    @DisplayName("GET /jiang-chi/export 回的是一份能打开的 xlsx，每条记录一行")
+    @DisplayName("GET /sheng-lv-tong-ji/export 回的是一份能打开的 xlsx，每条记录一行")
     void exportsWorkbook() throws Exception {
-        MvcResult result = mockMvc.perform(get("/jiang-chi/export"))
+        MvcResult result = mockMvc.perform(get("/sheng-lv-tong-ji/export"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
@@ -55,9 +55,9 @@ class JiangChiExportEndpointTest {
         assertThat(body).isNotEmpty();
 
         // 导出与 service 用的是同一个排序，所以第 i 条数据就在第 i 行
-        List<JiangChiRecord> records = mapper.selectList(Wrappers.<JiangChiRecord>lambdaQuery()
-                .orderByAsc(JiangChiRecord::getPool)
-                .orderByAsc(JiangChiRecord::getHero));
+        List<ShengLvTongJiRecord> records = mapper.selectList(Wrappers.<ShengLvTongJiRecord>lambdaQuery()
+                .orderByAsc(ShengLvTongJiRecord::getPool)
+                .orderByAsc(ShengLvTongJiRecord::getHero));
 
         try (Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(body))) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -76,7 +76,7 @@ class JiangChiExportEndpointTest {
 
             for (int i = 0; i < records.size(); i++) {
                 Row row = sheet.getRow(2 + i);
-                JiangChiRecord record = records.get(i);
+                ShengLvTongJiRecord record = records.get(i);
                 assertThat(row.getCell(0).getStringCellValue()).isEqualTo(record.getHero());
                 assertThat(row.getCell(2).getStringCellValue())
                         .isEqualTo(Boolean.TRUE.equals(record.getInPool()) ? "是" : "否");

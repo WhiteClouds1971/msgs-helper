@@ -1,9 +1,9 @@
 import request from '@/utils/request';
 
 /**
- * 将池战绩接口
+ * 胜率统计接口
  *
- * 后端见 server/src/main/java/com/msgshelper/server/controller/JiangChiRecordController.java
+ * 后端见 server/src/main/java/com/msgshelper/server/controller/ShengLvTongJiRecordController.java
  * 实际地址 = APP_SERVER_URL + APP_BASE_API + 下面的路径（见 .env.*）
  */
 
@@ -25,7 +25,7 @@ import request from '@/utils/request';
  *   失败由 request 拦截器统一弹提示并 reject，这里不用再判 code
  */
 export function createRecord(payload) {
-  return request.post('/jiang-chi/records', payload);
+  return request.post('/sheng-lv-tong-ji/records', payload);
 }
 
 /**
@@ -33,7 +33,7 @@ export function createRecord(payload) {
  *
  * 请求体与新增同形，但 role 与 result <b>必填</b>：撤回的是某一场对局，
  * 光有「武将 + 将池」减不掉任何东西（那种只登记归属的记录也不进撤回列表）。
- * 后端把对应的胜场或败场 -1（见 JiangChiRecordService#undo），
+ * 后端把对应的胜场或败场 -1（见 ShengLvTongJiRecordService#undo），
  * 同样不碰武将的将池归属 —— 撤回历史战绩不该把用户后来换的池子改回去。
  *
  * @param {object} payload
@@ -47,7 +47,7 @@ export function createRecord(payload) {
  *   失败由 request 拦截器统一弹提示并 reject，这里不用再判 code
  */
 export function undoRecord(payload) {
-  return request.post('/jiang-chi/records/undo', payload);
+  return request.post('/sheng-lv-tong-ji/records/undo', payload);
 }
 
 /**
@@ -60,7 +60,7 @@ export function undoRecord(payload) {
  * @returns {Promise<string[]>}
  */
 export function listHeroes(options = {}) {
-  return request.get('/jiang-chi/heroes', options);
+  return request.get('/sheng-lv-tong-ji/heroes', options);
 }
 
 /**
@@ -72,7 +72,7 @@ export function listHeroes(options = {}) {
  *
  * <b>这是历史口径</b>：该将池下记过的对局全都算 —— 换过将池的武将留在这里的战绩也照样计入，
  * <b>不</b>按 `in_pool` 过滤（与 `listHeroStats` 的范围不同，两者数字对不上是正常的）。
- * 胜率在后端算好（该身份的胜场 ÷ 该身份自己的场数，各身份各算各的，见 JiangChiRoleStatService），
+ * 胜率在后端算好（该身份的胜场 ÷ 该身份自己的场数，各身份各算各的，见 ShengLvTongJiRoleStatService），
  * 前端只管把 rate 画出来。
  *
  * @param {string} pool 将池，取页面 POOLS 的 value —— 必传：没选将池就没有口径可言
@@ -82,7 +82,7 @@ export function listHeroes(options = {}) {
  *   （胜 + 负），该身份在这个将池下一场没打过时为 0，rate 随之是 null
  */
 export function listRoleStats(pool, options = {}) {
-  return request.get('/jiang-chi/role-stats', { ...options, params: { pool } });
+  return request.get('/sheng-lv-tong-ji/role-stats', { ...options, params: { pool } });
 }
 
 /**
@@ -110,7 +110,7 @@ export function listRoleStats(pool, options = {}) {
  *   rate: number|null }>>} games 是该武将在该身份下的总场数（胜 + 败），也是 rate 的分母
  */
 export function listHeroStats({ pool, mode, role, limit } = {}, options = {}) {
-  return request.get('/jiang-chi/hero-stats', {
+  return request.get('/sheng-lv-tong-ji/hero-stats', {
     ...options,
     params: { pool, mode, role, limit },
   });
@@ -127,5 +127,5 @@ export function listHeroStats({ pool, mode, role, limit } = {}, options = {}) {
  *   按 blob 取不到响应头里的 Content-Disposition（见 @/utils/request 的拆包规则）
  */
 export function exportRecords() {
-  return request.get('/jiang-chi/export', { responseType: 'blob' });
+  return request.get('/sheng-lv-tong-ji/export', { responseType: 'blob' });
 }

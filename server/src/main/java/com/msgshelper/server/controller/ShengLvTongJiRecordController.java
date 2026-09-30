@@ -18,18 +18,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.msgshelper.server.common.Result;
 import com.msgshelper.server.dto.HeroStat;
-import com.msgshelper.server.dto.JiangChiRecordRequest;
+import com.msgshelper.server.dto.ShengLvTongJiRecordRequest;
 import com.msgshelper.server.dto.RoleStat;
-import com.msgshelper.server.entity.JiangChiRecord;
-import com.msgshelper.server.service.JiangChiExportService;
-import com.msgshelper.server.service.JiangChiHeroStatService;
-import com.msgshelper.server.service.JiangChiRecordService;
-import com.msgshelper.server.service.JiangChiRoleStatService;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
+import com.msgshelper.server.service.ShengLvTongJiExportService;
+import com.msgshelper.server.service.ShengLvTongJiHeroStatService;
+import com.msgshelper.server.service.ShengLvTongJiRecordService;
+import com.msgshelper.server.service.ShengLvTongJiRoleStatService;
 
-/** 将池战绩 —— 实际路径是 /api/jiang-chi/records（/api 来自 server.servlet.context-path） */
+/** 胜率统计 —— 实际路径是 /api/sheng-lv-tong-ji/records（/api 来自 server.servlet.context-path） */
 @RestController
-@RequestMapping("/jiang-chi")
-public class JiangChiRecordController {
+@RequestMapping("/sheng-lv-tong-ji")
+public class ShengLvTongJiRecordController {
 
     /** xlsx 的 MIME，Excel 与 WPS 都认这个 */
     private static final MediaType XLSX = MediaType
@@ -38,15 +38,15 @@ public class JiangChiRecordController {
     /** 附件名里的时间戳：导两次不会互相覆盖，也一眼看得出是哪天导的 */
     private static final DateTimeFormatter FILE_STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
 
-    private final JiangChiRecordService service;
-    private final JiangChiExportService exportService;
-    private final JiangChiRoleStatService roleStatService;
-    private final JiangChiHeroStatService heroStatService;
+    private final ShengLvTongJiRecordService service;
+    private final ShengLvTongJiExportService exportService;
+    private final ShengLvTongJiRoleStatService roleStatService;
+    private final ShengLvTongJiHeroStatService heroStatService;
 
-    public JiangChiRecordController(JiangChiRecordService service,
-                                    JiangChiExportService exportService,
-                                    JiangChiRoleStatService roleStatService,
-                                    JiangChiHeroStatService heroStatService) {
+    public ShengLvTongJiRecordController(ShengLvTongJiRecordService service,
+                                         ShengLvTongJiExportService exportService,
+                                         ShengLvTongJiRoleStatService roleStatService,
+                                         ShengLvTongJiHeroStatService heroStatService) {
         this.service = service;
         this.exportService = exportService;
         this.roleStatService = roleStatService;
@@ -63,7 +63,7 @@ public class JiangChiRecordController {
      * <p>返回这条记录的最新全貌（前端想显示「3 胜 1 负」就不用再查一次）。
      */
     @PostMapping("/records")
-    public Result<JiangChiRecord> record(@RequestBody JiangChiRecordRequest request) {
+    public Result<ShengLvTongJiRecord> record(@RequestBody ShengLvTongJiRecordRequest request) {
         return Result.ok(service.record(request));
     }
 
@@ -73,12 +73,12 @@ public class JiangChiRecordController {
      * <p>请求体与 {@code /records} 同形，但 role 与 result <b>必填</b>：撤回的是某一场对局，
      * 光有「武将 + 将池」减不掉任何东西（只登记归属的那种记录不进撤回列表）。
      *
-     * <p>与新增一样不碰武将的将池归属 —— 见 {@link JiangChiRecordService#undo}。
+     * <p>与新增一样不碰武将的将池归属 —— 见 {@link ShengLvTongJiRecordService#undo}。
      *
      * <p>返回这条记录的最新全貌（前端显示「3 胜 1 负」用）。
      */
     @PostMapping("/records/undo")
-    public Result<JiangChiRecord> undo(@RequestBody JiangChiRecordRequest request) {
+    public Result<ShengLvTongJiRecord> undo(@RequestBody ShengLvTongJiRecordRequest request) {
         return Result.ok(service.undo(request));
     }
 
@@ -100,7 +100,7 @@ public class JiangChiRecordController {
      * 前端切模式时不用再请求一次，切将池才要。
      *
      * <p>口径：该身份的胜场 ÷ 该身份自己的场数（胜 + 负），各身份各算各的 —— 见
-     * {@link JiangChiRoleStatService}。
+     * {@link ShengLvTongJiRoleStatService}。
      *
      * @param pool 将池，取前端 POOLS 的 value —— 口径就是某个将池，不给（或给空）
      *             由 service 抛业务异常（不是 400/500：走统一响应体，前端照常弹那句文案）
@@ -115,7 +115,7 @@ public class JiangChiRecordController {
      *
      * <p>口径：每个武将各算各的 —— 胜率 = 该武将在<b>这个身份</b>下的胜场 ÷ 它自己在这个身份下的
      * 场数（胜 + 败）。同一个武将的地主场次不会混进农民那档，别的武将、别的身份、别的将池也都
-     * 不参与（见 {@link JiangChiHeroStatService}）。
+     * 不参与（见 {@link ShengLvTongJiHeroStatService}）。
      *
      * <p>范围内只留<b>现在还待在这个将池里</b>的武将：换过池子的武将在旧池子留下的是历史战绩。
      *

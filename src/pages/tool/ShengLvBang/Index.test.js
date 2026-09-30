@@ -14,7 +14,7 @@ const api = vi.hoisted(() => ({
   listRoleStats: vi.fn(),
 }));
 
-vi.mock('@/api/jiang-chi', () => ({
+vi.mock('@/api/sheng-lv-tong-ji', () => ({
   listHeroStats: api.listHeroStats,
   listRoleStats: api.listRoleStats,
 }));
@@ -27,7 +27,7 @@ import Index from './Index.vue';
 
 const PAGE_PATH = '/tool/sheng-lv-bang';
 
-/** 一份后端汇总（口径见 server 的 JiangChiRoleStatService） */
+/** 一份后端汇总（口径见 server 的 ShengLvTongJiRoleStatService） */
 const ROLE_STATS = [
   { mode: 'dou-di-zhu', role: 'landlord', win: 3, lose: 2, games: 5, rate: 60 },
   { mode: 'dou-di-zhu', role: 'farmer', win: 1, lose: 1, games: 2, rate: 50 },

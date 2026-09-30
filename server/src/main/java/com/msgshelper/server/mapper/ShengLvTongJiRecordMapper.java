@@ -9,9 +9,9 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.msgshelper.server.entity.JiangChiRecord;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
 
-public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
+public interface ShengLvTongJiRecordMapper extends BaseMapper<ShengLvTongJiRecord> {
 
     /**
      * 确保 (将池, 武将) 这条记录在。
@@ -23,7 +23,7 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
      *
      * @return 影响行数（插入算 1，命中重复键更新算 2）
      */
-    @Insert("INSERT INTO jiang_chi_record (pool, hero) VALUES (#{pool}, #{hero}) "
+    @Insert("INSERT INTO sheng_lv_tong_ji_record (pool, hero) VALUES (#{pool}, #{hero}) "
             + "ON DUPLICATE KEY UPDATE updated_at = NOW()")
     int ensureExists(@Param("pool") String pool, @Param("hero") String hero);
 
@@ -44,7 +44,7 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
      * @param pool 这次记的将池 —— 它才是该武将的当前将池
      * @param hero 武将
      */
-    @Update("UPDATE jiang_chi_record SET in_pool = (pool = #{pool}), updated_at = updated_at "
+    @Update("UPDATE sheng_lv_tong_ji_record SET in_pool = (pool = #{pool}), updated_at = updated_at "
             + "WHERE hero = #{hero}")
     int markInPool(@Param("pool") String pool, @Param("hero") String hero);
 
@@ -56,7 +56,7 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
      * 它只能来自 {@link com.msgshelper.server.service.RoleCounter} 这个白名单枚举，
      * 绝不允许把请求里的字符串透传进来，否则就是 SQL 注入。
      */
-    @Update("UPDATE jiang_chi_record SET ${column} = ${column} + 1, updated_at = NOW() "
+    @Update("UPDATE sheng_lv_tong_ji_record SET ${column} = ${column} + 1, updated_at = NOW() "
             + "WHERE pool = #{pool} AND hero = #{hero}")
     int increaseCounter(@Param("pool") String pool,
                         @Param("hero") String hero,
@@ -75,7 +75,7 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
      * <p>注意这里<b>不</b>碰 {@code in_pool}：撤回一局战绩不该顺手把武将的将池归属改回去
      * （那条记录可能是用户后来主动换的池子，见 {@link #markInPool}）。
      */
-    @Update("UPDATE jiang_chi_record SET ${column} = GREATEST(${column} - 1, 0), updated_at = NOW() "
+    @Update("UPDATE sheng_lv_tong_ji_record SET ${column} = GREATEST(${column} - 1, 0), updated_at = NOW() "
             + "WHERE pool = #{pool} AND hero = #{hero}")
     int decreaseCounter(@Param("pool") String pool,
                         @Param("hero") String hero,
@@ -83,7 +83,7 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
 
     /**
      * 某个将池下按身份（位置）汇总胜败场 —— 「身份（位置）胜率」的数据源
-     * （见 {@link com.msgshelper.server.service.JiangChiRoleStatService}）。
+     * （见 {@link com.msgshelper.server.service.ShengLvTongJiRoleStatService}）。
      *
      * <p>一条 SQL 把所有身份的两列一起加起来，按将池过滤、不按武将：选项后面那个数是
      * 「这个将池里这个身份打得怎么样」——换将池就换一套数，同一将池里各武将的战绩合在一起看。
@@ -106,7 +106,7 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
             + " COALESCE(SUM(${prefix}_win), 0) AS ${prefix}_win,"
             + " COALESCE(SUM(${prefix}_lose), 0) AS ${prefix}_lose"
             + " </foreach>"
-            + " FROM jiang_chi_record"
+            + " FROM sheng_lv_tong_ji_record"
             + " WHERE pool = #{pool}"
             + "</script>")
     Map<String, Object> sumCounters(@Param("pool") String pool,
@@ -114,14 +114,14 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
 
     /**
      * 某个将池 + 某个身份（位置）下，各武将的战绩 —— 胜率榜的数据源
-     * （见 {@link com.msgshelper.server.service.JiangChiHeroStatService}）。
+     * （见 {@link com.msgshelper.server.service.ShengLvTongJiHeroStatService}）。
      *
      * <p>一个武将一行，只数它在这<b>一个身份</b>上的胜败场：同一行的地主场次不会混进农民那档，
      * 换个身份就是另一套数 —— 与 {@link #sumCounters} 同一套口径，只是这边按武将分组。
      *
      * <p><b>只算现在还待在这个将池里的武将</b>（{@code in_pool = 1}）：换过将池的武将在这个池子里
      * 留下的都是历史战绩，它的「当前强度」得在当前池子里看 —— 那些行留着是给导出报表对账用的
-     * （见 {@link com.msgshelper.server.entity.JiangChiRecord#getInPool}），不该混进这份战力表。
+     * （见 {@link com.msgshelper.server.entity.ShengLvTongJiRecord#getInPool}），不该混进这份战力表。
      *
      * <p>排序：胜率高的在前，场数多的次之（同为 100% 时，打了 10 场的排在 1 场的前面），
      * 再并列就按武将名 —— 同一份数据每次查出来顺序都一样。一场没打的武将被
@@ -143,7 +143,7 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
             + " SELECT hero,"
             + " COALESCE(SUM(${winColumn}), 0) AS win_count,"
             + " COALESCE(SUM(${loseColumn}), 0) AS lose_count"
-            + " FROM jiang_chi_record"
+            + " FROM sheng_lv_tong_ji_record"
             + " WHERE pool = #{pool} AND in_pool = 1"
             + " GROUP BY hero"
             + " HAVING SUM(${winColumn}) + SUM(${loseColumn}) > 0"
@@ -167,6 +167,6 @@ public interface JiangChiRecordMapper extends BaseMapper<JiangChiRecord> {
      *
      * @return 武将名，最近用过的排前面
      */
-    @Select("SELECT hero FROM jiang_chi_record GROUP BY hero ORDER BY MAX(updated_at) DESC")
+    @Select("SELECT hero FROM sheng_lv_tong_ji_record GROUP BY hero ORDER BY MAX(updated_at) DESC")
     List<String> listHeroes();
 }

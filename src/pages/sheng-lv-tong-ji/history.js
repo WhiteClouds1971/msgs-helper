@@ -4,7 +4,7 @@
  * 为什么这份清单留在前端：后端那张表只存「一个武将在一个将池下的累计胜败场」，
  * 记一局就是某一列 +1，没有逐局的流水，也就谈不上「撤回哪一局」。
  * 所以「刚记了什么」由页面自己记着 —— 撤回时按这条记录把那一列 -1
- * （接口见 @/api/jiang-chi 的 undoRecord），撤完再把这条从历史里抹掉。
+ * （接口见 @/api/sheng-lv-tong-ji 的 undoRecord），撤完再把这条从历史里抹掉。
  *
  * 四条约定：
  *   · <b>只记能撤回的</b>：模式 / 将池 / 武将 / 身份 / 对局结果齐全的那几条。
@@ -149,11 +149,11 @@ export function entryPoolLabel(entry) {
  */
 export function useRecordHistory() {
   const ls = useLocalStorage();
-  ls.load(StorageKeys.JIANG_CHI_HISTORY, { entries: [] });
+  ls.load(StorageKeys.SHENG_LV_TONG_JI_HISTORY, { entries: [] });
 
   /** 这一个 key 下的数据；页面数据被清过就补一个空的回来 */
   function bucket() {
-    const key = StorageKeys.JIANG_CHI_HISTORY;
+    const key = StorageKeys.SHENG_LV_TONG_JI_HISTORY;
     if (!ls.cache[key]) ls.cache[key] = { entries: [] };
     return ls.cache[key];
   }

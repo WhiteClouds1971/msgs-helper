@@ -10,7 +10,7 @@
    * 两个字段都是选填：不填也能记一条。
    * 两个字段的值由页面持有（见 ../Index.vue 的 role / result），组件只负责画字段：
    * 各模式的身份/位置值域不同，换模式时页面会清空它们，不带过去。
-   * 行距由页面给（.jiang-chi__mode-form），组件自己不带样式。
+   * 行距由页面给（.sheng-lv-tong-ji__mode-form），组件自己不带样式。
    */
   const role = defineModel('role', { type: String, default: '' });
   const result = defineModel('result', { type: String, default: '' });

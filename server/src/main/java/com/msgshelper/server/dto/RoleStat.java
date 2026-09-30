@@ -5,7 +5,7 @@ package com.msgshelper.server.dto;
  *
  * <p>统计范围是<b>一个将池</b>（跨武将）：这个数是「这个将池里这个身份打得怎么样」，
  * 换个将池就是另一套数。将池本身不进参数 —— 一次请求就只算一个将池，
- * 前端按当前选中的那个来问（见 JiangChiRecordController#listRoleStats）。
+ * 前端按当前选中的那个来问（见 ShengLvTongJiRecordController#listRoleStats）。
  *
  * @param mode  模式，取前端 MODES 的 value：dou-di-zhu / jun-zheng / tuan-zhan
  * @param role  身份（斗地主、军争）或位置（团战），取前端各模式表单的 value
@@ -26,7 +26,7 @@ public record RoleStat(String mode, String role, long win, long lose, long games
         return new RoleStat(mode, role, win, lose, games, rate(win, games));
     }
 
-    /** 胜率（0~100，两位小数）：与导出的 {@code JiangChiStatRow} 用同一套四舍五入 */
+    /** 胜率（0~100，两位小数）：与导出的 {@code ShengLvTongJiStatRow} 用同一套四舍五入 */
     private static Double rate(long win, long games) {
         if (games <= 0) {
             return null;

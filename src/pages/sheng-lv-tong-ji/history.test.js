@@ -190,7 +190,7 @@ describe('useRecordHistory', () => {
     await new Promise(resolve => setTimeout(resolve, 0));
 
     const saved = JSON.parse(
-      localStorage.getItem(StorageKeys.JIANG_CHI_HISTORY)
+      localStorage.getItem(StorageKeys.SHENG_LV_TONG_JI_HISTORY)
     );
     expect(saved.entries).toHaveLength(1);
     expect(saved.entries[0].hero).toBe('关羽');

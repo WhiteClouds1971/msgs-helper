@@ -21,10 +21,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import com.msgshelper.server.entity.JiangChiRecord;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
 
 /** 模板填充：数据有没有落到对的行、对列，样式与表头有没有被冲掉 */
-class JiangChiExportServiceTest {
+class ShengLvTongJiExportServiceTest {
 
     /** 列表占位符 {.字段名} */
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\.([A-Za-z0-9]+)}");
@@ -36,12 +36,12 @@ class JiangChiExportServiceTest {
     private static final int COLUMNS = 39;
 
     /** 只测「模板 + 填充」这一段，用不着数据库，mapper 传 null */
-    private final JiangChiExportService service = new JiangChiExportService(null);
+    private final ShengLvTongJiExportService service = new ShengLvTongJiExportService(null);
 
     @Test
     @DisplayName("按模板填出一份报表：说明与表头原样，数据从第三行往下长")
     void fillsTemplateFromThirdRow() throws Exception {
-        JiangChiRecord guanyu = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord guanyu = newRecord("关羽", "jiang-chi-1");
         guanyu.setLandlordWin(1);
         guanyu.setLandlordLose(1);      // 地主 1 胜 1 负 → 50%，这一档 2 场（全场最高）
         guanyu.setFarmerLose(2);        // 农民 0 胜 2 负 → 0%
@@ -49,8 +49,8 @@ class JiangChiExportServiceTest {
         guanyu.setUpdatedAt(LocalDateTime.of(2026, 9, 16, 17, 13, 45));
 
         byte[] xlsx = service.fillTemplate(List.of(
-                new JiangChiStatRow(guanyu).toMap(),
-                new JiangChiStatRow(newRecord("张飞", "jiang-chi-2")).toMap()));
+                new ShengLvTongJiStatRow(guanyu).toMap(),
+                new ShengLvTongJiStatRow(newRecord("张飞", "jiang-chi-2")).toMap()));
 
         try (Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(xlsx))) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -111,7 +111,7 @@ class JiangChiExportServiceTest {
     @Test
     @DisplayName("模板第三行的占位符，行数据里一个都不缺、一个都不多")
     void templateAndRowKeysMatch() throws Exception {
-        Map<String, Object> row = new JiangChiStatRow(newRecord("关羽", "jiang-chi-1")).toMap();
+        Map<String, Object> row = new ShengLvTongJiStatRow(newRecord("关羽", "jiang-chi-1")).toMap();
 
         int checked = 0;
         Matcher matcher = PLACEHOLDER.matcher(templatePlaceholders());
@@ -145,7 +145,7 @@ class JiangChiExportServiceTest {
 
     /** 模板第三行（列表行）所有格子拼起来的文字 */
     private static String templatePlaceholders() throws Exception {
-        try (InputStream template = new ClassPathResource(JiangChiExportService.TEMPLATE).getInputStream();
+        try (InputStream template = new ClassPathResource(ShengLvTongJiExportService.TEMPLATE).getInputStream();
              Workbook workbook = WorkbookFactory.create(template)) {
             Row row = workbook.getSheetAt(0).getRow(2);
             StringBuilder text = new StringBuilder();
@@ -164,8 +164,8 @@ class JiangChiExportServiceTest {
         return sheet.getRow(rowIndex).getCell(columnIndex).getNumericCellValue();
     }
 
-    private static JiangChiRecord newRecord(String hero, String pool) {
-        JiangChiRecord record = new JiangChiRecord();
+    private static ShengLvTongJiRecord newRecord(String hero, String pool) {
+        ShengLvTongJiRecord record = new ShengLvTongJiRecord();
         record.setHero(hero);
         record.setPool(pool);
         return record;

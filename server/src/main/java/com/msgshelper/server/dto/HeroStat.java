@@ -27,7 +27,7 @@ public record HeroStat(String hero, long win, long lose, long games, Double rate
         return new HeroStat(hero, win, lose, games, rate(win, games));
     }
 
-    /** 胜率（0~100，两位小数）：与 {@link RoleStat}、导出的 JiangChiStatRow 同一套四舍五入 */
+    /** 胜率（0~100，两位小数）：与 {@link RoleStat}、导出的 ShengLvTongJiStatRow 同一套四舍五入 */
     private static Double rate(long win, long games) {
         if (games <= 0) {
             return null;

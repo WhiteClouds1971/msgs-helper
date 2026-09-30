@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { formatRate, roleHints } from './rates.js';
 
 /**
- * 一份后端汇总（口径见 server 的 JiangChiRoleStatService）：
+ * 一份后端汇总（口径见 server 的 ShengLvTongJiRoleStatService）：
  * 斗地主 12 局 —— 地主 7 胜 5 负；一局两个农民，故农民一栏合计 10 胜 14 负。
  * 每个身份各用各的场数当分母，所以农民算的是 10 / 24。
  * 团战那个位置一场没打（0 场），胜率给的是 null。

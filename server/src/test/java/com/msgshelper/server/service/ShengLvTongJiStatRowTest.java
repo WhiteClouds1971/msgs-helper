@@ -8,10 +8,10 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.msgshelper.server.entity.JiangChiRecord;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
 
 /** 导出报表每一行的算法：最高胜率总场数、各身份胜率、胜率最高 / 最低身份 */
-class JiangChiStatRowTest {
+class ShengLvTongJiStatRowTest {
 
     @Test
     @DisplayName("将池写成中文名；没登记过的将池原样带出去")
@@ -24,7 +24,7 @@ class JiangChiStatRowTest {
     @Test
     @DisplayName("最高胜率总场数 = 胜率最高那一档自己的场数，不是所有身份加起来")
     void bestRoleTotalCountsOnlyTheTopRole() {
-        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
         record.setLandlordWin(3);               // 地主 3 胜 0 负 → 100%，这一档 3 场
         record.setFarmerWin(1);
         record.setFarmerLose(1);                // 农民 1 胜 1 负 → 50%，这一档 2 场
@@ -41,7 +41,7 @@ class JiangChiStatRowTest {
     @Test
     @DisplayName("最高胜率总场数跟着胜率走，不跟着场次多走")
     void bestRoleTotalFollowsRateNotVolume() {
-        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
         record.setLandlordWin(5);
         record.setLandlordLose(5);              // 地主 10 场、50%
         record.setFarmerWin(2);                 // 农民 2 场、100%
@@ -54,7 +54,7 @@ class JiangChiStatRowTest {
     @Test
     @DisplayName("胜率 = 胜场 /（胜场 + 败场），保留两位小数")
     void rateIsWinOverPlayed() {
-        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
         record.setLandlordWin(2);
         record.setLandlordLose(1);
 
@@ -68,7 +68,7 @@ class JiangChiStatRowTest {
     @Test
     @DisplayName("只打过一种身份时：它既是最高也是最低")
     void bestAndWorstWithOneRole() {
-        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
         record.setLandlordWin(2);
 
         Map<String, Object> row = row(record);
@@ -81,7 +81,7 @@ class JiangChiStatRowTest {
     @Test
     @DisplayName("没打过的身份不参与最高 / 最低，胜率一格留空")
     void unplayedRolesStayOut() {
-        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
         record.setLandlordWin(1);
         record.setLandlordLose(1);
         record.setFarmerLose(2);
@@ -111,7 +111,7 @@ class JiangChiStatRowTest {
     @Test
     @DisplayName("是否在将池中：在池写「是」，历史将池写「否」")
     void inPoolIsWrittenAsYesOrNo() {
-        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
         // 列是 NOT NULL DEFAULT 0：还没落库的对象（null）按 0 算，与库里默认值一致
         assertThat(row(record).get("inPool")).isEqualTo("否");
 
@@ -125,7 +125,7 @@ class JiangChiStatRowTest {
     @Test
     @DisplayName("最后更新时间：写成 yyyy-MM-dd HH:mm，没更新过就留空")
     void updatedAtIsFormattedToMinute() {
-        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
         record.setUpdatedAt(LocalDateTime.of(2026, 9, 16, 17, 13, 45));
 
         // 秒不进报表：一局打完记的是日期与分钟，秒既没人看又白占一列宽度
@@ -136,7 +136,7 @@ class JiangChiStatRowTest {
     @Test
     @DisplayName("胜率并列：取 RoleCounter 顺序靠前的那个（每次导出结果一致）")
     void tieKeepsTheEarlierRole() {
-        JiangChiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
         record.setLandlordWin(1);
         record.setLandlordLose(1);
         record.setFarmerWin(3);
@@ -150,14 +150,14 @@ class JiangChiStatRowTest {
     }
 
     /** 只填用得上的那几档，其余字段留 null —— RoleCounter 按 0 算（列本身 NOT NULL） */
-    private static JiangChiRecord newRecord(String hero, String pool) {
-        JiangChiRecord record = new JiangChiRecord();
+    private static ShengLvTongJiRecord newRecord(String hero, String pool) {
+        ShengLvTongJiRecord record = new ShengLvTongJiRecord();
         record.setHero(hero);
         record.setPool(pool);
         return record;
     }
 
-    private static Map<String, Object> row(JiangChiRecord record) {
-        return new JiangChiStatRow(record).toMap();
+    private static Map<String, Object> row(ShengLvTongJiRecord record) {
+        return new ShengLvTongJiStatRow(record).toMap();
     }
 }

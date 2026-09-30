@@ -8,16 +8,16 @@ import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.msgshelper.server.common.BizException;
-import com.msgshelper.server.dto.JiangChiRecordRequest;
-import com.msgshelper.server.entity.JiangChiRecord;
-import com.msgshelper.server.mapper.JiangChiRecordMapper;
+import com.msgshelper.server.dto.ShengLvTongJiRecordRequest;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
+import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 
 @Service
-public class JiangChiRecordService {
+public class ShengLvTongJiRecordService {
 
-    private final JiangChiRecordMapper mapper;
+    private final ShengLvTongJiRecordMapper mapper;
 
-    public JiangChiRecordService(JiangChiRecordMapper mapper) {
+    public ShengLvTongJiRecordService(ShengLvTongJiRecordMapper mapper) {
         this.mapper = mapper;
     }
 
@@ -39,7 +39,7 @@ public class JiangChiRecordService {
      * @throws BizException 必填项为空，或身份 / 对局结果只给了一个，或模式与身份对不上
      */
     @Transactional
-    public JiangChiRecord record(JiangChiRecordRequest request) {
+    public ShengLvTongJiRecord record(ShengLvTongJiRecordRequest request) {
         String mode = requireText(request.mode(), "模式");
         String pool = requireText(request.pool(), "将池");
         String hero = requireText(request.hero(), "武将");
@@ -58,9 +58,9 @@ public class JiangChiRecordService {
             mapper.increaseCounter(pool, hero, RoleCounter.of(mode, role).columnOf(result));
         }
 
-        return mapper.selectOne(new LambdaQueryWrapper<JiangChiRecord>()
-                .eq(JiangChiRecord::getPool, pool)
-                .eq(JiangChiRecord::getHero, hero));
+        return mapper.selectOne(new LambdaQueryWrapper<ShengLvTongJiRecord>()
+                .eq(ShengLvTongJiRecord::getPool, pool)
+                .eq(ShengLvTongJiRecord::getHero, hero));
     }
 
     /**
@@ -68,7 +68,7 @@ public class JiangChiRecordService {
      *
      * <p>与 {@code record} 的差别只有两处，都是「撤回」这件事本身要求的：
      * <ol>
-     *   <li>最后一步从 +1 变成 -1（见 {@code JiangChiRecordMapper#decreaseCounter}）；</li>
+     *   <li>最后一步从 +1 变成 -1（见 {@code ShengLvTongJiRecordMapper#decreaseCounter}）；</li>
      *   <li>不碰 (将池, 武将) 那条的归属 —— 既不 {@code ensureExists} 也不 {@code markInPool}。
      *       撤回的是一条<b>历史</b>记录，而武将现在待在哪个池子里是之后可能又改过的事，
      *       按历史把归属改回去等于悄悄撤销用户后来的操作。</li>
@@ -81,7 +81,7 @@ public class JiangChiRecordService {
      * @throws BizException 必填项为空，或模式与身份对不上，或结果不是 win / lose
      */
     @Transactional
-    public JiangChiRecord undo(JiangChiRecordRequest request) {
+    public ShengLvTongJiRecord undo(ShengLvTongJiRecordRequest request) {
         String mode = requireText(request.mode(), "模式");
         String pool = requireText(request.pool(), "将池");
         String hero = requireText(request.hero(), "武将");
@@ -90,9 +90,9 @@ public class JiangChiRecordService {
 
         mapper.decreaseCounter(pool, hero, RoleCounter.of(mode, role).columnOf(result));
 
-        return mapper.selectOne(new LambdaQueryWrapper<JiangChiRecord>()
-                .eq(JiangChiRecord::getPool, pool)
-                .eq(JiangChiRecord::getHero, hero));
+        return mapper.selectOne(new LambdaQueryWrapper<ShengLvTongJiRecord>()
+                .eq(ShengLvTongJiRecord::getPool, pool)
+                .eq(ShengLvTongJiRecord::getHero, hero));
     }
 
     /**

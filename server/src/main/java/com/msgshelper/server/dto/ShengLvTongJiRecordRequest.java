@@ -9,5 +9,5 @@ package com.msgshelper.server.dto;
  * @param role   身份（斗地主、军争）或位置（团战），取前端各模式表单的 value；可不填
  * @param result 对局结果：win / lose；可不填
  */
-public record JiangChiRecordRequest(String mode, String pool, String hero, String role, String result) {
+public record ShengLvTongJiRecordRequest(String mode, String pool, String hero, String role, String result) {
 }

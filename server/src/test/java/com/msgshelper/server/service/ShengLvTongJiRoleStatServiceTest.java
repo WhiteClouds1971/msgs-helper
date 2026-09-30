@@ -17,21 +17,21 @@ import org.junit.jupiter.api.Test;
 
 import com.msgshelper.server.common.BizException;
 import com.msgshelper.server.dto.RoleStat;
-import com.msgshelper.server.mapper.JiangChiRecordMapper;
+import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 
 /**
  * 身份（位置）胜率：统计范围是一个将池，口径是「该身份的胜场 ÷ 该身份自己的场数」。
  *
  * <p>不起数据库：汇总 SQL 的结果由 mock 直接喂进来（那句 SQL 本身由
- * {@link com.msgshelper.server.JiangChiRoleStatEndpointTest} 走真实链路验）。
+ * {@link com.msgshelper.server.ShengLvTongJiRoleStatEndpointTest} 走真实链路验）。
  */
-class JiangChiRoleStatServiceTest {
+class ShengLvTongJiRoleStatServiceTest {
 
     /** 测试用的将池 —— 值本身不参与算法，只验它原样传给了汇总 SQL */
     private static final String POOL = "jiang-chi-1";
 
-    private final JiangChiRecordMapper mapper = mock(JiangChiRecordMapper.class);
-    private final JiangChiRoleStatService service = new JiangChiRoleStatService(mapper);
+    private final ShengLvTongJiRecordMapper mapper = mock(ShengLvTongJiRecordMapper.class);
+    private final ShengLvTongJiRoleStatService service = new ShengLvTongJiRoleStatService(mapper);
 
     @Test
     @DisplayName("斗地主：地主与农民各用各的场数当分母，农民不拿地主的场数除")

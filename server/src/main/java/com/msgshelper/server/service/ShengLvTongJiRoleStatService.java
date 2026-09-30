@@ -9,7 +9,7 @@ import org.springframework.util.StringUtils;
 
 import com.msgshelper.server.common.BizException;
 import com.msgshelper.server.dto.RoleStat;
-import com.msgshelper.server.mapper.JiangChiRecordMapper;
+import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 
 /**
  * 身份（位置）胜率 —— 前端「身份 / 位置」选项后面那个百分比的数据源。
@@ -27,15 +27,15 @@ import com.msgshelper.server.mapper.JiangChiRecordMapper;
  *
  * <p><b>这是历史口径</b>：这个将池下记过的对局全都算 —— 换过将池的武将留在这里的战绩
  * 也照样计入，<b>不</b>按 {@code in_pool} 过滤。要「现在还待在这个池子里的武将分别打得怎么样」
- * 是另一回事，见 {@link JiangChiHeroStatService}（那个按 {@code in_pool = 1} 过滤）。
+ * 是另一回事，见 {@link ShengLvTongJiHeroStatService}（那个按 {@code in_pool = 1} 过滤）。
  * 两个数对不上是正常的，别去「对齐」它们。
  */
 @Service
-public class JiangChiRoleStatService {
+public class ShengLvTongJiRoleStatService {
 
-    private final JiangChiRecordMapper mapper;
+    private final ShengLvTongJiRecordMapper mapper;
 
-    public JiangChiRoleStatService(JiangChiRecordMapper mapper) {
+    public ShengLvTongJiRoleStatService(ShengLvTongJiRecordMapper mapper) {
         this.mapper = mapper;
     }
 

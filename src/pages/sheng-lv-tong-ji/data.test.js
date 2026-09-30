@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 // 后端名单的桩：默认成功，个别用例先让它失败一次
 const { listHeroes } = vi.hoisted(() => ({ listHeroes: vi.fn() }));
-vi.mock('@/api/jiang-chi', () => ({ listHeroes }));
+vi.mock('@/api/sheng-lv-tong-ji', () => ({ listHeroes }));
 
 import { addHeroToCache, loadHeroes, searchHeroes } from './data.js';
 

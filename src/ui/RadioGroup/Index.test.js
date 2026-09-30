@@ -178,9 +178,9 @@ describe('RadioGroup', () => {
   it('外部传入的 class 会落到根元素上，便于页面挂布局类', () => {
     const wrapper = mountRadioGroup(
       {},
-      { attrs: { class: 'jiang-chi__role' } }
+      { attrs: { class: 'sheng-lv-tong-ji__role' } }
     );
 
-    expect(wrapper.classes()).toContain('jiang-chi__role');
+    expect(wrapper.classes()).toContain('sheng-lv-tong-ji__role');
   });
 });

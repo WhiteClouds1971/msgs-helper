@@ -20,8 +20,8 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.msgshelper.server.entity.JiangChiRecord;
-import com.msgshelper.server.mapper.JiangChiRecordMapper;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
+import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 import com.msgshelper.server.service.RoleCounter;
 
 /**
@@ -36,7 +36,7 @@ import com.msgshelper.server.service.RoleCounter;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-class JiangChiRoleStatEndpointTest {
+class ShengLvTongJiRoleStatEndpointTest {
 
     /** 胜率保留两位小数（与导出报表同一套四舍五入） */
     private static final double RATE_SCALE = 10000.0;
@@ -48,10 +48,10 @@ class JiangChiRoleStatEndpointTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JiangChiRecordMapper mapper;
+    private ShengLvTongJiRecordMapper mapper;
 
     @Test
-    @DisplayName("GET /jiang-chi/role-stats?pool=… 只算这个将池，每个身份的胜率各用各的场数当分母")
+    @DisplayName("GET /sheng-lv-tong-ji/role-stats?pool=… 只算这个将池，每个身份的胜率各用各的场数当分母")
     void listsRoleRatesOfPool() throws Exception {
         Map<String, Map<RoleCounter, long[]>> expected = sumByHandByPool();
         assertThat(expected).isNotEmpty();
@@ -66,7 +66,7 @@ class JiangChiRoleStatEndpointTest {
     @Test
     @DisplayName("不给将池：走统一响应体的业务失败（HTTP 200 + code != 0），不是 500")
     void poolIsRequired() throws Exception {
-        MvcResult result = mockMvc.perform(get("/jiang-chi/role-stats"))
+        MvcResult result = mockMvc.perform(get("/sheng-lv-tong-ji/role-stats"))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -112,7 +112,7 @@ class JiangChiRoleStatEndpointTest {
     }
 
     private JsonNode fetch(String pool) throws Exception {
-        MvcResult result = mockMvc.perform(get("/jiang-chi/role-stats").param("pool", pool))
+        MvcResult result = mockMvc.perform(get("/sheng-lv-tong-ji/role-stats").param("pool", pool))
                 .andExpect(status().isOk())
                 .andReturn();
         return new ObjectMapper()
@@ -123,7 +123,7 @@ class JiangChiRoleStatEndpointTest {
     /** 期望值：记录表全拉下来，按 {@link RoleCounter} 的两列在 Java 里自己按将池加一遍 */
     private Map<String, Map<RoleCounter, long[]>> sumByHandByPool() {
         Map<String, Map<RoleCounter, long[]>> byPool = new HashMap<>();
-        for (JiangChiRecord record : mapper.selectList(null)) {
+        for (ShengLvTongJiRecord record : mapper.selectList(null)) {
             Map<RoleCounter, long[]> sums =
                     byPool.computeIfAbsent(record.getPool(), pool -> emptySums());
             for (RoleCounter counter : RoleCounter.values()) {

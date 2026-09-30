@@ -16,8 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.msgshelper.server.entity.JiangChiRecord;
-import com.msgshelper.server.mapper.JiangChiRecordMapper;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
+import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 
 /**
  * 走真实链路记一局 / 只登记将池：HTTP → Controller → Service → 库。
@@ -31,7 +31,7 @@ import com.msgshelper.server.mapper.JiangChiRecordMapper;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class JiangChiRecordInPoolEndpointTest {
+class ShengLvTongJiRecordInPoolEndpointTest {
 
     /** 造出来的武将名 —— 库里本来不会有，跑完随事务回滚 */
     private static final String HERO = "单测武将-是否在将池";
@@ -49,7 +49,7 @@ class JiangChiRecordInPoolEndpointTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JiangChiRecordMapper mapper;
+    private ShengLvTongJiRecordMapper mapper;
 
     @Test
     @DisplayName("记一局：本次的将池标成「是」，别的将池清成「否」，老记录的最后更新时间不动")
@@ -95,7 +95,7 @@ class JiangChiRecordInPoolEndpointTest {
         mapper.ensureExists(OLD_POOL, HERO);
         mapper.markInPool(OLD_POOL, HERO);
 
-        JiangChiRecord backdated = new JiangChiRecord();
+        ShengLvTongJiRecord backdated = new ShengLvTongJiRecord();
         backdated.setId(recordOf(OLD_POOL).getId());
         backdated.setUpdatedAt(BACKDATED);
         mapper.updateById(backdated);
@@ -103,16 +103,16 @@ class JiangChiRecordInPoolEndpointTest {
 
     /** 发一条记录请求；请求体直接给 JSON 字面量，免得为一个 DTO 引 Jackson 序列化 */
     private void record(String body) throws Exception {
-        mockMvc.perform(post("/jiang-chi/records")
+        mockMvc.perform(post("/sheng-lv-tong-ji/records")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk());
     }
 
-    private JiangChiRecord recordOf(String pool) {
-        return mapper.selectOne(new LambdaQueryWrapper<JiangChiRecord>()
-                .eq(JiangChiRecord::getPool, pool)
-                .eq(JiangChiRecord::getHero, HERO));
+    private ShengLvTongJiRecord recordOf(String pool) {
+        return mapper.selectOne(new LambdaQueryWrapper<ShengLvTongJiRecord>()
+                .eq(ShengLvTongJiRecord::getPool, pool)
+                .eq(ShengLvTongJiRecord::getHero, HERO));
     }
 
     /** 这个将池下那条记录是不是标着「还在将池中」 */

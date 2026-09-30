@@ -2,7 +2,7 @@
  * 武将候选数据 —— 名单来自后端（记录表里出现过的武将），本地缓存 + 建索引后离线搜
  *
  * 四条约定：
- *   · 名单只有一份事实源：后端 GET /api/jiang-chi/heroes。没有写死的基础名单 ——
+ *   · 名单只有一份事实源：后端 GET /api/sheng-lv-tong-ji/heroes。没有写死的基础名单 ——
  *     表里有什么就是什么，记一局就自然多一个武将。
  *   · 拉成功一次就不再打网络（失败会退避重试，后端中途起来也能自己好），
  *     拉回来就把拼音索引建好（3000 条约 32ms，只付一次）。
@@ -19,7 +19,7 @@
  *
  * 组件侧（@/ui/SearchSelect）不用改一行：对外只有下面这三个函数。
  */
-import { listHeroes } from '@/api/jiang-chi';
+import { listHeroes } from '@/api/sheng-lv-tong-ji';
 import { convertChineseToPinyin } from '@/utils/pinyin';
 
 /**

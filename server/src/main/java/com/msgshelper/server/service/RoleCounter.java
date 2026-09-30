@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.msgshelper.server.common.BizException;
-import com.msgshelper.server.entity.JiangChiRecord;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
 
 /**
  * 「模式 + 身份/位置」→ 表里那一对胜/败场列 的对照表。
  *
- * <p>role 的取值就是前端各模式表单里的 value（见 src/pages/jiang-chi/components/*.vue），
+ * <p>role 的取值就是前端各模式表单里的 value（见 src/pages/sheng-lv-tong-ji/components/*.vue），
  * 三套身份/位置互不重复，所以 (mode, role) 能唯一定到一组列。
  *
- * <p><b>这里的 columnPrefix 会拼进 SQL</b>（见 JiangChiRecordMapper#increaseCounter），
+ * <p><b>这里的 columnPrefix 会拼进 SQL</b>（见 ShengLvTongJiRecordMapper#increaseCounter），
  * 所以列名只认本枚举，绝不接受请求里的任意字符串。
  *
  * <p>同一个 columnPrefix 还兼当导出报表的字段前缀（{@code {.xxxWin}} / {@code {.xxxLose}} /
- * {@code {.xxxRate}}，见 {@link JiangChiStatRow}）—— 报表的一列本来就是这个身份的一档战绩，
+ * {@code {.xxxRate}}，见 {@link ShengLvTongJiStatRow}）—— 报表的一列本来就是这个身份的一档战绩，
  * 再立一套对照只会多一处要同步的地方。
  *
  * <p>枚举顺序 = 报表里的列顺序 = 「胜率最高/最低」撞上并列时认谁：新增身份一律往后加，
@@ -27,47 +27,47 @@ public enum RoleCounter {
 
     /** 斗地主 · 地主 */
     LANDLORD("dou-di-zhu", "landlord", "landlord", "地主",
-            JiangChiRecord::getLandlordWin, JiangChiRecord::getLandlordLose),
+            ShengLvTongJiRecord::getLandlordWin, ShengLvTongJiRecord::getLandlordLose),
     /** 斗地主 · 农民 */
     FARMER("dou-di-zhu", "farmer", "farmer", "农民",
-            JiangChiRecord::getFarmerWin, JiangChiRecord::getFarmerLose),
+            ShengLvTongJiRecord::getFarmerWin, ShengLvTongJiRecord::getFarmerLose),
 
     /** 军争 · 主公 */
     LORD("jun-zheng", "lord", "lord", "主公",
-            JiangChiRecord::getLordWin, JiangChiRecord::getLordLose),
+            ShengLvTongJiRecord::getLordWin, ShengLvTongJiRecord::getLordLose),
     /** 军争 · 忠臣 */
     LOYALIST("jun-zheng", "loyalist", "loyalist", "忠臣",
-            JiangChiRecord::getLoyalistWin, JiangChiRecord::getLoyalistLose),
+            ShengLvTongJiRecord::getLoyalistWin, ShengLvTongJiRecord::getLoyalistLose),
     /** 军争 · 反贼 */
     REBEL("jun-zheng", "rebel", "rebel", "反贼",
-            JiangChiRecord::getRebelWin, JiangChiRecord::getRebelLose),
+            ShengLvTongJiRecord::getRebelWin, ShengLvTongJiRecord::getRebelLose),
     /** 军争 · 内奸 */
     TRAITOR("jun-zheng", "traitor", "traitor", "内奸",
-            JiangChiRecord::getTraitorWin, JiangChiRecord::getTraitorLose),
+            ShengLvTongJiRecord::getTraitorWin, ShengLvTongJiRecord::getTraitorLose),
 
     /** 团战 · 一号位 */
     SEAT1("tuan-zhan", "1", "seat1", "一号位",
-            JiangChiRecord::getSeat1Win, JiangChiRecord::getSeat1Lose),
+            ShengLvTongJiRecord::getSeat1Win, ShengLvTongJiRecord::getSeat1Lose),
     /** 团战 · 二号位 */
     SEAT2("tuan-zhan", "2", "seat2", "二号位",
-            JiangChiRecord::getSeat2Win, JiangChiRecord::getSeat2Lose),
+            ShengLvTongJiRecord::getSeat2Win, ShengLvTongJiRecord::getSeat2Lose),
     /** 团战 · 三号位 */
     SEAT3("tuan-zhan", "3", "seat3", "三号位",
-            JiangChiRecord::getSeat3Win, JiangChiRecord::getSeat3Lose),
+            ShengLvTongJiRecord::getSeat3Win, ShengLvTongJiRecord::getSeat3Lose),
     /** 团战 · 四号位 */
     SEAT4("tuan-zhan", "4", "seat4", "四号位",
-            JiangChiRecord::getSeat4Win, JiangChiRecord::getSeat4Lose);
+            ShengLvTongJiRecord::getSeat4Win, ShengLvTongJiRecord::getSeat4Lose);
 
     private final String mode;
     private final String role;
     private final String columnPrefix;
     private final String label;
-    private final Function<JiangChiRecord, Integer> winGetter;
-    private final Function<JiangChiRecord, Integer> loseGetter;
+    private final Function<ShengLvTongJiRecord, Integer> winGetter;
+    private final Function<ShengLvTongJiRecord, Integer> loseGetter;
 
     RoleCounter(String mode, String role, String columnPrefix, String label,
-                Function<JiangChiRecord, Integer> winGetter,
-                Function<JiangChiRecord, Integer> loseGetter) {
+                Function<ShengLvTongJiRecord, Integer> winGetter,
+                Function<ShengLvTongJiRecord, Integer> loseGetter) {
         this.mode = mode;
         this.role = role;
         this.columnPrefix = columnPrefix;
@@ -112,7 +112,7 @@ public enum RoleCounter {
     /**
      * 所有身份的列前缀（按枚举顺序）。
      *
-     * <p>给汇总接口拼列名用（见 {@link com.msgshelper.server.mapper.JiangChiRecordMapper#sumCounters}）——
+     * <p>给汇总接口拼列名用（见 {@link com.msgshelper.server.mapper.ShengLvTongJiRecordMapper#sumCounters}）——
      * 加了新身份，那边不用跟着改一行。
      */
     public static List<String> columnPrefixes() {
@@ -135,12 +135,12 @@ public enum RoleCounter {
     }
 
     /** 该身份（位置）的胜场；列上为 null 按 0 算（列本身 NOT NULL，只有手搓的实体才会是 null） */
-    public int win(JiangChiRecord record) {
+    public int win(ShengLvTongJiRecord record) {
         return orZero(winGetter.apply(record));
     }
 
     /** 该身份（位置）的败场，同上 */
-    public int lose(JiangChiRecord record) {
+    public int lose(ShengLvTongJiRecord record) {
         return orZero(loseGetter.apply(record));
     }
 

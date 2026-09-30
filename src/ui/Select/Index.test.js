@@ -67,7 +67,7 @@ describe('Select', () => {
   });
 
   it('外部传入的 class 会落到根元素上，便于页面挂布局类', () => {
-    const wrapper = mountSelect({}, { attrs: { class: 'jiang-chi__mode' } });
-    expect(wrapper.classes()).toContain('jiang-chi__mode');
+    const wrapper = mountSelect({}, { attrs: { class: 'sheng-lv-tong-ji__mode' } });
+    expect(wrapper.classes()).toContain('sheng-lv-tong-ji__mode');
   });
 });

@@ -5,12 +5,12 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.msgshelper.server.entity.JiangChiRecord;
+import com.msgshelper.server.entity.ShengLvTongJiRecord;
 
 /**
  * 导出报表的一行 —— 记录表的一行，加上按身份（位置）算出来的胜率与几项汇总。
  *
- * <p>给 {@link JiangChiExportService} 填 Excel 模板用，{@link #toMap()} 的 key 与模板第三行
+ * <p>给 {@link ShengLvTongJiExportService} 填 Excel 模板用，{@link #toMap()} 的 key 与模板第三行
  * 的占位符（{@code {.hero}}、{@code {.landlordWin}} …）一一对应，改字段名两边都要改。
  *
  * <p>三条算法规矩（模板第一行那句升降级规则就靠它们）：
@@ -29,12 +29,12 @@ import com.msgshelper.server.entity.JiangChiRecord;
  *       同一份数据每次导出结果都一样。</li>
  * </ul>
  */
-public final class JiangChiStatRow {
+public final class ShengLvTongJiStatRow {
 
     /** 「最后更新时间」一列在报表里的写法：见类注释 */
     private static final DateTimeFormatter UPDATED_AT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    private final JiangChiRecord record;
+    private final ShengLvTongJiRecord record;
 
     /** 各身份（位置）的胜场 */
     private final Map<RoleCounter, Integer> wins = new EnumMap<>(RoleCounter.class);
@@ -52,7 +52,7 @@ public final class JiangChiStatRow {
     private final RoleCounter worst;
     private final Double worstRate;
 
-    public JiangChiStatRow(JiangChiRecord record) {
+    public ShengLvTongJiStatRow(ShengLvTongJiRecord record) {
         this.record = record;
 
         RoleCounter top = null;

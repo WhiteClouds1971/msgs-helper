@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 
 import com.msgshelper.server.common.BizException;
 import com.msgshelper.server.dto.HeroStat;
-import com.msgshelper.server.mapper.JiangChiRecordMapper;
+import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 
 /**
  * 武将胜率 —— 「某个将池 + 某个模式 + 某个身份（位置）下，各武将打得怎么样」。
@@ -21,18 +21,18 @@ import com.msgshelper.server.mapper.JiangChiRecordMapper;
  * 少一个都答不出「这个身份下谁最能打」这个问题。
  *
  * <p>范围内<b>只留现在还待在这个将池里的武将</b>（{@code in_pool = 1}，见
- * {@link JiangChiRecordMapper#heroStats}）：换过池子的武将在旧池子里留下的是历史战绩，
+ * {@link ShengLvTongJiRecordMapper#heroStats}）：换过池子的武将在旧池子里留下的是历史战绩，
  * 不该拿来和新池子的现任比。
  *
  * <p>排序与截断都在 SQL 里：胜率高的在前，场数多的次之；一场没打的武将不进来
  * （0 场没有胜率可言）。默认<b>不截断</b> —— 口径已被将池与身份框住，条数最多就是该将池的武将数。
  */
 @Service
-public class JiangChiHeroStatService {
+public class ShengLvTongJiHeroStatService {
 
-    private final JiangChiRecordMapper mapper;
+    private final ShengLvTongJiRecordMapper mapper;
 
-    public JiangChiHeroStatService(JiangChiRecordMapper mapper) {
+    public ShengLvTongJiHeroStatService(ShengLvTongJiRecordMapper mapper) {
         this.mapper = mapper;
     }
 

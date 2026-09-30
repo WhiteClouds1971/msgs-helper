@@ -1,7 +1,7 @@
 /**
  * 身份（位置）胜率 —— 把后端汇总的胜率整理成「身份选项后面那句话」
  *
- * 数据只有一份事实源：后端 GET /api/jiang-chi/role-stats（见 @/api/jiang-chi 的 listRoleStats）
+ * 数据只有一份事实源：后端 GET /api/sheng-lv-tong-ji/role-stats（见 @/api/sheng-lv-tong-ji 的 listRoleStats）
  * 按<b>将池</b>问，一次把该将池下三个模式的汇总都回过来 —— 条数是死的（模式 × 身份），
  * 切模式不用再请求，切将池才要（页面按池拉取见 ../Index.vue 的 refreshRoleStats）。
  * 这里只做两件事：挑出当前模式的、把数字写成给人看的百分比文字。
