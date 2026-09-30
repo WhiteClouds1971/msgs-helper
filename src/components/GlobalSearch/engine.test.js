@@ -24,13 +24,21 @@ describe('全局搜索 —— 合并文档按节认领', () => {
     expect(docRow('洞烛先机', '洞烛先机')?.route).toBe('/jsrg/guo-jia')
   })
 
-  it('斗地主模式专属武将技能同样按节认领到本页', () => {
-    const row = docRow('破军', '破军')
+  it('斗地主页的替换武将并入勘误后，那一节认领到勘误页', () => {
+    const row = docRow('将徐盛替换为界徐盛', '将徐盛替换为界徐盛')
 
-    expect(row?.route).toBe('/mode/dou-di-zhu')
-    expect(row?.title).toBe('斗地主')
+    expect(row?.route).toBe('/tool/kan-wu')
+    expect(row?.title).toBe('勘误')
     expect(row?.section).toBe('界徐盛')
     expect(row?.disabled).toBe(false)
+  })
+
+  it('勘误页自己的条目同样认领到勘误页', () => {
+    const row = docRow('自己不能交给自己牌', '自己不能交给自己牌')
+
+    expect(row?.route).toBe('/tool/kan-wu')
+    expect(row?.title).toBe('勘误')
+    expect(row?.section).toBe('将星徐氏')
   })
 
   it('结果行标题取认领的菜单名，而不是退化成文件名', () => {

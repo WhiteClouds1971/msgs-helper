@@ -32,7 +32,14 @@ const ROLE_STATS = [
   { mode: 'dou-di-zhu', role: 'landlord', win: 3, lose: 2, games: 5, rate: 60 },
   { mode: 'dou-di-zhu', role: 'farmer', win: 1, lose: 1, games: 2, rate: 50 },
   { mode: 'jun-zheng', role: 'lord', win: 1, lose: 1, games: 2, rate: 50 },
-  { mode: 'jun-zheng', role: 'loyalist', win: 0, lose: 0, games: 0, rate: null },
+  {
+    mode: 'jun-zheng',
+    role: 'loyalist',
+    win: 0,
+    lose: 0,
+    games: 0,
+    rate: null,
+  },
 ];
 
 /** 一份榜单（后端已按胜率排好） */
@@ -79,9 +86,9 @@ describe('胜率榜页', () => {
       '地主',
       '农民',
     ]);
-    expect(
-      wrapper.findAll('.tabs__tab')[0].attributes('data-state')
-    ).toBe('active');
+    expect(wrapper.findAll('.tabs__tab')[0].attributes('data-state')).toBe(
+      'active'
+    );
 
     // 历史胜率按将池问一次；武将战绩按 (将池, 模式, 身份) 问，不带 limit（要全部）
     expect(api.listRoleStats).toHaveBeenCalledWith('jiang-chi-1');
@@ -97,25 +104,19 @@ describe('胜率榜页', () => {
     const wrapper = mountPage();
     await flushPromises();
 
-    const rate = wrapper.find('.sheng-lv-bang__rate').text().replace(/\s+/g, '');
+    const rate = wrapper
+      .find('.sheng-lv-bang__rate')
+      .text()
+      .replace(/\s+/g, '');
     // 将池名 / 模式 / 身份 / 胜率 / 原始战绩都在这一句里
     expect(rate).toContain('将池1');
     expect(rate).toContain('斗地主');
     expect(rate).toContain('地主');
     expect(rate).toContain('60.00%');
-    expect(rate).toContain('3胜2负，共5场');
+    // 「将次」不是「场」：斗地主一局有两个农民，这个口径按身份各算各的
+    expect(rate).toContain('3胜2负，共5将次');
     // 历史口径：这个数把已离开该将池的武将也算在内（与表内只列在池武将不同），界面上写明
     expect(rate).toContain('含已离开该将池的武将');
-  });
-
-  it('表下脚注把「只列在池武将」限定在这张表上，不牵连上面那行历史胜率', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
-    const wrapper = mountPage();
-    await flushPromises();
-
-    const note = wrapper.find('.sheng-lv-bang__note').text().replace(/\s+/g, '');
-    expect(note).toContain('表内只列目前仍在将池中的武将');
-    expect(note).toContain('总场数=该武将在该身份下的胜场+败场');
   });
 
   it('该身份一场没打过时直说没有历史胜率，不画一个假的 0%', async () => {
@@ -235,6 +236,66 @@ describe('胜率榜页', () => {
       mode: 'jun-zheng',
       role: 'lord',
     });
+  });
+
+  it('斗地主：模式规则压在表下，一条一行，「条件 → 结论」', async () => {
+    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    const wrapper = mountPage();
+    await flushPromises();
+
+    const rules = wrapper.findAll('.sheng-lv-bang__rule');
+    expect(rules).toHaveLength(2);
+    expect(
+      rules.map(rule => rule.find('.sheng-lv-bang__rule-when').text())
+    ).toEqual(['地主胜率 > 60%', '地主胜率 < 40%']);
+    expect(rules.map(rule => rule.text().replace(/\s+/g, ''))).toEqual([
+      '地主胜率>60%→移除地主专属技能【强易】',
+      '地主胜率<40%→新增地主专属技能【殷富】',
+    ]);
+
+    // 不写标题、不另起一块：就压在表格底下那一点地方
+    const notes = wrapper.find('.sheng-lv-bang__notes');
+    expect(notes.element.previousElementSibling.className).toContain('table');
+  });
+
+  it('军争：换成主公那一条（同一模式下四个身份看到的是同一份）', async () => {
+    presetPageData({ mode: 'jun-zheng', pool: 'jiang-chi-1' });
+    const wrapper = mountPage();
+    await flushPromises();
+
+    const rules = wrapper.findAll('.sheng-lv-bang__rule');
+    expect(rules).toHaveLength(1);
+    expect(rules[0].find('.sheng-lv-bang__rule-when').text()).toBe(
+      '主公胜率 < 40%'
+    );
+    expect(rules[0].text().replace(/\s+/g, '')).toBe(
+      '主公胜率<40%→主公从【飞扬】【跋扈】【强易】【殷富】中随机获得一个专属技能；主公专属技能不受武将技能影响'
+    );
+
+    // 切页签不换说明：规则认的是模式，不认身份
+    api.listHeroStats.mockClear();
+    await wrapper.findAll('.tabs__tab')[1].trigger('mousedown');
+    await wrapper.findAll('.tabs__tab')[1].trigger('click');
+    await flushPromises();
+    expect(wrapper.findAll('.sheng-lv-bang__rule')).toHaveLength(1);
+  });
+
+  it('没有规则的模式：整块不画，连那点间距都不留', async () => {
+    presetPageData({ mode: 'tuan-zhan', pool: 'jiang-chi-1' });
+    const wrapper = mountPage();
+    await flushPromises();
+
+    expect(wrapper.find('.sheng-lv-bang__notes').exists()).toBe(false);
+    expect(wrapper.findAll('.sheng-lv-bang__rule')).toHaveLength(0);
+    // 页签与表格照常，说明没了也不影响别的
+    expect(wrapper.findAll('.tabs__tab')).toHaveLength(4);
+  });
+
+  it('没挑模式时同样没有规则那几行', async () => {
+    const wrapper = mountPage();
+    await flushPromises();
+
+    expect(wrapper.findAll('.sheng-lv-bang__rule')).toHaveLength(0);
   });
 
   it('榜单为空时说清楚是空，而不是留一张没有内容的表', async () => {

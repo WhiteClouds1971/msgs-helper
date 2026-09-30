@@ -15,6 +15,7 @@
     rolesOf,
   } from '@/pages/sheng-lv-tong-ji/modes.js';
   import { formatRate } from '@/pages/sheng-lv-tong-ji/rates.js';
+  import { modeNotesOf } from './modeNotes';
 
   /**
    * 胜率榜 —— 「这个将池 + 这个模式 + 这个身份（位置）下，各武将打得怎么样」
@@ -57,6 +58,13 @@
 
   const mode = pageField('mode');
   const pool = pageField('pool');
+
+  /* ── 模式说明 ──
+   本模式自己的规则（按胜率调整专属技能之类），文案见 ./modeNotes.js。
+
+   **只认模式、不认身份**：同一模式下四个身份看到的是同一份规则。
+   没有规则的模式（团战）拿到空数组 —— 模板据此一行不画，不留空位 */
+  const modeNotes = computed(() => modeNotesOf(mode.value));
 
   /* ── 身份（位置）页签 ──
    页签就是当前模式的全部身份 / 位置（斗地主两档、军争四档、团战四个座位） */
@@ -265,10 +273,24 @@
               </template>
             </Table>
 
-            <p class="sheng-lv-bang__note">
-              表内只列目前仍在将池中的武将；总场数 = 该武将在该身份下的胜场 +
-              败场，胜率 = 胜场 ÷ 总场数。
-            </p>
+            <!-- 表下这一小块说明：本模式的规则（按胜率调整专属技能之类，见 ./modeNotes.js），
+                 一行一句，不占上面看数据的地方。
+                 没有规则的模式（团战）拿到的是空列表 —— 整块不画，连那点间距都不留 -->
+            <div v-if="modeNotes.length" class="sheng-lv-bang__notes">
+              <p
+                v-for="note in modeNotes"
+                :key="note.condition"
+                class="sheng-lv-bang__rule"
+              >
+                <span class="sheng-lv-bang__rule-when">
+                  {{ note.condition }}
+                </span>
+                <span class="sheng-lv-bang__rule-arrow" aria-hidden="true">
+                  →
+                </span>
+                {{ note.effect }}
+              </p>
+            </div>
           </div>
         </template>
       </Tabs>
@@ -359,14 +381,39 @@
     margin-top: var(--space-3);
   }
 
-  /* 表格口径说明：垫在表下，比正文再退一档（定高，不参与伸缩） */
-  .sheng-lv-bang__note {
+  /* ── 表下说明 ──
+     本模式的规则（按胜率调整专属技能之类，见 ./modeNotes.js）：压在表下的一行行小字，
+     不画框、不写标题 —— 不占上面看数据的地方。
+     整块定高不参与伸缩：本页整页不滚，说明多了只会让表格矮一点，版式不跑 */
+  .sheng-lv-bang__notes {
+    display: flex;
     flex: none;
-    margin: var(--space-2) 0 0;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+  }
+
+  /* 一行一句：比正文退一档（定高，不参与伸缩） */
+  .sheng-lv-bang__rule {
+    margin: 0;
     font-size: var(--text-xs);
     line-height: var(--leading-relaxed);
     letter-spacing: 0.02em;
     color: var(--text-secondary);
+  }
+
+  /* 触发条件回到浓墨、半档字重：一行里先看见「什么时候」，再读「做什么」 */
+  .sheng-lv-bang__rule-when {
+    margin-right: var(--space-1);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+  }
+
+  /* 条件与结论之间那道金箭头：纯装饰（aria-hidden），所以可以用 --accent-gold ——
+     它在 Light 模式只有 3.0:1，设计系统只许它做装饰与描边，不做正文 */
+  .sheng-lv-bang__rule-arrow {
+    margin-right: var(--space-1);
+    color: var(--accent-gold);
   }
 
   /* 还没挑模式时的占位：居中、淡墨，不与下面的内容抢视线 */

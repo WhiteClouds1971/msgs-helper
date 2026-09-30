@@ -1,20 +1,40 @@
 <script setup>
+import { ref } from 'vue'
 import { usePageReady } from '@/composables/usePageReady'
+import { useKeywordHighlight } from '@/composables/useKeywordHighlight'
+import { extractMarkdownSection } from '@/utils/markdown'
 import ImageFigure from '@/ui/ImageFigure/Index.vue'
+import MdViewer from '@/ui/MdViewer/Index.vue'
+// 勘误正文随包发布：?raw 静态导入，无需请求、离线可用、改文件即热更
+import kanWuMd from '@/assets/md/kan-wu.md?raw'
 import xuShiUrl from '@/assets/images/tool/将星-徐氏-节义双全.webp'
+import jieXuShengUrl from '@/assets/images/tool/手杀-界徐盛.webp'
+import shenLuSuUrl from '@/assets/images/tool/手杀-神鲁肃.webp'
 
 /**
- * 勘误条目 —— 一处错处一条：图是被订正的那张牌，caption 是图下那行字。
+ * 勘误条目 —— 一处错处一条：图是被订正的那张牌，图下那行字取正文里自己那一节。
  *
- * 新增一条：图按约定转成 webp 放进 src/assets/images/tool/，往下面数组追加一条即可。
- * 图下那行字想被全局搜索搜到，得把它的叫法一并写进 menus.js 的 tags ——
- * 搜索只索引「菜单（名称/标签）」与「src/assets/md 里的正文」两处，页面里写死的文字不进索引。
+ * 版式与游戏牌各页一致：一张图挂自己那一节的正文（一节一条）。
+ * 新增一条：图按约定转成 webp 放进 src/assets/images/tool/，在 kan-wu.md 里加一节，
+ * 再往下面某个分类的数组里追加一条，并同步在 menus.js 的 docs 里认领这一节 ——
+ * 漏认领则搜得到、点不进。
  */
 const wuJiangErrata = [
   {
     src: xuShiUrl,
     alt: '将星 徐氏',
-    caption: '勘误 将星 徐氏',
+    info: extractMarkdownSection(kanWuMd, '将星徐氏'),
+  },
+  // 原斗地主页「模式专属武将技能」里的替换武将，整体并入本类
+  {
+    src: jieXuShengUrl,
+    alt: '界徐盛',
+    info: extractMarkdownSection(kanWuMd, '界徐盛'),
+  },
+  {
+    src: shenLuSuUrl,
+    alt: '神鲁肃',
+    info: extractMarkdownSection(kanWuMd, '神鲁肃'),
   },
 ]
 
@@ -29,10 +49,17 @@ const sections = [
 
 // 空白布局页面：无装饰、无教学导览、无持久化数据
 usePageReady()
+
+// 全局搜索跳转落地：按 URL 上的 keyword 在正文里滚动并高亮
+const pageRef = ref(null)
+useKeywordHighlight(pageRef)
 </script>
 
 <template>
-  <div class="kan-wu">
+  <div
+    ref="pageRef"
+    class="kan-wu"
+  >
     <h1 class="kan-wu__title">
       勘误
     </h1>
@@ -49,12 +76,13 @@ usePageReady()
       <template v-if="section.items.length">
         <ImageFigure
           v-for="item in section.items"
-          :key="item.caption"
+          :key="item.alt"
           class="kan-wu__figure"
           :src="item.src"
           :alt="item.alt"
-          :caption="item.caption"
-        />
+        >
+          <MdViewer :content="item.info" />
+        </ImageFigure>
       </template>
 
       <p
@@ -128,7 +156,7 @@ usePageReady()
   color: var(--text-secondary);
 }
 
-/* 一张牌一块：间距由页面给（ImageFigure 只管一张图） */
+/* 一条一块：间距由页面给（ImageFigure 只管一张图） */
 .kan-wu__figure + .kan-wu__figure {
   margin-top: var(--space-6);
 }

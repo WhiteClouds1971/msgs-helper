@@ -277,6 +277,16 @@
     transform-origin: top center;
   }
 
+  /* 层高：reka-ui 会把 content 上算出来的 z-index 抄到它套在外面的那个 popper 容器上
+     （见 PopperContent 的 contentZIndex），传送门整体浮多高全看这一条。
+     必须显式给一个正值，留给 auto 就会被页面上任何带正 z-index 的东西盖住 ——
+     比如 @/ui/Table 吸顶的表头（z-index: 1），下拉一展开就压在它下面。
+     取 --z-dropdown：高过页面内容（含表头），低过抽屉 / 弹窗 / 轻提示。
+     用 :deep 是因为 content 的根元素由 reka 渲染，直接写类名够不着（@/ui/Tooltip 同理） */
+  :deep(.select-field__content) {
+    z-index: var(--z-dropdown);
+  }
+
   /* 入场状态挂在 reka-ui 的 content 上：它才是带 data-state 的那个元素 */
   .select-field__content[data-state='open'] .select-field__panel {
     animation: select-content-in var(--duration-fast) var(--ease-enter) both;

@@ -94,10 +94,15 @@ const menus = [
     cover: { title: '勘误', subtitle: '拾遗订讹 正本清源' },
     themeColor: ThemeColor.EMBER,
     packageName: PackageName.TOOL,
-    // 补充检索标签（全局搜索用，也显示在结果行）：纠错的常见叫法 + 每条勘误的叫法。
-    // 图下那行字（如「勘误 将星 徐氏」）没有 md 正文可索引，就靠这里进搜索；
-    // 本页条目在页面数据里，加一条时同步往这里补一个叫法
+    // 补充检索标签（全局搜索用，也显示在结果行）：纠错的常见叫法
     tags: ['纠错'],
+    // 正文文件：src/assets/md/kan-wu.md（逐条一节）—— 本页按「武将 / 游戏牌」分两块画，
+    // 每块里的图各挂自己那一节，故按节认领（新增一条时别忘了在这里补一行）
+    docs: [
+      { id: 'kan-wu', heading: '将星徐氏' },
+      { id: 'kan-wu', heading: '界徐盛' },
+      { id: 'kan-wu', heading: '神鲁肃' },
+    ],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
@@ -113,12 +118,9 @@ const menus = [
     packageName: PackageName.MODE,
     // 补充检索标签（全局搜索用，也显示在结果行）
     tags: [],
-    // 正文文件：src/assets/md/dou-di-zhu.md（规则，整篇）+ dou-di-zhu-wu-jiang.md（模式专属武将技能，按节认领）
-    docs: [
-      'dou-di-zhu',
-      { id: 'dou-di-zhu-wu-jiang', heading: '界徐盛' },
-      { id: 'dou-di-zhu-wu-jiang', heading: '神鲁肃' },
-    ],
+    // 正文文件：src/assets/md/dou-di-zhu.md（规则，整篇）
+    // 模式专属武将技能（替换武将）已并入勘误页，本页在原处只留一条跳转链接
+    docs: ['dou-di-zhu'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
