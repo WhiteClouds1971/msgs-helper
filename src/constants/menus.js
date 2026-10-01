@@ -108,6 +108,24 @@ const menus = [
     orientation: 'vertical',
   },
   {
+    code: 'zhu-lu-zhong-yuan',
+    name: '逐鹿中原',
+    route: '/mode/zhu-lu-zhong-yuan',
+    component: () => import('@/pages/mode/ZhuLuZhongYuan/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
+    cover: { title: '逐鹿中原', subtitle: '暗置六将 以分定鼎' },
+    themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.MODE,
+    // 补充检索标签（全局搜索用，也显示在结果行）：本模式的核心机制与常见叫法
+    tags: ['暗将', '计分', '群雄'],
+    // 正文文件：src/assets/md/zhu-lu-zhong-yuan.md（规则，整篇）
+    // 模式专属武将技能（替换武将）与斗地主同例：已并入勘误页，本页在原处只留一条跳转链接
+    docs: ['zhu-lu-zhong-yuan'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
     code: 'dou-di-zhu',
     name: '斗地主',
     route: '/mode/dou-di-zhu',
