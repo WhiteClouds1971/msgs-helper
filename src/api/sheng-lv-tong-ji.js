@@ -8,7 +8,7 @@ import request from '@/utils/request';
  */
 
 /**
- * 记一局，或只登记武将所属将池
+ * 记一局，或只把武将登记进这个将池
  *
  * @param {object} payload
  * @param {string} payload.mode   模式：dou-di-zhu / jun-zheng / tuan-zhan
@@ -21,6 +21,9 @@ import request from '@/utils/request';
  *   都给   → 对应身份（位置）的胜场或败场 +1
  *   都不给 → 只登记并刷新 (将池, 武将) 这条的更新日期，胜败场不动
  *
+ * 两种情况都会把这一条标成「在池」，且只点这一条：该武将在别的将池下的记录一个都不动
+ * —— 将池之间互不排斥，同一个武将可以同时待在好几个池子里。
+ *
  * @returns {Promise<object>} 这条记录的最新全貌（各胜败场 + 创建 / 更新日期）；
  *   失败由 request 拦截器统一弹提示并 reject，这里不用再判 code
  */
@@ -32,9 +35,9 @@ export function createRecord(payload) {
  * 撤回一局 —— 把 {@link createRecord} 记下的那一场减回去
  *
  * 请求体与新增同形，但 role 与 result <b>必填</b>：撤回的是某一场对局，
- * 光有「武将 + 将池」减不掉任何东西（那种只登记归属的记录也不进撤回列表）。
+ * 光有「武将 + 将池」减不掉任何东西（只登记进池的那种记录也不进撤回列表）。
  * 后端把对应的胜场或败场 -1（见 ShengLvTongJiRecordService#undo），
- * 同样不碰武将的将池归属 —— 撤回历史战绩不该把用户后来换的池子改回去。
+ * 与新增不同：不碰「在池」标记 —— 撤回历史战绩不该顺手改掉武将的池子归属。
  *
  * @param {object} payload
  * @param {string} payload.mode   模式：dou-di-zhu / jun-zheng / tuan-zhan
@@ -48,6 +51,25 @@ export function createRecord(payload) {
  */
 export function undoRecord(payload) {
   return request.post('/sheng-lv-tong-ji/records/undo', payload);
+}
+
+/**
+ * 把武将移出某个将池 —— 把 (将池, 武将) 这条的「在池」置为否
+ *
+ * 与 createRecord 是两个方向：那个记一局 / 只登记就把武将点亮进这个池子，这个把它摘出去。
+ * 摘的是<b>归属</b>不是记录：这一池的战绩原样留着、历史胜率照旧算，只是它不再算这个池子的
+ * 在池武将（按 `in_pool = 1` 过滤的地方，如 listHeroStats，就不再列它）。
+ *
+ * 只动这一个池子：该武将在别的将池里的「在池」不受影响（将池之间互不排斥）。
+ * 本来就不在池时后端报业务失败，前端由 request 拦截器统一弹那句「本来就不在…」。
+ *
+ * @param {object} payload
+ * @param {string} payload.pool 将池
+ * @param {string} payload.hero 武将
+ * @returns {Promise<object>} 这条记录的最新全貌（inPool 已是 false）
+ */
+export function removeFromPool(payload) {
+  return request.post('/sheng-lv-tong-ji/records/out-of-pool', payload);
 }
 
 /**
@@ -70,7 +92,7 @@ export function listHeroes(options = {}) {
  * 于是选项上那个数是「这个将池里这个身份打得怎么样」。三个模式一次全给
  * （条数是死的：模式 × 身份），切模式不用再请求，切将池才要。
  *
- * <b>这是历史口径</b>：该将池下记过的对局全都算 —— 换过将池的武将留在这里的战绩也照样计入，
+ * <b>这是历史口径</b>：该将池下记过的对局全都算 —— 不在池的武将留在这里的战绩也照样计入，
  * <b>不</b>按 `in_pool` 过滤（与 `listHeroStats` 的范围不同，两者数字对不上是正常的）。
  * 胜率在后端算好（该身份的胜场 ÷ 该身份自己的场数，各身份各算各的，见 ShengLvTongJiRoleStatService），
  * 前端只管把 rate 画出来。
@@ -82,7 +104,10 @@ export function listHeroes(options = {}) {
  *   （胜 + 负），该身份在这个将池下一场没打过时为 0，rate 随之是 null
  */
 export function listRoleStats(pool, options = {}) {
-  return request.get('/sheng-lv-tong-ji/role-stats', { ...options, params: { pool } });
+  return request.get('/sheng-lv-tong-ji/role-stats', {
+    ...options,
+    params: { pool },
+  });
 }
 
 /**
@@ -93,8 +118,8 @@ export function listRoleStats(pool, options = {}) {
  * 它自己在这个身份下的场数（胜 + 败），各武将各算各的，不借别人的场数当分母。
  * 三样都给才问得出数：换将池换一套数据，换模式换一套身份，换身份换一套分子分母。
  *
- * 范围内<b>只留现在还待在这个将池里的武将</b>（后端按 `in_pool` 过滤）：换过池子的武将
- * 在旧池子留下的是历史战绩，不该拿来和新池子的现任比 —— 那些场次只进 `listRoleStats`
+ * 范围内<b>只留标着「在池」的武将</b>（后端按 `in_pool` 过滤）：没标的几行是早先那套
+ * 「换池即摘出」留下的旧数据，不该拿来和池子里的现任比 —— 那些场次只进 `listRoleStats`
  * 那行历史胜率（那个接口不过滤，见上）。
  *
  * 排序与截断都在后端（胜率高的在前、场数多的次之），前端拿到即是排好的序；

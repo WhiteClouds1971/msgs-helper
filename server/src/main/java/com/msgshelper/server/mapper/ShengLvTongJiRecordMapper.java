@@ -28,25 +28,44 @@ public interface ShengLvTongJiRecordMapper extends BaseMapper<ShengLvTongJiRecor
     int ensureExists(@Param("pool") String pool, @Param("hero") String hero);
 
     /**
-     * 把「是否还在将池中」重新点一遍：这个武将的这一条为 1，其余全部为 0。
+     * 把 (将池, 武将) 这一条标成「在池」。
      *
-     * <p>一条语句干完两件事，是因为它本来就是一件事 ——「武将现在待在哪个将池」是唯一的，
-     * 点亮一条就等于把别的都灭了。先全清再单点会有中间态（并发下还能留下两条 1）。
+     * <p><b>只点这一条</b>：该武将在别的将池下的记录一律不动 —— 将池之间互不排斥，
+     * 一个武将可以同时待在好几个池子里（斗地主1 一份、排位2 一份，各算各的战绩），
+     * 进一个新池子不等于从老池子退出来。
      *
-     * <p>{@code in_pool = (pool = #{pool})}：MySQL 里比较的结果就是 1 / 0，
-     * 正好是这一列要的值。
+     * <p>这一列只由这里点亮，没有任何地方会把它清回 0：要拿掉某个池子的归属得直接改库
+     * （历史遗留数据里那些 {@code in_pool = 0} 的行就是这么来的）。
      *
-     * <p>末尾 {@code updated_at = updated_at} 不是废话：updated_at 带 ON UPDATE CURRENT_TIMESTAMP，
-     * 被清掉的那几条这一列的值确实变了，不显式赋一次的话时间戳会跟着被刷成现在 ——
-     * 报表里「最后更新时间」会变成「换将池的那天」，而且「当前将池 = 更新日期最大的那条」
-     * 这条不变量也会被自己破坏掉。显式赋值能压住自动更新。
+     * <p>不必再顺手压 {@code updated_at}：这条语句碰的就只有这一行，而它上面
+     * {@link #ensureExists} 与 {@link #increaseCounter} 本来就会把更新日期推到现在。
      *
-     * @param pool 这次记的将池 —— 它才是该武将的当前将池
+     * @param pool 这次记的将池 —— 该武将就此登记进它
      * @param hero 武将
      */
-    @Update("UPDATE sheng_lv_tong_ji_record SET in_pool = (pool = #{pool}), updated_at = updated_at "
-            + "WHERE hero = #{hero}")
+    @Update("UPDATE sheng_lv_tong_ji_record SET in_pool = 1 "
+            + "WHERE pool = #{pool} AND hero = #{hero}")
     int markInPool(@Param("pool") String pool, @Param("hero") String hero);
+
+    /**
+     * 把 (将池, 武将) 这条的「在池」置为否 —— 把这个武将从这个将池里摘出去。
+     *
+     * <p>与 {@link #markInPool} 是两个方向，且都只动这一条：别的将池里该武将的归属不受影响
+     * （将池之间互不排斥）。摘的是记录的归属，不是记录本身 —— 战绩照旧留着。
+     *
+     * <p>末尾 {@code updated_at = updated_at} 不是废话：{@code updated_at} 带
+     * ON UPDATE CURRENT_TIMESTAMP，「在池」由 1 变 0 是一次真实的列变更，不显式赋一次的话
+     * 时间戳会跟着被刷成现在 —— 报表里「最后更新时间」会变成「摘出去的那天」，
+     * 而它该是「最后记那一局的时间」。显式赋值能压住自动更新。
+     *
+     * @param pool 从这个将池里摘出去
+     * @param hero 武将
+     * @return 影响行数（没有这条记录时是 0；是否「本来就不在池」由 service 先查一次判定，
+     *         不靠这个数 —— Connector/J 默认按「匹配到的行数」报，本来就 0 也会报 1）
+     */
+    @Update("UPDATE sheng_lv_tong_ji_record SET in_pool = 0, updated_at = updated_at "
+            + "WHERE pool = #{pool} AND hero = #{hero}")
+    int markOutOfPool(@Param("pool") String pool, @Param("hero") String hero);
 
     /**
      * 某个身份（位置）的胜场或败场 +1，并把「更新日期」推到现在。
@@ -119,9 +138,9 @@ public interface ShengLvTongJiRecordMapper extends BaseMapper<ShengLvTongJiRecor
      * <p>一个武将一行，只数它在这<b>一个身份</b>上的胜败场：同一行的地主场次不会混进农民那档，
      * 换个身份就是另一套数 —— 与 {@link #sumCounters} 同一套口径，只是这边按武将分组。
      *
-     * <p><b>只算现在还待在这个将池里的武将</b>（{@code in_pool = 1}）：换过将池的武将在这个池子里
-     * 留下的都是历史战绩，它的「当前强度」得在当前池子里看 —— 那些行留着是给导出报表对账用的
+     * <p><b>只算标着「在池」的武将</b>（{@code in_pool = 1}）：没标在池的行留着是给导出报表对账用的
      * （见 {@link com.msgshelper.server.entity.ShengLvTongJiRecord#getInPool}），不该混进这份战力表。
+     * 记录一局就会把该武将标进这个池子，所以这一条过滤挡下的是早先那套「换池即摘出」留下的旧数据。
      *
      * <p>排序：胜率高的在前，场数多的次之（同为 100% 时，打了 10 场的排在 1 场的前面），
      * 再并列就按武将名 —— 同一份数据每次查出来顺序都一样。一场没打的武将被

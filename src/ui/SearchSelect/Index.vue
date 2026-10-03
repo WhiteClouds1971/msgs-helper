@@ -38,7 +38,14 @@
    *   .search-select__input     —— 真正的输入框（role="combobox"）
    *   .search-select__panel     —— 候选浮层（role="listbox"）
    *   .search-select__option    —— 单条候选（role="option"）
+   *   .search-select__option-label —— 候选文字（撑满行，超出省略）
    *   .search-select__empty     —— 无候选 / 搜索中的占位行
+   *
+   * 作用域槽（可选的扩展位，组件自己不带业务）：
+   *   #option-action = { row, index } —— 每一行行尾的动作位（如「移出将池」的删除图标）。
+   *   槽里的东西自己负责 stop：按下与点击都要 stop，否则会连坐选中这一行 ——
+   *   行上的点选是「按下记落点、抬手比位移」，让事件冒泡到行上就等于替用户点了它。
+   *   「使用原文」那一行也走同一个槽，用 row.custom 认出来、按需跳过。
    */
   const props = defineProps({
     /** v-model 绑定值；手动填值时就是输入框里的文字 */
@@ -541,7 +548,12 @@
           @pointerup="handleOptionPointerUp($event, row, index)"
           @pointermove="handleOptionPointerMove($event, index)"
         >
-          {{ row.custom ? `使用「${row.label}」` : row.label }}
+          <span class="search-select__option-label">
+            {{ row.custom ? `使用「${row.label}」` : row.label }}
+          </span>
+
+          <!-- 行尾动作位：使用方塞自己的东西（见文件头的作用域槽说明） -->
+          <slot name="option-action" :row="row" :index="index" />
         </li>
 
         <li v-if="!rows.length" class="search-select__empty">
@@ -711,6 +723,8 @@
   .search-select__option {
     display: flex;
     align-items: center;
+    /* 文字撑满，行尾的动作位（#option-action 槽）据此贴在右边 */
+    gap: var(--space-2);
     /* 候选条目与输入框同高（--control-height），与 @/ui/Select 的条目也一致 */
     min-height: var(--control-height);
     padding: var(--space-1) var(--space-2);
@@ -736,6 +750,15 @@
         color: var(--accent-red);
       }
     }
+  }
+
+  /* 候选文字：吃掉除动作位之外的全部宽度，长了省略而不折行（折行会把行撑高） */
+  .search-select__option-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .search-select__empty {

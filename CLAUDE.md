@@ -131,7 +131,7 @@ Spring Boot 3.3.7 · Java 21 · MyBatis-Plus · Flyway · MySQL 8。独立 Maven
 | 配置 | `application.yml` 公共 / `-dev.yml` 本机 MySQL / `-prod.yml` **不入库**（见 `server/.gitignore`），部署机手工放一份到 `server/src/main/resources/`；也可放 jar 工作目录，Spring Boot 外部配置优先级更高 |
 | 建表 | `resources/db/migration/*.sql` 由 Flyway 启动时执行 —— 改表加脚本，别手改库 |
 | 响应体 | `common/Result.java` `{ code, message, data }`，`code === 0` 为成功，异常由 `GlobalExceptionHandler` 兜底 —— 前端 `utils/request.js` 据此拆包、弹错 |
-| 现有接口 | `GET /api/ping`（探针）、`POST /api/sheng-lv-tong-ji/records`（记一局 / 只登记将池）、`POST /api/sheng-lv-tong-ji/records/undo`（撤回一局 —— 与新增反着走：对应的胜/败场 -1，`GREATEST(...,0)` 兜底不变负；role + result **必填**，且不碰武将的将池归属；记录页的历史浮层用它）、`GET /api/sheng-lv-tong-ji/heroes`（武将候选）、`GET /api/sheng-lv-tong-ji/role-stats?pool=`（该将池下各身份/位置的胜率 —— 该身份胜场 ÷ 该身份自己的场数，各身份各算各的）、`GET /api/sheng-lv-tong-ji/hero-stats?pool=&mode=&role=[&limit=]`（该将池 + 该模式 + 该身份下的武将战绩，胜率从高到低；**不传 limit 就全都给**。只算**现在还留在该将池里**的武将（`in_pool = 1`，换过池的留下的是历史战绩）；一场没打的不在里面 —— 胜率 = 该武将在**这个身份**下的胜场 ÷ 它自己在这个身份下的场数，各武将各算各的）、`GET /api/sheng-lv-tong-ji/export`（导出武将胜率统计 xlsx —— **不走 Result 统一响应体**，直接回文件流） |
+| 现有接口 | `GET /api/ping`（探针）、`POST /api/sheng-lv-tong-ji/records`（记一局 / 只把武将登记进这个将池 —— 两种都只把本次这条标成「在池」，该武将在别的将池下的记录一律不动）、`POST /api/sheng-lv-tong-ji/records/undo`（撤回一局 —— 与新增反着走：对应的胜/败场 -1，`GREATEST(...,0)` 兜底不变负；role + result **必填**，且不碰「在池」标记；记录页的历史浮层用它）、`POST /api/sheng-lv-tong-ji/records/out-of-pool`（把武将移出某个将池 —— 只把这一条的「在池」置否，别的池子与战绩一个数都不动；本来就不在池则报业务失败；记录页武将候选行尾那枚删除图标用它）、`GET /api/sheng-lv-tong-ji/heroes`（武将候选）、`GET /api/sheng-lv-tong-ji/role-stats?pool=`（该将池下各身份/位置的胜率 —— 该身份胜场 ÷ 该身份自己的场数，各身份各算各的）、`GET /api/sheng-lv-tong-ji/hero-stats?pool=&mode=&role=[&limit=]`（该将池 + 该模式 + 该身份下的武将战绩，胜率从高到低；**不传 limit 就全都给**。只算**现在还留在该将池里**的武将（`in_pool = 1`，换过池的留下的是历史战绩）；一场没打的不在里面 —— 胜率 = 该武将在**这个身份**下的胜场 ÷ 它自己在这个身份下的场数，各武将各算各的）、`GET /api/sheng-lv-tong-ji/export`（导出武将胜率统计 xlsx —— **不走 Result 统一响应体**，直接回文件流） |
 | Excel 导出 | EasyExcel 4.0.3（POI 5.2.5）按模板填充：模板 `resources/template/武将胜率统计模版.xlsx` **第三行是列表行**，格子内容是 `{.字段名}` 占位符，字段由 `service/ShengLvTongJiStatRow.toMap()` 提供；加列 = 模板加占位符 + 那里多 put 一个 key |
 | 部署 | JDK 21、Node ≥ 22、nginx 把 `/api` 转发到 8081、systemd 单元 `msgs-helper.service`（入口是 build.sh 生成的 `server/app.jar` 软链）—— 完整步骤见 README「生产部署」 |
 
@@ -226,7 +226,8 @@ import guiZeCunGuiMd from '@/assets/md/gui-ze-cun-gui.md?raw'
 - 选项可带一句补充说明 `hint`（如将池页身份后面的胜率）：画成跟在名称后面的「（说明）」（说明小一号、退到次文字色）；带说明的**整组**换成两列网格 —— 一排四枚时单枚只有 70 来像素，「主公（66.7%）」必被截成省略号，宁可多占一行；不带说明的照旧一行等分
 - 组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
 - SearchSelect 的候选浮层是**滚动容器**（条目多时靠手指划），所以「点一下」与「拖着滚」必须分得开：按下只记落点，抬手位移 ≤ TAP_SLOP（8px）才算选中。按下就选中会同时踩两个坑 —— 列表永远滚不动，且一碰就 pick（收起候选 + blur 输入框，软键盘跟着退）。拖动期间还要保住输入框的焦点：条目 pointerdown 上 preventDefault（规范保证它拦不住滚动，只拦复合鼠标事件）＋「面板上正按着指针时来的 blur 不当成失焦」兜底
-- `@/ui/Select` 的选项少（模式 3 项、将池 8 项），面板不溢出、无需滚动；真出现长列表再照 SearchSelect 那套改写
+- `@/ui/Select` 的选项少（模式 3 项、将池 12 项），面板不溢出、无需滚动；真出现长列表再照 SearchSelect 那套改写
+- `@/ui/SearchSelect` 的候选行尾留了一个作用域槽 `#option-action="{ row, index }"`（记录页那枚「移出将池」的删除图标就挂在这儿）。**槽里的东西要自己 stop 掉 pointerdown 与 click**，否则事件冒到行上会连坐选中这一行（行上的点选是「按下记落点、抬手比位移」）；「使用原文」那行也走同一个槽，用 `row.custom` 认出来按需跳过
 
 ## 路径别名
 

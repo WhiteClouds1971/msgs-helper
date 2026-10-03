@@ -16,15 +16,16 @@ class ShengLvTongJiStatRowTest {
     @Test
     @DisplayName("将池写成中文名；没登记过的将池原样带出去")
     void poolLabel() {
-        assertThat(row(newRecord("关羽", "jiang-chi-3")).get("pool")).isEqualTo("将池3");
-        assertThat(row(newRecord("关羽", "wang-zhan-2026")).get("pool")).isEqualTo("王战2026");
-        assertThat(row(newRecord("关羽", "jiang-chi-x")).get("pool")).isEqualTo("jiang-chi-x");
+        assertThat(row(newRecord("关羽", "shen-fen-3")).get("pool")).isEqualTo("身份3");
+        assertThat(row(newRecord("关羽", "pai-wei-1")).get("pool")).isEqualTo("排位1");
+        // 作废的占位池（jiang-chi-*）库里可能还有旧战绩：认不出来就原样带出去，不炸
+        assertThat(row(newRecord("关羽", "jiang-chi-1")).get("pool")).isEqualTo("jiang-chi-1");
     }
 
     @Test
     @DisplayName("最高胜率总场数 = 胜率最高那一档自己的场数，不是所有身份加起来")
     void bestRoleTotalCountsOnlyTheTopRole() {
-        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "dou-di-zhu-1");
         record.setLandlordWin(3);               // 地主 3 胜 0 负 → 100%，这一档 3 场
         record.setFarmerWin(1);
         record.setFarmerLose(1);                // 农民 1 胜 1 负 → 50%，这一档 2 场
@@ -41,7 +42,7 @@ class ShengLvTongJiStatRowTest {
     @Test
     @DisplayName("最高胜率总场数跟着胜率走，不跟着场次多走")
     void bestRoleTotalFollowsRateNotVolume() {
-        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "dou-di-zhu-1");
         record.setLandlordWin(5);
         record.setLandlordLose(5);              // 地主 10 场、50%
         record.setFarmerWin(2);                 // 农民 2 场、100%
@@ -54,7 +55,7 @@ class ShengLvTongJiStatRowTest {
     @Test
     @DisplayName("胜率 = 胜场 /（胜场 + 败场），保留两位小数")
     void rateIsWinOverPlayed() {
-        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "dou-di-zhu-1");
         record.setLandlordWin(2);
         record.setLandlordLose(1);
 
@@ -68,7 +69,7 @@ class ShengLvTongJiStatRowTest {
     @Test
     @DisplayName("只打过一种身份时：它既是最高也是最低")
     void bestAndWorstWithOneRole() {
-        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "dou-di-zhu-1");
         record.setLandlordWin(2);
 
         Map<String, Object> row = row(record);
@@ -81,7 +82,7 @@ class ShengLvTongJiStatRowTest {
     @Test
     @DisplayName("没打过的身份不参与最高 / 最低，胜率一格留空")
     void unplayedRolesStayOut() {
-        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "dou-di-zhu-1");
         record.setLandlordWin(1);
         record.setLandlordLose(1);
         record.setFarmerLose(2);
@@ -100,7 +101,7 @@ class ShengLvTongJiStatRowTest {
     @Test
     @DisplayName("一场没打：最高胜率总场数为 0，最高 / 最低身份与胜率都留空")
     void nothingPlayed() {
-        Map<String, Object> row = row(newRecord("关羽", "jiang-chi-1"));
+        Map<String, Object> row = row(newRecord("关羽", "dou-di-zhu-1"));
         assertThat(row.get("bestRoleTotal")).isEqualTo(0);
         assertThat(row.get("bestRole")).isNull();
         assertThat(row.get("bestRate")).isNull();
@@ -109,9 +110,9 @@ class ShengLvTongJiStatRowTest {
     }
 
     @Test
-    @DisplayName("是否在将池中：在池写「是」，历史将池写「否」")
+    @DisplayName("是否在将池中：在池写「是」，不在池写「否」")
     void inPoolIsWrittenAsYesOrNo() {
-        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "dou-di-zhu-1");
         // 列是 NOT NULL DEFAULT 0：还没落库的对象（null）按 0 算，与库里默认值一致
         assertThat(row(record).get("inPool")).isEqualTo("否");
 
@@ -125,18 +126,18 @@ class ShengLvTongJiStatRowTest {
     @Test
     @DisplayName("最后更新时间：写成 yyyy-MM-dd HH:mm，没更新过就留空")
     void updatedAtIsFormattedToMinute() {
-        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "dou-di-zhu-1");
         record.setUpdatedAt(LocalDateTime.of(2026, 9, 16, 17, 13, 45));
 
         // 秒不进报表：一局打完记的是日期与分钟，秒既没人看又白占一列宽度
         assertThat(row(record).get("updatedAt")).isEqualTo("2026-09-16 17:13");
-        assertThat(row(newRecord("关羽", "jiang-chi-1")).get("updatedAt")).isNull();
+        assertThat(row(newRecord("关羽", "dou-di-zhu-1")).get("updatedAt")).isNull();
     }
 
     @Test
     @DisplayName("胜率并列：取 RoleCounter 顺序靠前的那个（每次导出结果一致）")
     void tieKeepsTheEarlierRole() {
-        ShengLvTongJiRecord record = newRecord("关羽", "jiang-chi-1");
+        ShengLvTongJiRecord record = newRecord("关羽", "dou-di-zhu-1");
         record.setLandlordWin(1);
         record.setLandlordLose(1);
         record.setFarmerWin(3);

@@ -12,15 +12,17 @@
     createRecord,
     exportRecords,
     listRoleStats,
+    removeFromPool,
     undoRecord,
   } from '@/api/sheng-lv-tong-ji';
   import { fileStamp, saveBlob } from '@/utils/download';
   import exportIcon from '@/assets/icons/dao_chu.svg?raw';
   import addIcon from '@/assets/icons/xin_zeng.svg?raw';
+  import deleteIcon from '@/assets/icons/qing_chu.svg?raw';
   import RecordHistory from './components/RecordHistory.vue';
   import { addHeroToCache, loadHeroes, searchHeroes } from './data.js';
   import { entryPoolLabel, entrySummary, useRecordHistory } from './history.js';
-  import { MODE_OPTIONS, POOL_OPTIONS } from './modes.js';
+  import { MODE_OPTIONS, POOL_OPTIONS, labelOf } from './modes.js';
   import { roleHints } from './rates.js';
 
   // 胜率统计 —— 隐藏页
@@ -182,11 +184,11 @@
     4: { label: '四号位', field: 'seat4' },
   });
 
-  /** 成功提示：记了一局就报这一局之后的总战绩；只登记归属就直说 */
+  /** 成功提示：记了一局就报这一局之后的总战绩；只登记进池就直说 */
   function describeSaved(payload, record) {
     const hero = record?.hero ?? payload.hero;
     const display = ROLE_DISPLAY[payload.role];
-    if (!display) return `已登记「${hero}」的所属将池`;
+    if (!display) return `已把「${hero}」登记进该将池`;
 
     const win = record?.[`${display.field}Win`] ?? 0;
     const lose = record?.[`${display.field}Lose`] ?? 0;
@@ -249,7 +251,7 @@
      记一局就往里放一条，撤回时按这条把对应的那一列 -1，撤完再把这条抹掉。
 
      只留能撤回的：模式 / 将池 / 武将 / 身份 / 对局结果齐全的那几条。
-     只登记将池归属（不填身份与对局）的那条路不进历史 —— 它没动任何计数，
+     只登记进池（不填身份与对局）的那条路不进历史 —— 它没动任何计数，
      想改重新登记一次就行，没有「撤回」可言。 */
   const { entries, remember, forget } = useRecordHistory();
 
@@ -351,6 +353,75 @@
       exporting.value = false;
     }
   }
+
+  /* ── 移出将池（把武将的「在池」置否） ──
+     新增只会把武将点亮进池子（后端 markInPool），摘出去这条路只有这里：
+     武将候选行尾那枚删除图标。作用范围就是表单当前选中的那个将池 ——
+     没选将池就无从谈起，先提示去选池子。
+
+     摘的是归属不是记录：这一池的战绩原样留着、历史胜率照旧算（role-stats 不看 in_pool），
+     所以摘完不用重拉身份胜率；候选名单也不用动 —— 记录还在，这个武将还在名单里 */
+
+  /** 待摘的那位武将；空串 = 当前没有待确认的移出 */
+  const pendingRemoveHero = ref('');
+
+  /** 二次确认弹窗的开合 */
+  const removeOpen = ref(false);
+
+  /** 移出在飞 —— 连着点几下别把同一个请求发好几遍 */
+  const removing = ref(false);
+
+  /** 当前将池的中文名（确认文案与成功提示里用） */
+  const poolLabel = computed(() => labelOf(POOL_OPTIONS, pool.value));
+
+  /** 弹窗收起（取消 / Esc）：待确认的那位跟着作废，免得下次开出来还是旧的 */
+  watch(removeOpen, open => {
+    if (!open) pendingRemoveHero.value = '';
+  });
+
+  /** 点了行尾那枚删除图标：先看有没有口径，再问一句 */
+  function askRemoveFromPool(name) {
+    if (!pool.value) {
+      message.warning('请先在「将池」里选一个池子');
+      return;
+    }
+    pendingRemoveHero.value = name;
+    removeOpen.value = true;
+  }
+
+  /** 确认框标题：跟着待摘的那位武将走 */
+  const removeTitle = computed(() =>
+    pendingRemoveHero.value
+      ? `把「${pendingRemoveHero.value}」移出将池？`
+      : '移出将池？'
+  );
+
+  /** 确认框说明：讲清「只改归属、不动战绩」 */
+  const removeDescription = computed(() => {
+    const name = pendingRemoveHero.value;
+    if (!name) return '';
+    return `「${name}」在「${poolLabel.value}」里的归属将变成「否」：胜率榜不再列它；这一池的战绩原样留着，历史胜率照旧算。`;
+  });
+
+  async function handleRemoveConfirm() {
+    if (removing.value) return;
+
+    // 待摘的那位先拿在手上：下面 await 期间它可能被弹窗的收起逻辑清掉
+    const name = pendingRemoveHero.value;
+    if (!name) return;
+
+    removing.value = true;
+    try {
+      await removeFromPool({ pool: pool.value, hero: name });
+      message.success(`已把「${name}」移出「${poolLabel.value}」`);
+      removeOpen.value = false;
+    } catch {
+      // 失败提示由 @/utils/request 的拦截器统一弹（含后端那句「本来就不在…」）；
+      // 弹窗留着不关，用户可以再点一次
+    } finally {
+      removing.value = false;
+    }
+  }
 </script>
 
 <template>
@@ -358,12 +429,13 @@
     <!-- 内容限宽居中：本页是「表单 + 列表」的窄栏，桌面端不让控件横向摊开 -->
     <div class="sheng-lv-tong-ji__inner">
       <!-- 顶部一行：提示 + 两枚附带动作 ——
-           提示（身份 / 对局留空是「登记所属将池」这条路，不是漏填）先说清楚用法；
+           提示（身份 / 对局留空是「登记进这个将池」这条路，不是漏填）先说清楚用法；
            右端两枚线描图标：导出（全量报表）与历史（可撤回的记录），
            都不属于这张表单，只留图标本身，不与表单里的写操作抢视线 -->
       <div class="sheng-lv-tong-ji__top">
         <p class="sheng-lv-tong-ji__hint">
-          只输入「武将 + 将池」、不填身份与对局，可以修改该武将所在的将池
+          只输入「武将 +
+          将池」、不填身份与对局，可以把这个武将登记进这个将池（别的将池里的记录不受影响）
         </p>
 
         <!-- 图标按钮：不套 @/ui/Button（那是有底/有描边的按钮面），
@@ -401,7 +473,7 @@
           :options="MODES"
         />
 
-        <!-- 第二行：只能从这 8 个里挑（占位名，等真实划分定下来再换） -->
+        <!-- 第二行：只能从值域里挑（值域见 ./modes.js，与后端 PoolCatalog 同一套） -->
         <Select
           v-model="pool"
           class="sheng-lv-tong-ji__pool"
@@ -421,7 +493,30 @@
           placeholder="搜索或直接输入武将"
           :search="searchHeroes"
           :debounce="0"
-        />
+        >
+          <!-- 行尾动作位（@/ui/SearchSelect 的 #option-action 槽）：把这个武将
+               从表单当前选中的那个将池里摘出去（那条记录的 in_pool 置否）。
+               「使用原文」那行没有池子归属可摘，跳过（row.custom）。
+               按下与点击都 stop：不 stop 就会连坐选中这个武将 —— 行上的点选是
+               「按下记落点、抬手比位移」，事件冒到行上等于替用户点了它 -->
+          <template #option-action="{ row }">
+            <button
+              v-if="!row.custom"
+              class="sheng-lv-tong-ji__hero-remove"
+              type="button"
+              :aria-label="`把「${row.label}」移出将池`"
+              title="移出将池"
+              @pointerdown.stop
+              @click.stop="askRemoveFromPool(row.label)"
+            >
+              <span
+                class="sheng-lv-tong-ji__inline-icon"
+                aria-hidden="true"
+                v-html="deleteIcon"
+              />
+            </button>
+          </template>
+        </SearchSelect>
       </div>
 
       <!-- 横线：把通用表单与模式专属表单分开（金渐变装饰线，与斗地主页标题下那条同版式） -->
@@ -472,6 +567,21 @@
         @confirm="handleUndoConfirm"
       >
         {{ undoDescription }}
+      </ConfirmDialog>
+
+      <!-- 移出将池前的二次确认 —— 与撤回同一个组件、同一套收尾：
+           确认按钮不自己关弹窗，等接口回来由 handleRemoveConfirm 收，
+           期间按钮转成「处理中…」，失败则留着不关、用户可以再点一次 -->
+      <ConfirmDialog
+        v-model:open="removeOpen"
+        :title="removeTitle"
+        tone="danger"
+        confirm-text="移出将池"
+        loading-text="处理中…"
+        :loading="removing"
+        @confirm="handleRemoveConfirm"
+      >
+        {{ removeDescription }}
       </ConfirmDialog>
     </div>
   </div>
@@ -619,6 +729,52 @@
     :deep(svg) {
       width: 100%;
       height: 100%;
+    }
+  }
+
+  /* 武将候选行尾的「移出将池」：平时淡墨（与提示行同一档灰度），
+     指针划过 / 键盘聚焦才转朱砂 —— 它是行上的次要动作，不该抢候选文字的视线。
+     行是 @/ui/SearchSelect 的（槽把按钮送进去），样式归本页 */
+  .sheng-lv-tong-ji__hero-remove {
+    /* 图标比页首那枚内联图标小一档：行只有 --control-height 高 */
+    --icon-size: 16px;
+
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 28px;
+    padding: 0;
+    position: relative;
+    color: var(--text-tertiary);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    -webkit-tap-highlight-color: var(--tap-highlight);
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out);
+
+    /* 触控热区（设计系统 §3.8）：视觉仍是 32×28（行只有 --control-height 高，
+       长高就把行撑破了），缺的高度用不可见伪元素补回 44px —— 与 @/ui/Select
+       触发按钮同一套做法。绝对定位所以不参与行内排布 */
+    &::after {
+      content: '';
+      position: absolute;
+      inset: calc(-1 * var(--control-hit-pad)) 0;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--accent-red);
+      background: var(--accent-red-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--accent-red);
+      outline-offset: 2px;
     }
   }
 

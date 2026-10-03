@@ -42,7 +42,7 @@ class ShengLvTongJiRoleStatEndpointTest {
     private static final double RATE_SCALE = 10000.0;
 
     /** 库里不会有这个将池：一条记录都没有时将池也得能问，只是胜率全空 */
-    private static final String UNKNOWN_POOL = "jiang-chi-not-exist";
+    private static final String UNKNOWN_POOL = "mei-you-zhe-ge-chi";
 
     @Autowired
     private MockMvc mockMvc;

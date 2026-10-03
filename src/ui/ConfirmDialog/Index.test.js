@@ -12,7 +12,7 @@ async function mountDialog({ props = {}, slots } = {}) {
     props: {
       open: true,
       title: '撤回这条记录？',
-      description: '将从「将池3」里减去这 1 场。',
+      description: '将从「斗地主1」里减去这 1 场。',
       ...props,
     },
     slots,

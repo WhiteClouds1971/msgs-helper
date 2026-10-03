@@ -24,26 +24,36 @@ export const MODE_OPTIONS = Object.freeze([
 ]);
 
 /**
- * 将池 —— 前八个是占位名（将池1 ~ 将池8），往后接真实将池（王战2026）
+ * 将池 —— 按玩法分三个系列，各四个：斗地主1 ~ 4、身份1 ~ 4、排位1 ~ 4
  *
  * 与 MODE_OPTIONS 同一套规矩：改 label 不影响已存数据（库里存的是 value），
  * 后端 PoolCatalog 那份对照跟着改一处即可。
  *
- * 占位名那八个的 value 是序号（jiang-chi-1 ~ 8）—— 它们本来就只是先把位置占住，
- * 迟早要换成真实划分。真实将池别再沿用这个套路：value 取「拼音 + 年份」，
- * 序号式的标识换过一轮之后就认不出原本是哪个池子了。
+ * value 取「系列拼音 + 序号」（dou-di-zhu-N / shen-fen-N / pai-wei-N）——
+ * 序号式的标识只在这一套划分里认得出自己是哪个池子。换划分时别再沿用：
+ * 上一版那八个占位池（jiang-chi-1 ~ 8）就是这么作废的，库里可能还留着
+ * 挂在这些 value 上的旧战绩（不再登记，也不再出现在下拉里）。
  *
- * 顺序即下拉的展示顺序：占位的八个别动（已有战绩挂在它们的 value 上），新池往后追加。
+ * 顺序即下拉的展示顺序：三个系列各占一段，新池往自己那一系列后面追加。
  */
 export const POOL_OPTIONS = Object.freeze([
-  ...Array.from({ length: 8 }, (_, index) =>
-    Object.freeze({
-      label: `将池${index + 1}`,
-      value: `jiang-chi-${index + 1}`,
-    })
-  ),
-  /** 王者之战（王战）2026 —— 赛事将池 */
-  Object.freeze({ label: '王战2026', value: 'wang-zhan-2026' }),
+  /** 斗地主 —— 玩法专属将池 */
+  Object.freeze({ label: '斗地主1', value: 'dou-di-zhu-1' }),
+  Object.freeze({ label: '斗地主2', value: 'dou-di-zhu-2' }),
+  Object.freeze({ label: '斗地主3', value: 'dou-di-zhu-3' }),
+  Object.freeze({ label: '斗地主4', value: 'dou-di-zhu-4' }),
+
+  /** 身份 —— 玩法专属将池 */
+  Object.freeze({ label: '身份1', value: 'shen-fen-1' }),
+  Object.freeze({ label: '身份2', value: 'shen-fen-2' }),
+  Object.freeze({ label: '身份3', value: 'shen-fen-3' }),
+  Object.freeze({ label: '身份4', value: 'shen-fen-4' }),
+
+  /** 排位 —— 玩法专属将池 */
+  Object.freeze({ label: '排位1', value: 'pai-wei-1' }),
+  Object.freeze({ label: '排位2', value: 'pai-wei-2' }),
+  Object.freeze({ label: '排位3', value: 'pai-wei-3' }),
+  Object.freeze({ label: '排位4', value: 'pai-wei-4' }),
 ]);
 
 /**

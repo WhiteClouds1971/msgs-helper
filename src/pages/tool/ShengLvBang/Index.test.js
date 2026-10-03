@@ -78,7 +78,7 @@ describe('胜率榜页', () => {
   });
 
   it('选了口径：页签是该模式的全部身份，默认停在第一枚', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
@@ -91,16 +91,16 @@ describe('胜率榜页', () => {
     );
 
     // 历史胜率按将池问一次；武将战绩按 (将池, 模式, 身份) 问，不带 limit（要全部）
-    expect(api.listRoleStats).toHaveBeenCalledWith('jiang-chi-1');
+    expect(api.listRoleStats).toHaveBeenCalledWith('dou-di-zhu-1');
     expect(api.listHeroStats).toHaveBeenCalledWith({
-      pool: 'jiang-chi-1',
+      pool: 'dou-di-zhu-1',
       mode: 'dou-di-zhu',
       role: 'landlord',
     });
   });
 
   it('面板先交代这个身份的历史胜率（口径与记录页一致）', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
@@ -109,18 +109,18 @@ describe('胜率榜页', () => {
       .text()
       .replace(/\s+/g, '');
     // 将池名 / 模式 / 身份 / 胜率 / 原始战绩都在这一句里
-    expect(rate).toContain('将池1');
+    expect(rate).toContain('斗地主1');
     expect(rate).toContain('斗地主');
     expect(rate).toContain('地主');
     expect(rate).toContain('60.00%');
     // 「将次」不是「场」：斗地主一局有两个农民，这个口径按身份各算各的
     expect(rate).toContain('3胜2负，共5将次');
-    // 历史口径：这个数把已离开该将池的武将也算在内（与表内只列在池武将不同），界面上写明
-    expect(rate).toContain('含已离开该将池的武将');
+    // 历史口径：这个数把已不在池的武将也算在内（与表内只列在池武将不同），界面上写明
+    expect(rate).toContain('含已不在池的武将');
   });
 
   it('该身份一场没打过时直说没有历史胜率，不画一个假的 0%', async () => {
-    presetPageData({ mode: 'jun-zheng', pool: 'jiang-chi-3' });
+    presetPageData({ mode: 'jun-zheng', pool: 'shen-fen-1' });
     const wrapper = mountPage();
     await flushPromises();
 
@@ -135,7 +135,7 @@ describe('胜率榜页', () => {
   });
 
   it('表格画武将 / 总场数 / 胜率三列，列名与数据一律左对齐', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
@@ -163,7 +163,7 @@ describe('胜率榜页', () => {
   });
 
   it('该身份下的武将全都画出来，不截断（后端不传 limit）', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     api.listHeroStats.mockResolvedValue(
       Array.from({ length: 42 }, (_, index) => ({
         hero: `武将${index + 1}`,
@@ -179,14 +179,14 @@ describe('胜率榜页', () => {
 
     expect(wrapper.findAll('tbody .table__row')).toHaveLength(42);
     expect(api.listHeroStats).toHaveBeenCalledWith({
-      pool: 'jiang-chi-1',
+      pool: 'dou-di-zhu-1',
       mode: 'dou-di-zhu',
       role: 'landlord',
     });
   });
 
   it('页签下只有历史胜率那一行说明，不再点名武将', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
@@ -195,7 +195,7 @@ describe('胜率榜页', () => {
   });
 
   it('切页签换身份：重新按新身份问一次榜单', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
@@ -206,21 +206,21 @@ describe('胜率榜页', () => {
 
     expect(api.listHeroStats).toHaveBeenCalledTimes(1);
     expect(api.listHeroStats).toHaveBeenCalledWith({
-      pool: 'jiang-chi-1',
+      pool: 'dou-di-zhu-1',
       mode: 'dou-di-zhu',
       role: 'farmer',
     });
   });
 
   it('换模式换一整套身份，旧身份不带过去', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
     // 页面数据里的模式变了（等价于用户在「模式」下拉里换了军争）
     localStorage.setItem(
       PAGE_PATH,
-      JSON.stringify({ mode: 'jun-zheng', pool: 'jiang-chi-1' })
+      JSON.stringify({ mode: 'jun-zheng', pool: 'dou-di-zhu-1' })
     );
     wrapper.vm.mode = 'jun-zheng';
     await flushPromises();
@@ -232,14 +232,14 @@ describe('胜率榜页', () => {
       '内奸',
     ]);
     expect(api.listHeroStats).toHaveBeenLastCalledWith({
-      pool: 'jiang-chi-1',
+      pool: 'dou-di-zhu-1',
       mode: 'jun-zheng',
       role: 'lord',
     });
   });
 
   it('斗地主：模式规则压在表下，一条一行，「条件 → 结论」', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
@@ -247,10 +247,10 @@ describe('胜率榜页', () => {
     expect(rules).toHaveLength(2);
     expect(
       rules.map(rule => rule.find('.sheng-lv-bang__rule-when').text())
-    ).toEqual(['地主胜率 > 60%', '地主胜率 < 40%']);
+    ).toEqual(['若地主胜率 > 60%', '若地主胜率 < 40%']);
     expect(rules.map(rule => rule.text().replace(/\s+/g, ''))).toEqual([
-      '地主胜率>60%→移除地主专属技能【强易】',
-      '地主胜率<40%→新增地主专属技能【殷富】',
+      '若地主胜率>60%→移除地主专属技能【强易】',
+      '若地主胜率<40%→新增地主专属技能【殷富】',
     ]);
 
     // 不写标题、不另起一块：就压在表格底下那一点地方
@@ -259,17 +259,17 @@ describe('胜率榜页', () => {
   });
 
   it('军争：换成主公那一条（同一模式下四个身份看到的是同一份）', async () => {
-    presetPageData({ mode: 'jun-zheng', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'jun-zheng', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
     const rules = wrapper.findAll('.sheng-lv-bang__rule');
     expect(rules).toHaveLength(1);
     expect(rules[0].find('.sheng-lv-bang__rule-when').text()).toBe(
-      '主公胜率 < 40%'
+      '若主公胜率 < 40%'
     );
     expect(rules[0].text().replace(/\s+/g, '')).toBe(
-      '主公胜率<40%→主公从【飞扬】【跋扈】【强易】【殷富】中随机获得一个专属技能；主公专属技能不受武将技能影响'
+      '若主公胜率<40%→主公从【飞扬】【跋扈】【强易】【殷富】中随机获得一个专属技能；主公专属技能不受武将技能影响'
     );
 
     // 切页签不换说明：规则认的是模式，不认身份
@@ -281,7 +281,7 @@ describe('胜率榜页', () => {
   });
 
   it('没有规则的模式：整块不画，连那点间距都不留', async () => {
-    presetPageData({ mode: 'tuan-zhan', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'tuan-zhan', pool: 'dou-di-zhu-1' });
     const wrapper = mountPage();
     await flushPromises();
 
@@ -299,7 +299,7 @@ describe('胜率榜页', () => {
   });
 
   it('榜单为空时说清楚是空，而不是留一张没有内容的表', async () => {
-    presetPageData({ mode: 'dou-di-zhu', pool: 'jiang-chi-1' });
+    presetPageData({ mode: 'dou-di-zhu', pool: 'dou-di-zhu-1' });
     api.listHeroStats.mockResolvedValue([]);
 
     const wrapper = mountPage();

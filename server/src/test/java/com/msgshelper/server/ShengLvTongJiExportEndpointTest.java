@@ -6,9 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -63,35 +61,31 @@ class ShengLvTongJiExportEndpointTest {
             Sheet sheet = workbook.getSheetAt(0);
 
             // 表头没被数据顶掉：第一行说明、第二行表头
-            assertThat(sheet.getRow(0).getCell(0).getStringCellValue()).startsWith("若最高胜率总场数");
+            assertThat(sheet.getRow(0).getCell(0).getStringCellValue()).startsWith("武将将池划分遵循以下原则");
             assertThat(sheet.getRow(1).getCell(0).getStringCellValue()).isEqualTo("武将");
             assertThat(sheet.getRow(1).getCell(1).getStringCellValue()).isEqualTo("将池");
-            assertThat(sheet.getRow(1).getCell(2).getStringCellValue()).isEqualTo("是否在将池中");
-            assertThat(sheet.getRow(1).getCell(3).getStringCellValue()).isEqualTo("最高胜率总场数");
-            assertThat(sheet.getRow(1).getCell(37).getStringCellValue()).isEqualTo("四号位胜率");
+            assertThat(sheet.getRow(1).getCell(2).getStringCellValue()).isEqualTo("最高胜率总场数");
+            assertThat(sheet.getRow(1).getCell(3).getStringCellValue()).isEqualTo("胜率最高身份/位置");
+            assertThat(sheet.getRow(1).getCell(36).getStringCellValue()).isEqualTo("四号位胜率");
+            // 最后两列：是否在将池中 / 最后更新时间
+            assertThat(sheet.getRow(1).getCell(37).getStringCellValue()).isEqualTo("是否在将池中");
             assertThat(sheet.getRow(1).getCell(38).getStringCellValue()).isEqualTo("最后更新时间");
 
-            // 「是否在将池中」这一列每个武将只能有一个「是」—— 它标的是武将现在待在哪个池子里
-            Map<String, Integer> inPoolCount = new HashMap<>();
-
+            // 「是否在将池中」只照库里那条记录自己写：将池之间互不排斥，一个武将可以同时
+            // 在好几个池子里，所以不再有「每个武将只能有一个是」这条不变量（逐行的比对见下）
             for (int i = 0; i < records.size(); i++) {
                 Row row = sheet.getRow(2 + i);
                 ShengLvTongJiRecord record = records.get(i);
                 assertThat(row.getCell(0).getStringCellValue()).isEqualTo(record.getHero());
-                assertThat(row.getCell(2).getStringCellValue())
+                // 「是否在将池中」在倒数第二列（38 是最后更新时间）
+                assertThat(row.getCell(37).getStringCellValue())
                         .isEqualTo(Boolean.TRUE.equals(record.getInPool()) ? "是" : "否");
-                assertThat(row.getCell(3).getNumericCellValue()).isGreaterThanOrEqualTo(0);
+                assertThat(row.getCell(2).getNumericCellValue()).isGreaterThanOrEqualTo(0);
                 // 库里的 updated_at 是 NOT NULL，导出的每一行这一列都不该是空的，
                 // 且是「到分钟」的写法（不是 Excel 那串日期序列号）
                 assertThat(row.getCell(38).getStringCellValue())
                         .matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}");
-
-                if ("是".equals(row.getCell(2).getStringCellValue())) {
-                    inPoolCount.merge(record.getHero(), 1, Integer::sum);
-                }
             }
-
-            assertThat(inPoolCount.values()).isNotEmpty().allMatch(count -> count == 1);
         }
     }
 }

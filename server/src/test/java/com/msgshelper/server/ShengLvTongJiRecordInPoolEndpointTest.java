@@ -22,8 +22,9 @@ import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 /**
  * 走真实链路记一局 / 只登记将池：HTTP → Controller → Service → 库。
  *
- * <p>验的是「是否还在将池中」这一列怎么被维护：本次记的那个将池标成「是」，
- * 该武将在别的将池下的记录全部清成「否」，两边的战绩各归各的。
+ * <p>验的是「在池」这一列怎么被维护：本次记的那个将池标成「是」，该武将在别的将池下的记录
+ * <b>一个都不动</b> —— 将池之间互不排斥，一个武将可以同时待在好几个池子里，进新池子
+ * 不等于从老池子退出来。
  *
  * <p>整个类<b>带着事务跑</b>：造出来的武将随回滚一起消失，不会脏了本地那份开发数据
  * （这是唯一会写库的将池测试，其余几个都是只读的）。
@@ -37,12 +38,12 @@ class ShengLvTongJiRecordInPoolEndpointTest {
     private static final String HERO = "单测武将-是否在将池";
 
     /** 老将池：先待在这儿 */
-    private static final String OLD_POOL = "jiang-chi-4";
+    private static final String OLD_POOL = "dou-di-zhu-1";
 
-    /** 新将池：记一局 / 登记到这儿，标记就该跟着挪过来 */
-    private static final String NEW_POOL = "jiang-chi-7";
+    /** 新将池：记一局 / 登记到这儿，这条也标上「在池」，老池子照旧留着 */
+    private static final String NEW_POOL = "shen-fen-1";
 
-    /** 给老记录按回去的时间戳：清理标记时若把 updated_at 也刷了，断言就会红 */
+    /** 给老记录按回去的时间戳：记新池子时若把它也碰了，断言就会红 */
     private static final LocalDateTime BACKDATED = LocalDateTime.of(2020, 1, 2, 3, 4, 5);
 
     @Autowired
@@ -52,7 +53,7 @@ class ShengLvTongJiRecordInPoolEndpointTest {
     private ShengLvTongJiRecordMapper mapper;
 
     @Test
-    @DisplayName("记一局：本次的将池标成「是」，别的将池清成「否」，老记录的最后更新时间不动")
+    @DisplayName("记一局：本次的将池标成「是」，别的将池照旧留着，老记录一个字段都没动")
     void marksThePoolOfThisGame() throws Exception {
         seedOldPool();
 
@@ -61,31 +62,33 @@ class ShengLvTongJiRecordInPoolEndpointTest {
                 """.formatted(NEW_POOL, HERO));
 
         assertThat(inPool(NEW_POOL)).isTrue();
-        assertThat(inPool(OLD_POOL)).isFalse();
+        // 进新池子不等于退出老池子：那条记录连「在池」都还是「是」
+        assertThat(inPool(OLD_POOL)).isTrue();
         // 这一局记在哪个将池就加在哪个将池上
         assertThat(recordOf(NEW_POOL).getLandlordWin()).isEqualTo(1);
-        // 老记录的时间戳没被这次清理带跑 —— updated_at 带 ON UPDATE CURRENT_TIMESTAMP，
-        // 不显式赋一次的话它会跟着被刷成现在，「最后更新时间」就全成了「换将池的那天」
+        // 老记录的时间戳也没被这次记录带跑 —— updated_at 带 ON UPDATE CURRENT_TIMESTAMP，
+        // 碰它一下就会刷成现在，「最后更新时间」就变成了「记新池子的那天」
         assertThat(recordOf(OLD_POOL).getUpdatedAt()).isEqualTo(BACKDATED);
     }
 
     @Test
-    @DisplayName("只登记将池（不填身份与对局）：照样换标记，两边的战绩一个数都不动")
-    void registeringPoolOnlyAlsoMovesTheFlag() throws Exception {
+    @DisplayName("只登记将池（不填身份与对局）：两个池子都在池，两边的战绩一个数都不动")
+    void registeringPoolOnlyAlsoMarksIt() throws Exception {
         seedOldPool();
         record("""
                 {"mode":"dou-di-zhu","pool":"%s","hero":"%s","role":"landlord","result":"win"}
                 """.formatted(NEW_POOL, HERO));
         int winsBefore = recordOf(NEW_POOL).getLandlordWin();
 
-        // 这就是页面上那句「只输入武将 + 将池，可以修改该武将所在的将池」
+        // 这就是页面上那句「只输入武将 + 将池……登记进这个将池」—— 只登记，不搬家
         record("""
                 {"mode":"dou-di-zhu","pool":"%s","hero":"%s"}
                 """.formatted(OLD_POOL, HERO));
 
         assertThat(inPool(OLD_POOL)).isTrue();
-        assertThat(inPool(NEW_POOL)).isFalse();
-        // 换将池不是搬记录：老将池的战绩原样留着，一个数都没动
+        // 老池子那条还在：登记进新池子不会把先前那个摘掉
+        assertThat(inPool(NEW_POOL)).isTrue();
+        // 登记不改战绩：先记下的那一局原样留着，一个数都没动
         assertThat(recordOf(NEW_POOL).getLandlordWin()).isEqualTo(winsBefore);
         assertThat(recordOf(NEW_POOL).getLandlordLose()).isZero();
     }

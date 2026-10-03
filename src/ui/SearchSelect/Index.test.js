@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { nextTick } from 'vue';
+import { h, nextTick } from 'vue';
 import { describe, expect, it, vi } from 'vitest';
 import SearchSelect from './Index.vue';
 
@@ -404,5 +404,45 @@ describe('SearchSelect', () => {
 
     await input.trigger('keydown', { key: 'Enter' });
     expect(lastEmit(wrapper)).toBe('风');
+  });
+
+  it('行尾动作位：option-action 槽按行渲染，槽内自己 stop 就不会连坐选中这一行', async () => {
+    const removed = [];
+    const wrapper = mountSelect(
+      {},
+      {
+        slots: {
+          // 使用方那侧的写法：按下与点击都 stop（见组件头的槽说明）
+          'option-action': ({ row }) =>
+            h(
+              'button',
+              {
+                class: 'row-action',
+                type: 'button',
+                onPointerdown: event => event.stopPropagation(),
+                onClick: event => {
+                  event.stopPropagation();
+                  removed.push(row.value);
+                },
+              },
+              '移除'
+            ),
+        },
+      }
+    );
+
+    await wrapper.find('.search-select__input').trigger('focus');
+
+    expect(wrapper.findAll('.row-action')).toHaveLength(4);
+    // 文字照旧画在动作位前面（槽是加在行尾的，不接管原来的 label）
+    expect(wrapper.findAll('.search-select__option')[1].text()).toBe('风移除');
+
+    // 按下与抬手都落在动作位上：这一行不该被选中
+    const action = wrapper.findAll('.row-action')[1];
+    await tap(action);
+    await action.trigger('click');
+
+    expect(removed).toEqual(['风']);
+    expect(lastEmit(wrapper)).toBeUndefined();
   });
 });

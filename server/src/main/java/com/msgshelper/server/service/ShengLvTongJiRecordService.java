@@ -22,19 +22,20 @@ public class ShengLvTongJiRecordService {
     }
 
     /**
-     * 记一局，或只登记武将所属将池。
+     * 记一局，或只把武将登记进这个将池。
      *
      * <p>两种情况走的是同一条路径，只差最后一步：
      * <ol>
      *   <li>先确保 (将池, 武将) 这条在 —— 不在就建一条全 0 的，已在就把更新日期推到现在；</li>
-     *   <li>把「是否还在将池中」重新点一遍：本次这个将池为是，该武将其余记录全部为否；</li>
-     *   <li>带了身份和对局结果 → 对应的那一列 +1；没带 → 到此为止，只是登记 / 刷新归属。</li>
+     *   <li>把这一条标成「在池」（见 {@link ShengLvTongJiRecordMapper#markInPool}）
+     *       —— 只点本次这条，该武将在别的将池下的记录一个都不动；</li>
+     *   <li>带了身份和对局结果 → 对应的那一列 +1；没带 → 到此为止，只是登记进池。</li>
      * </ol>
      *
-     * <p>「武将换将池」不是搬记录，而是在目标将池下新起一条 —— 老将池的战绩原样留着，
-     * 两个将池各算各的。所以第 2 步两个分支都要走：不填身份与对局的那条路
-     * （前端页面顶上写着的「只输入武将 + 将池，可以修改该武将所在的将池」）
-     * 正是换将池的入口，漏了它，报表上这个武将就会同时挂在两个将池里、或者哪个都不挂。
+     * <p>将池之间互不排斥：同一个武将可以同时待在好几个池子里（斗地主1 一份、排位2 一份，
+     * 战绩各算各的），记进新池子既不是搬家、也不会把它从老池子里摘出去。所以不填身份与对局
+     * 的那条路（前端页面顶上写着的「只输入武将 + 将池……登记进这个将池」）只是「把这个武将
+     * 记进这个池子」，不承担任何「换池」的语义。
      *
      * @throws BizException 必填项为空，或身份 / 对局结果只给了一个，或模式与身份对不上
      */
@@ -69,9 +70,9 @@ public class ShengLvTongJiRecordService {
      * <p>与 {@code record} 的差别只有两处，都是「撤回」这件事本身要求的：
      * <ol>
      *   <li>最后一步从 +1 变成 -1（见 {@code ShengLvTongJiRecordMapper#decreaseCounter}）；</li>
-     *   <li>不碰 (将池, 武将) 那条的归属 —— 既不 {@code ensureExists} 也不 {@code markInPool}。
-     *       撤回的是一条<b>历史</b>记录，而武将现在待在哪个池子里是之后可能又改过的事，
-     *       按历史把归属改回去等于悄悄撤销用户后来的操作。</li>
+     *   <li>不碰 (将池, 武将) 那条的「在池」标记 —— 既不 {@code ensureExists} 也不 {@code markInPool}。
+     *       撤回的是一条<b>历史</b>记录，而「这个武将在不在这个池子里」是之后可能又变过的事
+     *       （库里的登记由用户自己维护），按历史把它改回去等于悄悄撤销后来的操作。</li>
      * </ol>
      *
      * <p>要撤回的是「哪一场」由调用方给全：模式 + 身份（位置）定到那一列，结果定到胜或败。
@@ -93,6 +94,39 @@ public class ShengLvTongJiRecordService {
         return mapper.selectOne(new LambdaQueryWrapper<ShengLvTongJiRecord>()
                 .eq(ShengLvTongJiRecord::getPool, pool)
                 .eq(ShengLvTongJiRecord::getHero, hero));
+    }
+
+    /**
+     * 把武将移出某个将池 —— 把 (将池, 武将) 这条的「在池」置为否。
+     *
+     * <p>与 {@link #record} 正好是两个方向：那边记一局 / 登记一次就把这个武将点亮进这个池子，
+     * 这边把它摘出去。摘的是<b>归属</b>，不是记录：这一池的战绩原样留着、历史胜率照旧算，
+     * 只是它不再算这个池子的在池武将（{@code in_pool = 1} 那类查询，如胜率榜，就不再列它）。
+     *
+     * <p>只动这一个池子：该武将在别的将池里的「在池」不受影响（将池之间互不排斥）。
+     * 本来就不在池（或压根没这条记录）时不动库，直接报业务异常 —— 前端弹一句
+     * 「本来就不在」比弹一句「已移出」诚实。
+     *
+     * @return 这条记录的最新全貌（在池已置否）
+     * @throws BizException 将池 / 武将为空，或这条本来就不在池
+     */
+    @Transactional
+    public ShengLvTongJiRecord outOfPool(ShengLvTongJiRecordRequest request) {
+        String pool = requireText(request.pool(), "将池");
+        String hero = requireText(request.hero(), "武将");
+
+        // 先查再写（而不是看 UPDATE 的影响行数）：Connector/J 默认按「匹配到的行数」报数，
+        // 本来就 0 也会报 1，判不出「本来就不在池」
+        ShengLvTongJiRecord existing = mapper.selectOne(new LambdaQueryWrapper<ShengLvTongJiRecord>()
+                .eq(ShengLvTongJiRecord::getPool, pool)
+                .eq(ShengLvTongJiRecord::getHero, hero));
+        if (existing == null || !Boolean.TRUE.equals(existing.getInPool())) {
+            throw new BizException("「" + hero + "」本来就不在「" + PoolCatalog.labelOf(pool) + "」里");
+        }
+
+        mapper.markOutOfPool(pool, hero);
+        existing.setInPool(false);
+        return existing;
     }
 
     /**

@@ -28,7 +28,7 @@ import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
 class ShengLvTongJiRoleStatServiceTest {
 
     /** 测试用的将池 —— 值本身不参与算法，只验它原样传给了汇总 SQL */
-    private static final String POOL = "jiang-chi-1";
+    private static final String POOL = "dou-di-zhu-1";
 
     private final ShengLvTongJiRecordMapper mapper = mock(ShengLvTongJiRecordMapper.class);
     private final ShengLvTongJiRoleStatService service = new ShengLvTongJiRoleStatService(mapper);

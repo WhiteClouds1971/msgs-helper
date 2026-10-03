@@ -54,11 +54,14 @@ public class ShengLvTongJiRecordController {
     }
 
     /**
-     * 记一局，或只登记武将所属将池。
+     * 记一局，或只把武将登记进这个将池。
      *
      * <p>请求体 {@code { mode, pool, hero, role?, result? }}：
      * 带 role + result → 对应身份（位置）的胜场或败场 +1；
      * 不带 → 只登记并刷新 (将池, 武将) 这条的更新日期，胜败场不动。
+     *
+     * <p>两种情况都会把这条标成「在池」，且<b>只点这一条</b>：该武将在别的将池下的记录
+     * 一个都不动 —— 将池之间互不排斥，可以同时在好几个池子里。
      *
      * <p>返回这条记录的最新全貌（前端想显示「3 胜 1 负」就不用再查一次）。
      */
@@ -71,15 +74,33 @@ public class ShengLvTongJiRecordController {
      * 撤回一局 —— 与 {@link #record} 反着走：把那一场的胜/败场 -1。
      *
      * <p>请求体与 {@code /records} 同形，但 role 与 result <b>必填</b>：撤回的是某一场对局，
-     * 光有「武将 + 将池」减不掉任何东西（只登记归属的那种记录不进撤回列表）。
+     * 光有「武将 + 将池」减不掉任何东西（只登记进池的那种记录不进撤回列表）。
      *
-     * <p>与新增一样不碰武将的将池归属 —— 见 {@link ShengLvTongJiRecordService#undo}。
+     * <p>与新增不同：这里<b>不碰</b>「在池」标记 —— 见 {@link ShengLvTongJiRecordService#undo}。
      *
      * <p>返回这条记录的最新全貌（前端显示「3 胜 1 负」用）。
      */
     @PostMapping("/records/undo")
     public Result<ShengLvTongJiRecord> undo(@RequestBody ShengLvTongJiRecordRequest request) {
         return Result.ok(service.undo(request));
+    }
+
+    /**
+     * 把武将移出某个将池 —— 把 (将池, 武将) 这条的「在池」置为否。
+     *
+     * <p>与 {@link #record} 反着走，是「归属」这条路上的收尾动作：记录只会把武将点亮进池子，
+     * 摘出去只有这一个入口（记录页武将候选行尾那枚删除图标）。请求体只认 pool + hero，
+     * 模式 / 身份 / 结果都不参与。
+     *
+     * <p>只动这一个池子，别的池子照旧；战绩一个数都不动，只改归属。
+     *
+     * <p>本来就不在池时报业务异常（统一响应体，HTTP 200 + code != 0）—— 前端照常弹那句话。
+     *
+     * @return 这条记录的最新全貌（在池已置否）
+     */
+    @PostMapping("/records/out-of-pool")
+    public Result<ShengLvTongJiRecord> outOfPool(@RequestBody ShengLvTongJiRecordRequest request) {
+        return Result.ok(service.outOfPool(request));
     }
 
     /**
@@ -117,7 +138,8 @@ public class ShengLvTongJiRecordController {
      * 场数（胜 + 败）。同一个武将的地主场次不会混进农民那档，别的武将、别的身份、别的将池也都
      * 不参与（见 {@link ShengLvTongJiHeroStatService}）。
      *
-     * <p>范围内只留<b>现在还待在这个将池里</b>的武将：换过池子的武将在旧池子留下的是历史战绩。
+     * <p>范围内只留<b>标着「在池」</b>的武将（{@code in_pool = 1}）：没标的几行是早先那套
+     * 「换池即摘出」留下的旧数据，只能在导出报表里对账。
      *
      * <p>三项都是必给：换将池换一套数据，换模式换一套身份，换身份换一套分子分母 ——
      * 少一个都答不出「这个身份下谁最能打」。缺项或模式 / 身份对不上号时，由 service 抛业务异常

@@ -33,11 +33,11 @@ public class ShengLvTongJiRecord {
     private String hero;
 
     /**
-     * 是否还在将池中：该武将当前待着的将池为 true，其余（历史将池）都是 false。
+     * 这个武将算不算待在这个将池里：记一局 / 登记一次就点亮，报表里「是否在将池中」写的就是它。
      *
-     * <p>一个武将可以在多个将池下各留一条记录，但任一时刻只待在一个池子里，
-     * 所以这个标记是「按武将」算的、不是「按 (将池, 武将) 行」算的 ——
-     * 同一武将的记录里最多只有一条为 true。维护它的地方见
+     * <p>标记是「按 (将池, 武将) 行」算的 —— 将池之间互不排斥，一个武将可以同时在好几个
+     * 池子里，每行各标各的、互不影响。这个标记只增不减：没有任何地方会自动把它清回 false
+     * （历史遗留数据里那些 false 的行就是早先那套「换池即摘出」的逻辑留下的）。点亮见
      * {@link com.msgshelper.server.mapper.ShengLvTongJiRecordMapper#markInPool}。
      */
     private Boolean inPool;

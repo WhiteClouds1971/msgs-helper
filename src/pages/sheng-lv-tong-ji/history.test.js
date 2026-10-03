@@ -17,7 +17,7 @@ import {
 /** 一条能撤回的记录（身份 + 对局结果齐全的那条路） */
 const PAYLOAD = {
   mode: 'dou-di-zhu',
-  pool: 'jiang-chi-3',
+  pool: 'shen-fen-3',
   hero: '关羽',
   role: 'landlord',
   result: 'win',
@@ -47,7 +47,7 @@ describe('createEntry', () => {
     expect(entryAt(1700000000000)).toMatchObject({
       at: 1700000000000,
       mode: 'dou-di-zhu',
-      pool: 'jiang-chi-3',
+      pool: 'shen-fen-3',
       hero: '关羽',
       role: 'landlord',
       result: 'win',
@@ -144,7 +144,7 @@ describe('entrySummary / entryPoolLabel', () => {
   });
 
   it('将池画中文名', () => {
-    expect(entryPoolLabel(entryAt(1))).toBe('将池3');
+    expect(entryPoolLabel(entryAt(1))).toBe('身份3');
     expect(entryPoolLabel(entryAt(1, { pool: '没有这个池' }))).toBe('');
   });
 });

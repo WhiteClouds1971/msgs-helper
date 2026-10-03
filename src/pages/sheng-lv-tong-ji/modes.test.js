@@ -31,21 +31,28 @@ describe('modes.js — 公共值域', () => {
     }
   });
 
-  it('将池是八个占位名 + 王战2026，value 与后端 PoolCatalog 一致', () => {
-    expect(POOL_OPTIONS).toHaveLength(9);
+  it('将池是三个系列各四个（斗地主 / 身份 / 排位），value 与后端 PoolCatalog 一致', () => {
+    expect(POOL_OPTIONS).toHaveLength(12);
     expect(POOL_OPTIONS.map(pool => pool.value)).toEqual([
-      'jiang-chi-1',
-      'jiang-chi-2',
-      'jiang-chi-3',
-      'jiang-chi-4',
-      'jiang-chi-5',
-      'jiang-chi-6',
-      'jiang-chi-7',
-      'jiang-chi-8',
-      'wang-zhan-2026',
+      'dou-di-zhu-1',
+      'dou-di-zhu-2',
+      'dou-di-zhu-3',
+      'dou-di-zhu-4',
+      'shen-fen-1',
+      'shen-fen-2',
+      'shen-fen-3',
+      'shen-fen-4',
+      'pai-wei-1',
+      'pai-wei-2',
+      'pai-wei-3',
+      'pai-wei-4',
     ]);
-    // 中文名两边各有一份对照（后端 PoolCatalog），这边认一下王战那条的名字
-    expect(labelOf(POOL_OPTIONS, 'wang-zhan-2026')).toBe('王战2026');
+    // 中文名两边各有一份对照（后端 PoolCatalog），这边认一下每个系列的头一条
+    expect(labelOf(POOL_OPTIONS, 'dou-di-zhu-1')).toBe('斗地主1');
+    expect(labelOf(POOL_OPTIONS, 'shen-fen-1')).toBe('身份1');
+    expect(labelOf(POOL_OPTIONS, 'pai-wei-4')).toBe('排位4');
+    // 作废的占位池：不在值域里了，标签也认不出来
+    expect(labelOf(POOL_OPTIONS, 'jiang-chi-1')).toBe('');
   });
 
   it('将池的 value 互不重复 —— 下拉里两个选项指着同一个池子就没法记录了', () => {

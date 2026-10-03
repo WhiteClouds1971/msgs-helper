@@ -20,9 +20,9 @@ import com.msgshelper.server.mapper.ShengLvTongJiRecordMapper;
  * <p>三个条件一个都不能少：换将池换一套数据，换模式换一套身份，换身份换一套分子分母 ——
  * 少一个都答不出「这个身份下谁最能打」这个问题。
  *
- * <p>范围内<b>只留现在还待在这个将池里的武将</b>（{@code in_pool = 1}，见
- * {@link ShengLvTongJiRecordMapper#heroStats}）：换过池子的武将在旧池子里留下的是历史战绩，
- * 不该拿来和新池子的现任比。
+ * <p>范围内<b>只留标着「在池」的武将</b>（{@code in_pool = 1}，见
+ * {@link ShengLvTongJiRecordMapper#heroStats}）：标了在池才算是这个池子的战力，
+ * 没标的那几行只能在导出报表里对账。
  *
  * <p>排序与截断都在 SQL 里：胜率高的在前，场数多的次之；一场没打的武将不进来
  * （0 场没有胜率可言）。默认<b>不截断</b> —— 口径已被将池与身份框住，条数最多就是该将池的武将数。
