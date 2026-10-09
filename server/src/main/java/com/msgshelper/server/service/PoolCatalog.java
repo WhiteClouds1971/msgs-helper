@@ -4,7 +4,7 @@ package com.msgshelper.server.service;
  * 将池 → 中文名，导出报表里「将池」那一列写的就是它。
  *
  * <p>库里存的是稳定标识（{@code dou-di-zhu-1}），给人看的名字在别处 —— 前端
- * {@code src/pages/sheng-lv-tong-ji/modes.js} 的 POOL_OPTIONS 常量。两边因此各有一份对照：
+ * {@code src/pages/tool/ShengLvTongJi/modes.js} 的 POOL_OPTIONS 常量。两边因此各有一份对照：
  * <b>改将池名要同时改这里和那里</b>。之所以不把中文名存进库，是因为它是展示口径，
  * 将来再换一套将池划分时，只需要动这两处映射，历史数据一行都不用改。
  *

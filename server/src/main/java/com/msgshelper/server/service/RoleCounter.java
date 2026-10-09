@@ -10,7 +10,7 @@ import com.msgshelper.server.entity.ShengLvTongJiRecord;
 /**
  * 「模式 + 身份/位置」→ 表里那一对胜/败场列 的对照表。
  *
- * <p>role 的取值就是前端各模式表单里的 value（见 src/pages/sheng-lv-tong-ji/components/*.vue），
+ * <p>role 的取值就是前端各模式表单里的 value（见 src/pages/tool/ShengLvTongJi/components/*.vue），
  * 三套身份/位置互不重复，所以 (mode, role) 能唯一定到一组列。
  *
  * <p><b>这里的 columnPrefix 会拼进 SQL</b>（见 ShengLvTongJiRecordMapper#increaseCounter），

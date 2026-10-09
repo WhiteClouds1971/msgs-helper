@@ -9,7 +9,7 @@
  *   · condition —— 触发条件（如「若地主胜率 > 60%」），画成行首那一截
  *   · effect    —— 条件成立时做什么，纯文本照原样画（技能名的【】留在文案里）
  *
- * 键就是 MODE_OPTIONS 的 value（@/pages/sheng-lv-tong-ji/modes.js），新增规则时对着那份值域写。
+ * 键就是 MODE_OPTIONS 的 value（@/pages/tool/ShengLvTongJi/modes.js），新增规则时对着那份值域写。
  */
 
 /** 规则表 —— 冻结：这些是常量，被哪个页面顺手 push 一下就好玩了 */

@@ -93,7 +93,7 @@ const LandingPage = defineComponent({
 })
 
 /** 挂上带 query 的落地页，等到标完 */
-async function land({ path = '/jsrg/cheng-lv-bu-qing-jiao', html = TWO_CARDS, query }) {
+async function land({ path = '/da-qi/cheng-lv-bu', html = TWO_CARDS, query }) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path, component: LandingPage }],

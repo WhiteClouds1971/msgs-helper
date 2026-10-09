@@ -17,13 +17,13 @@ whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让
 |---|---|---|
 | 标题 | `name` | 用户给的中文名，如 `夏侯渊 神速` |
 | 分类 | `packageName` | 枚举 `PackageName`，现有 `工具/OL/十周年/M/大旗`；无合适项就在枚举加一条 |
-| 代号 | `code` | 标题转拼音 kebab-case，全局唯一，如 `xia-hou-yuan-shen-su` |
+| 代号 | `code` | **与路由末段逐字一致**（即菜单名的拼音 kebab-case，全局唯一），如 `si-ma-hui` |
 | 路由 | `route` | `/<包前缀>/<code>` |
-| 页面 | `component` | `() => import('@/pages/<包前缀>/<PascalCase>/Index.vue')` |
+| 页面 | `component` | `() => import('@/pages/<包前缀>/<菜单名拼音大驼峰>/Index.vue')` —— 目录名 = 菜单名拼音，路由 = 它的小写 kebab（`SiMaHui` ↔ `/da-qi/si-ma-hui`） |
 | 布局 | `layout` | 默认 `MenuLayout.BACKGROUND`；纯内容页用 `MenuLayout.BLANK` |
 | 封面 | `image` | 见第 1 步 |
 
-包前缀 = 枚举 key 的 kebab-case 小写：`TOOL→tool`、`DA_QI→da-qi`、`OL→ol`、`ANNIVERSARY→anniversary`、`MOBILE→mobile`、`JXTP→jxtp`、`SHZL→shzl`、`YJCM→yjcm`、`JX→jx`、`JSRG→jsrg`。**目录即分类**（按 packageName 归档，不按图片来源）。
+包前缀 = 枚举 key 的 kebab-case 小写（现有枚举：`TOOL→tool`、`MODE→mode`、`HEROES→heroes`、`DA_QI→da-qi`；将来加包在枚举里补一条，照 `OL→ol`、`MOBILE→mobile`、`JXTP→jxtp`、`SHZL→shzl`、`YJCM→yjcm`、`JX→jx`、`JSRG→jsrg` 的规矩命名）。**目录即分类**（按 packageName 归档，不按图片来源）：页面 `src/pages/<包前缀>/`、页面内容图 `src/assets/images/<包前缀>/` 都照此归位；再往里一层同样同名 —— 模块目录 `src/pages/<包前缀>/<模块名>/` ↔ 图片目录 `src/assets/images/<包前缀>/<模块名>/`（如 `da-qi/SiMaHui/` 放该页自己的图）。
 `themeColor` 取 `ThemeColor` 里贴合封面主色的；`orientation` 一律 `'vertical'`。
 
 另需定：**要不要教程**（要 → 加 `tourKey` 并在 `tourKeys.js`/`tourSteps.js` 注册；不要 → 不写该字段）、**要不要持久化**（要 → 页面用 `useLocalStorage`，key 用路由全路径；不要 → 不引入 store）、**页面主内容形态**（图片 / Markdown / 空壳 / 交互）。
@@ -40,7 +40,7 @@ whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让
 
 ## 1. 封面图
 
-1. 重命名格式 `<出处/皮肤名>-<武将>[-静态].webp`（如 `大旗-夏侯渊-神速.webp`），**不要保留原始哈希文件名**。
+1. 重命名格式 `<packageName 中文>-<菜单名>-<后缀>.webp` —— 即「包名（工具/模式/武将/大旗）- 菜单名 - 技能名或牌名」，如 `大旗-转郭嘉-神速.webp`、`武将-神华佗-五禽戏.webp`；封面没有技能名可当后缀时后缀留空（现有两例：`大旗-转郭嘉-.webp`、`大旗-承吕布-.webp`）。**不要保留原始哈希文件名，也不要再用 出处/皮肤名（OL、将星、一将、江山如故·转…）当前缀**。
 2. 转换 + 归档（源码图常是数 MB 的 jpg，必须转 webp 并缩到同量级 120–380 KB）：
 
    ```bash
@@ -64,7 +64,7 @@ whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让
 
 **关键约束**：`image.src` 必须是 `src/assets/images/menus/<文件名>`，中文文件名与磁盘文件**逐字一致**（卡片按路径末段 glob 匹配，写错只会静默显示「图片加载失败」）；`fit` 固定 `'cover'`。
 
-页面内容图（非封面）放 `src/assets/images/<包前缀>/`，同样走脚本、加 `-o src/assets/images/<包前缀>`，带文字的图用 `-q 88`。
+页面内容图（非封面）放 `src/assets/images/<包前缀>/<模块名>/`（模块名 = 该页在 `src/pages/<包前缀>/` 下的目录名），同样走脚本、加 `-o src/assets/images/<包前缀>/<模块名>`，带文字的图用 `-q 88`。
 
 ## 2. 在 menus.js 追加条目
 
@@ -72,19 +72,19 @@ whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让
 
 ```js
 {
-  code: 'xia-hou-yuan-shen-su',
-  name: '夏侯渊 神速',
-  route: '/da-qi/xia-hou-yuan-shen-su',
-  component: () => import('@/pages/da-qi/XiaHouYuanShenSu/Index.vue'),
+  code: 'si-ma-hui',                                  // = route 末段
+  name: '司马徽',
+  route: '/da-qi/si-ma-hui',
+  component: () => import('@/pages/da-qi/SiMaHui/Index.vue'),   // 目录 = 菜单名拼音大驼峰
   image: {
-    src: 'src/assets/images/menus/大旗-夏侯渊-神速.webp',
+    src: 'src/assets/images/menus/大旗-司马徽-荐杰.webp',        // 包名中文-菜单名-技能
     focalX: 50,
     focalY: 50,
     fit: 'cover',
   },
   themeColor: ThemeColor.STEEL_BLUE,
   packageName: PackageName.DA_QI,
-  tags: ['神速', '大旗'],          // 可选：补充检索标签
+  tags: ['荐杰', '火计'],          // 可选：补充检索标签
   // docs: ['cun-gui'],           // 仅当本页用 MdViewer 渲染 .md 时写
   // tourKey: TourKeys.XXX,       // 无教程就不写
   layout: MenuLayout.BLANK,
@@ -96,7 +96,7 @@ whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让
 
 ## 3. 页面
 
-新建 `src/pages/<包前缀>/<PascalCase>/Index.vue`（路由无需手写，`src/pages/index.js` 遍历注册表生成）。**每个页面必须调用 `usePageReady()`**，否则 SplashScreen 永不解除。
+新建 `src/pages/<包前缀>/<菜单名拼音大驼峰>/Index.vue`（如司马徽 → `da-qi/SiMaHui/`；路由无需手写，`src/pages/index.js` 遍历注册表生成）。**每个页面必须调用 `usePageReady()`**，否则 SplashScreen 永不解除。
 
 `#app` 是 `overflow: hidden` 的固定高度壳，文档本身不滚动 —— 页面根元素自建滚动容器，样式统一：
 
@@ -121,7 +121,7 @@ whenToUse: 用户说「添加一个菜单 / 新增工具 / 加一张卡片 / 让
 <script setup>
 import { usePageReady } from '@/composables/usePageReady'
 import ImageFigure from '@/ui/ImageFigure/Index.vue'
-import bannerUrl from '@/assets/images/<包前缀>/<文件名>.webp'
+import bannerUrl from '@/assets/images/<包前缀>/<模块名>/<文件名>.webp'
 
 usePageReady()
 </script>
@@ -143,7 +143,7 @@ usePageReady()
 </style>
 ```
 
-图下可选说明（不给就不渲染、不留空位）：`:caption="'一句话'"` 给纯文本，或用默认插槽塞内容（如 `<MdViewer>`）。参考 `src/pages/ol/GuanSuoZhengNan/Index.vue`（单图）、`src/pages/jsrg/GuoJia/Index.vue`（多图 + 说明）。
+图下可选说明（不给就不渲染、不留空位）：`:caption="'一句话'"` 给纯文本，或用默认插槽塞内容（如 `<MdViewer>`）。参考 `src/pages/da-qi/SiMaHui/Index.vue`（单图）、`src/pages/da-qi/ZhuanGuoJia/Index.vue`（多图 + 说明）。
 
 **B. Markdown 页**（规则 / 说明 / FAQ）—— 正文放 `src/assets/md/<id>.md`，页面用 `@/ui/MdViewer`，并在注册表写 `docs`。`MdViewer` 不自建滚动容器，滚动交给页面根元素（同时是搜索落地定位范围）：
 

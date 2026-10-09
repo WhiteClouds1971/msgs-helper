@@ -37,7 +37,9 @@ msgs-helper/
 │   ├── assets/                      # 静态资源
 │   │   ├── css/                     # 全局样式（Design Token 定义）
 │   │   ├── icons/                   # SVG 图标
-│   │   ├── images/menus/            # 菜单卡片图片
+│   │   ├── images/menus/            # 菜单卡片封面（menus.js 的 image.src；命名 <packageName 中文>-<菜单名>-<后缀>.webp）
+│   │   ├── images/<包前缀>/<模块名>/ # 页面内容图：包前缀按 menus.js 的 packageName 归档（heroes/ tool/ mode/ da-qi/），
+│   │   │                            #   模块名与 src/pages/<包前缀>/ 下的二级目录逐字对应（如 da-qi/SiMaHui/）
 │   │   └── md/                      # 页内展示的 Markdown 正文（?raw 导入）
 │   ├── components/                  # 业务组件
 │   │   ├── Console/                 # 尚书台控制台
@@ -79,12 +81,13 @@ msgs-helper/
 │   ├── pages/                       # 页面：一个菜单一个目录
 │   │   ├── home/                    # 主页（卡片堆叠）
 │   │   ├── demo/
-│   │   ├── sheng-lv-tong-ji/        # 胜率统计（隐藏页；components/ 下每个模式一个表单 +
-│   │   │                            #   RecordHistory 历史浮层；history.js 是记录历史（可撤回，留 50 条）；
-│   │   │                            #   modes.js 是与后端 RoleCounter / PoolCatalog 对应的公共值域）
 │   │   ├── tool/ShengLvBang/        # 胜率榜（菜单页：模式 + 将池 + 身份页签 → 该身份下全部武将的场数与胜率；
 │   │   │                            #   整页不滚，武将多了滚表格自己 —— Tabs/Table 的 fill）
-│   │   └── ji/ jx/ ol/ shzl/ yjcm/ jsrg/ jxtp/ mode/ mobile/ tool/   # 各扩展包页面
+│   │   ├── tool/ShengLvTongJi/      # 胜率统计（隐藏页，路由仍是口令 /p/z3r729 —— 目录在 tool/ 下但路径不跟目录走；
+│   │   │                            #   components/ 下每个模式一个表单 + RecordHistory 历史浮层；
+│   │   │                            #   history.js 是记录历史（可撤回，留 50 条）；modes.js 是与后端
+│   │   │                            #   RoleCounter / PoolCatalog 对应的公共值域）
+│   │   └── heroes/ tool/ mode/ da-qi/   # 其余菜单页：目录即分类（按 menus.js 的 packageName 归档）
 │   ├── router/
 │   │   ├── index.js
 │   │   └── routes.js
@@ -163,7 +166,7 @@ Spring Boot 3.3.7 · Java 21 · MyBatis-Plus · Flyway · MySQL 8。独立 Maven
 页面展示图片一律用 `src/ui/ImageFigure/`：`<ImageFigure :src="url" alt="…" caption="…" />`（**一张图 = 一个组件**，铺满容器宽度、等比缩放，永不裁切、永不拉伸；无内边距、无边框、无圆角）。
 
 - **只画一张图，不管一组图**：多图的排列、间距、谁跟谁一组，全由使用方在自己的页面里组织（叠几个 `<ImageFigure>` 即可）—— 组件不自建滚动容器、不画列表，否则同页多图各成一个滚动区会互相打架
-- **说明区域（可选）**：图下的 `<figcaption>`，与图之间只隔一段 `--space-3` 间距、不加装饰线。两种喂法二选一：`caption` 给纯文本，或默认插槽塞任意内容（如 `<MdViewer>`，参考 `src/pages/jsrg/GuoJia/`）；两者都不给就不渲染，图下不留空位
+- **说明区域（可选）**：图下的 `<figcaption>`，与图之间只隔一段 `--space-3` 间距、不加装饰线。两种喂法二选一：`caption` 给纯文本，或默认插槽塞任意内容（如 `<MdViewer>`，参考 `src/pages/da-qi/ZhuanGuoJia/`）；两者都不给就不渲染，图下不留空位
 - **滚动与居中归页面**：组件是普通块级元素（`margin: 0`）。整页只有一张图时，页面用 `display: flex` + 图 `margin: auto` 实现「放得下就整屏居中，放不下就整页滚」（`margin: auto` 在溢出时自动归零，不像 `justify-content: center` 那样裁掉顶部）
 - 尺寸全部交给 CSS（`width: 100%` + `height: auto`），没有脚本测量，图片加载前后不跳版；加载失败会撤下 `<img>` 原地留占位
 - 组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
@@ -202,7 +205,7 @@ import guiZeCunGuiMd from '@/assets/md/gui-ze-cun-gui.md?raw'
 - 根元素是 `div.skill-card`（`position: relative` + 底色/描边/圆角/阴影），class 可透传，方便页面挂自己的类做交互状态
 - 动效只动 `transform` / `border-color` 且时长走 token（reduced-motion 归零）；组件契约由同目录 `Index.test.js` 覆盖，`npm test` 可跑
 
-**列表参考实现**：神华佗 五禽戏页（`src/pages/mobile/ShenHuaTuoWuQinXi/`）—— 列表结构写在页面 `Index.vue`（`ul.skill-board` + `li.skill-board__item[data-skill-key]` + `.skill-board__viewport` 裁剪层 + `.skill-board__bed` 朱砂滑出层，每项内嵌 `<SkillCard class="skill-board__card">`），手势由同目录 `useSkillGestures.js` 接管：
+**列表参考实现**：神华佗 五禽戏页（`src/pages/heroes/ShenHuaTuo/`）—— 列表结构写在页面 `Index.vue`（`ul.skill-board` + `li.skill-board__item[data-skill-key]` + `.skill-board__viewport` 裁剪层 + `.skill-board__bed` 朱砂滑出层，每项内嵌 `<SkillCard class="skill-board__card">`），手势由同目录 `useSkillGestures.js` 接管：
 
 - 长按 360ms 拖动排序；左滑移除（滑过 72px，或距离过半 ≥40px 且速度 ≥0.5px/ms）
 - 位移内联写在元素上，纯几何计算（落点下标 / 让位量）抽在 `sortable.js`，`sortable.test.js` 覆盖

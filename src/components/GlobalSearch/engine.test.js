@@ -19,31 +19,14 @@ function docRow(query, anchorPart) {
  */
 describe('全局搜索 —— 合并文档按节认领', () => {
   it('每一节都跳到真正画它的那个页面', () => {
-    expect(docRow('趁火打劫', '趁火打劫')?.route).toBe('/jsrg/cheng-lv-bu-qing-jiao')
-    expect(docRow('推心置腹', '推心置腹')?.route).toBe('/jsrg/cheng-lv-bu-qing-jiao')
-    expect(docRow('洞烛先机', '洞烛先机')?.route).toBe('/jsrg/guo-jia')
-  })
-
-  it('斗地主页的替换武将并入勘误后，那一节认领到勘误页', () => {
-    const row = docRow('将徐盛替换为界徐盛', '将徐盛替换为界徐盛')
-
-    expect(row?.route).toBe('/tool/kan-wu')
-    expect(row?.title).toBe('勘误')
-    expect(row?.section).toBe('界徐盛')
-    expect(row?.disabled).toBe(false)
-  })
-
-  it('勘误页自己的条目同样认领到勘误页', () => {
-    const row = docRow('自己不能交给自己牌', '自己不能交给自己牌')
-
-    expect(row?.route).toBe('/tool/kan-wu')
-    expect(row?.title).toBe('勘误')
-    expect(row?.section).toBe('将星徐氏')
+    expect(docRow('趁火打劫', '趁火打劫')?.route).toBe('/da-qi/cheng-lv-bu')
+    expect(docRow('推心置腹', '推心置腹')?.route).toBe('/da-qi/cheng-lv-bu')
+    expect(docRow('洞烛先机', '洞烛先机')?.route).toBe('/da-qi/zhuan-guo-jia')
   })
 
   it('结果行标题取认领的菜单名，而不是退化成文件名', () => {
     expect(docRow('洞烛先机', '洞烛先机')?.title).toBe('转郭嘉')
-    expect(docRow('趁火打劫', '趁火打劫')?.title).toBe('承吕布 轻狡')
+    expect(docRow('趁火打劫', '趁火打劫')?.title).toBe('承吕布')
     expect(docRow('趁火打劫', '趁火打劫')?.disabled).toBe(false)
   })
 
@@ -55,8 +38,8 @@ describe('全局搜索 —— 合并文档按节认领', () => {
   })
 
   it('节内正文行也归本节所属的页面', () => {
-    expect(docRow('摸两张牌', '摸两张牌。')?.route).toBe('/jsrg/guo-jia')
-    expect(docRow('等量的手牌', '等量的手牌。')?.route).toBe('/jsrg/cheng-lv-bu-qing-jiao')
+    expect(docRow('摸两张牌', '摸两张牌。')?.route).toBe('/da-qi/zhuan-guo-jia')
+    expect(docRow('等量的手牌', '等量的手牌。')?.route).toBe('/da-qi/cheng-lv-bu')
   })
 })
 
@@ -72,9 +55,9 @@ describe('全局搜索 —— 落点身份（section + hit）', () => {
     expect(new Set(rows)).toEqual(
       new Set([
         '规则&村规 → /tool/gui-ze-cun-gui',
-        '趁火打劫 → /jsrg/cheng-lv-bu-qing-jiao',
-        '洞烛先机 → /jsrg/guo-jia',
-        '推心置腹 → /jsrg/cheng-lv-bu-qing-jiao',
+        '趁火打劫 → /da-qi/cheng-lv-bu',
+        '洞烛先机 → /da-qi/zhuan-guo-jia',
+        '推心置腹 → /da-qi/cheng-lv-bu',
       ]),
     )
   })

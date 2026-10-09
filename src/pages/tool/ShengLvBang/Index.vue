@@ -13,8 +13,8 @@
     labelOf,
     roleLabelOf,
     rolesOf,
-  } from '@/pages/sheng-lv-tong-ji/modes.js';
-  import { formatRate } from '@/pages/sheng-lv-tong-ji/rates.js';
+  } from '@/pages/tool/ShengLvTongJi/modes.js';
+  import { formatRate } from '@/pages/tool/ShengLvTongJi/rates.js';
   import { modeNotesOf } from './modeNotes';
 
   /**
@@ -29,7 +29,7 @@
    *   · hero-stats —— 按 (将池, 模式, 身份) 问，回该身份下<b>全部</b>武将的战绩（胜率从高到低，
    *     只算现在还留在该将池里的）。切页签就得重问一次
    *
-   * 值域（模式 / 将池 / 身份）取 @/pages/sheng-lv-tong-ji/modes.js —— 与记录页同一份常量，
+   * 值域（模式 / 将池 / 身份）取 @/pages/tool/ShengLvTongJi/modes.js —— 与记录页同一份常量，
    * 那边记一局，这边就是对得上的数。
    *
    * 版式：<b>整页不滚</b> —— 下拉、页签、历史胜率始终在视野里，武将多了滚的是表格自己
@@ -87,7 +87,7 @@
 
   /* ── 历史胜率（该将池下各身份，一次全拉） ──
    口径与记录页「身份 / 位置」选项后面那个百分比完全一致：该身份的胜场 ÷
-   该身份自己的场数，各身份各算各的（见 @/pages/sheng-lv-tong-ji/rates.js 与后端 ShengLvTongJiRoleStatService）。
+   该身份自己的场数，各身份各算各的（见 @/pages/tool/ShengLvTongJi/rates.js 与后端 ShengLvTongJiRoleStatService）。
 
    **这是历史口径**：不按 in_pool 过滤 —— 不在池的武将在这个池子里留下的对局照样算进去。
    与下方表格（只列标着「在池」的武将）是两套范围，数字对不上是正常的，别去「对齐」它们 */

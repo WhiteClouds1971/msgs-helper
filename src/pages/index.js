@@ -39,12 +39,12 @@ export default [
   },
   ...menuRoutes,
   {
-    // 隐藏页：胜率统计 —— 不注册进 menus.js（主页无卡片、全局搜索无结果），
-    // 路径里的 6 位随机段即访问口令，防止无关人员直达；不带 meta.code，
-    // App.vue 因此不会把它记进主页卡片堆的访问顺序
+    // 隐藏页：胜率统计（页面目录在 pages/tool/ 下，但路由不跟目录走）—— 不注册进 menus.js
+    // （主页无卡片、全局搜索无结果），路径里的 6 位随机段即访问口令，防止无关人员直达；
+    // 不带 meta.code，App.vue 因此不会把它记进主页卡片堆的访问顺序
     name: 'ShengLvTongJi',
     path: '/p/z3r729',
-    component: () => import('@/pages/sheng-lv-tong-ji/Index.vue'),
+    component: () => import('@/pages/tool/ShengLvTongJi/Index.vue'),
     meta: { layout: 'BlankLayout', title: '将池胜率' },
   },
   {
