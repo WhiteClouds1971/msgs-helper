@@ -73,4 +73,36 @@ export const tourSteps = Object.freeze({
       },
     ]),
   }),
+
+  /** 记录 游戏牌：模式 → 牌池 → 已记录区，三步讲清怎么记、怎么删、怎么藏 */
+  'ji-lu': Object.freeze({
+    steps: Object.freeze([
+      {
+        element: '#jlp-mode',
+        popover: {
+          title: '两种记法',
+          description:
+            '简单模式只点亮牌名；复杂模式点开牌名挑花色与点数，记下的牌落在下方列表。',
+        },
+      },
+      {
+        element: '#jlp-pool',
+        popover: {
+          title: '游戏牌',
+          description:
+            '基本、锦囊、装备分成三折，记哪一类就展开哪一类；点牌名就是记它。',
+          side: 'top',
+        },
+      },
+      {
+        element: '#jlp-added',
+        popover: {
+          title: '已记录的牌',
+          description:
+            '左滑一张把它删掉；点牌面可隐藏或显示信息，右上角两枚按钮能一次全部隐藏或全部显示。',
+          side: 'top',
+        },
+      },
+    ]),
+  }),
 });

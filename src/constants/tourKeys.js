@@ -15,4 +15,7 @@ export const TourKeys = Object.freeze({
 
   /** 神华佗 五禽戏 — 技能区手势（长按拖动排序 / 左滑移除 / 重置还原） */
   SHEN_HUA_TUO_WU_QIN_XI: Object.freeze({ key: 'shen-hua-tuo-wu-qin-xi', count: 1 }),
+
+  /** 记录 游戏牌 — 模式切换 / 牌池 / 已记录区（左滑删除、点牌面隐藏） */
+  JI_LU: Object.freeze({ key: 'ji-lu', count: 1 }),
 });

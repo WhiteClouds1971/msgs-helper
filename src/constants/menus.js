@@ -25,6 +25,7 @@ export const PackageName = Object.freeze({
   MODE: '模式',
   HEROES: '武将',
   DA_QI: '大旗',
+  YOU_XI_PAI: '游戏牌',
 });
 
 /** 菜单布局枚举（值对应 App.vue 的 layoutMap 键名） */
@@ -125,6 +126,23 @@ const menus = [
     // 正文文件：src/assets/md/pai-wei.md（规则，整篇）
     docs: ['pai-wei'],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'ji-lu',
+    name: '记录',
+    route: '/tool/ji-lu',
+    component: () => import('@/pages/tool/JiLu/Index.vue'),
+    // 文字封面：毛笔字主标题 + 副标题，底色取 themeColor（无图片资源）
+    cover: { title: '记录', subtitle: '落牌成册 心中有数' },
+    themeColor: ThemeColor.JADE,
+    packageName: PackageName.TOOL,
+    // 补充检索标签（全局搜索用，也显示在结果行）：本页的常见叫法
+    tags: ['记牌', '牌池', '游戏牌', '花色点数'],
+    // 教学导览：模式切换 / 牌池 / 已记录区三步（首次进入自动教一次，之后走控制台「教学导览」）
+    tourKey: TourKeys.JI_LU,
+    // 空白布局：无装饰；有教学导览与页面数据（模式 / 点亮的牌 / 记录存 route.fullPath）
     layout: MenuLayout.BLANK,
     orientation: 'vertical',
   },
@@ -342,6 +360,101 @@ const menus = [
     packageName: PackageName.DA_QI,
     // 补充检索标签（全局搜索用，也显示在结果行）：本页牌面名
     tags: ['除害'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'shen-tai-shi-ci',
+    name: '神太史慈',
+    route: '/da-qi/shen-tai-shi-ci',
+    component: () => import('@/pages/da-qi/ShenTaiShiCi/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-神太史慈-义信天武.webp',
+      focalX: 52,
+      focalY: 38,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.CRIMSON,
+    packageName: PackageName.DA_QI,
+    // 补充检索标签（全局搜索用，也显示在结果行）：本页牌面名
+    tags: ['破围'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'shen-zhong-hui',
+    name: '神钟会',
+    route: '/da-qi/shen-zhong-hui',
+    component: () => import('@/pages/da-qi/ShenZhongHui/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/大旗-神钟会-立世.webp',
+      focalX: 50,
+      focalY: 45,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.ORCHID,
+    packageName: PackageName.DA_QI,
+    // 补充检索标签（全局搜索用，也显示在结果行）：本页牌面名
+    tags: ['立世'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'chu-qi-bu-yi',
+    name: '出其不意',
+    route: '/you-xi-pai/chu-qi-bu-yi',
+    component: () => import('@/pages/you-xi-pai/ChuQiBuYi/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/游戏牌-出其不意-.webp',
+      focalX: 50,
+      focalY: 52,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.YOU_XI_PAI,
+    // 正文文件：src/assets/md/you-xi-pai.md（合并文档）—— 本页只认领「出其不意」一节
+    docs: [{ id: 'you-xi-pai', heading: '出其不意' }],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'bing-sha',
+    name: '冰杀',
+    route: '/you-xi-pai/bing-sha',
+    component: () => import('@/pages/you-xi-pai/BingSha/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/游戏牌-冰杀-.webp',
+      focalX: 50,
+      focalY: 46,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.YOU_XI_PAI,
+    // 正文文件：src/assets/md/you-xi-pai.md（合并文档）—— 本页只认领「冰杀」一节
+    docs: [{ id: 'you-xi-pai', heading: '冰杀' }],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
+    code: 'ci-sha',
+    name: '刺杀',
+    route: '/you-xi-pai/ci-sha',
+    component: () => import('@/pages/you-xi-pai/CiSha/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/游戏牌-刺杀-.webp',
+      focalX: 50,
+      focalY: 49,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.EMBER,
+    packageName: PackageName.YOU_XI_PAI,
+    // 正文文件：src/assets/md/you-xi-pai.md（合并文档）—— 本页只认领「刺杀」一节
+    docs: [{ id: 'you-xi-pai', heading: '刺杀' }],
     // 空白布局：无装饰、无教学导览（不配 tourKey）、无持久化数据
     layout: MenuLayout.BLANK,
     orientation: 'vertical',

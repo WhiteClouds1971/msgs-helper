@@ -49,10 +49,13 @@ msgs-helper/
 │   │   ├── JadeSeal/                # 玉玺悬浮按钮
 │   ├── ui/                          # 无业务耦合的基础 UI 组件
 │   │   ├── Button/                       # 按钮（primary / ghost 两变体）
+│   │   ├── Collapse/                     # 折叠框（reka-ui Accordion 封装：标题行 + 可收起的正文）
+│   │   ├── ConfirmDialog/                # 二次确认弹窗（reka-ui AlertDialog 封装）
 │   │   ├── Drawer/                       # 抽屉面板（reka-ui 封装）
 │   │   ├── ImageFigure/                  # 单张图片展示（铺满宽度 + 可选说明区域）
 │   │   ├── MdViewer/                     # Markdown 正文展示（marked 渲染）
 │   │   ├── Message/                      # 全局轻提示宿主（reka-ui Toast 封装）
+│   │   ├── PlayingCard/                  # 单张牌面展示（花色 + 点数角标 + 牌名，tile / row 两版式）
 │   │   ├── RadioGroup/                   # 单选按钮组（选项摊成一行按钮，原生 radio 语义）
 │   │   ├── SearchSelect/                 # 可搜索 / 可手填的下拉选择
 │   │   ├── Select/                       # 单选下拉框（reka-ui 封装）
@@ -87,6 +90,10 @@ msgs-helper/
 │   │   │                            #   components/ 下每个模式一个表单 + RecordHistory 历史浮层；
 │   │   │                            #   history.js 是记录历史（可撤回，留 50 条）；modes.js 是与后端
 │   │   │                            #   RoleCounter / PoolCatalog 对应的公共值域）
+│   │   ├── tool/JiLu/               # 记录（菜单页：基本/锦囊/装备三折共 44 张牌名，简单模式只点亮、
+│   │   │                            #   复杂模式挑花色点数后落成下方一行两张的牌签（左滑删 / 点牌面藏 / 一键全藏；
+│   │   │                            #   清空把两套记录一起清）；cards.js 是牌名与花色点数值域，
+│   │   │                            #   useSwipeDelete.js 是左滑手势）
 │   │   └── heroes/ tool/ mode/ da-qi/   # 其余菜单页：目录即分类（按 menus.js 的 packageName 归档）
 │   ├── router/
 │   │   ├── index.js
@@ -212,6 +219,32 @@ import guiZeCunGuiMd from '@/assets/md/gui-ze-cun-gui.md?raw'
 - 三个状态类挂在 li 上、样式在页面里：`is-pressed`（按下）/ `is-dragging`（拖起，金色描边 + 辉光）/ `is-swiping`（左滑中，滑出层才显形 —— 平时 `opacity: 0`，否则卡片浮起时缩放会漏红底）
 - li 上必须带 `touch-action: pan-y`：纵向滚动照常放行，横向留给手势。缺了它，触屏上的横向滑动会被浏览器判成平移并掐断指针事件流，左滑会整个失效
 - 拖拽期间 `preventDefault` 掉 touchmove 压住页面滚动；数据提交与视觉解耦（让位量 = 提交后的真实布局差，故清掉 transform 不跳版，被拖项再用一次 FLIP 补间落位）
+
+## 折叠框 (Collapse) 与牌面 (PlayingCard)
+
+两块常一起用的基础件：`src/ui/Collapse/` 收内容，`src/ui/PlayingCard/` 画一张牌。
+
+**折叠框** `<Collapse v-model="open" type="multiple" :items="[{ value, title, hint? }]">` + 默认插槽（拿得到 `item`）：
+
+- 单选（`type="single"`，`collapsible` 默认开，能整组再收回去）或多选（`type="multiple"`，各组各管各的）
+- 语义与键盘交给 reka-ui 的 Accordion：`role=region` 与 `aria-labelledby` 互指、标题就是按钮、上下方向键在组间跳
+- **正文不做高度动画**（设计系统 §6 不许拿 height 做动画）：收起时整块不挂载（reka-ui `unmountOnHide` 默认开），展开时正文淡入上浮一段、箭头同时转身 —— 只动 `opacity` / `transform`
+- 结构契约：`.collapse__trigger`（44px 标题行）/ `__title` / `__hint` / `__chevron` / `__panel`
+
+**牌面** `<PlayingCard :name :suit :rank :variant :selected :hidden as="span" />`：
+
+- `suit` 给 `{ pip, label, tone }`（`tone: 'ink' | 'red'`）：字形画在角标里，`label` 只喂读屏。**花色与点数的值域归页面**（记录页在 `cards.js`），组件不认识「黑桃」是什么；只给牌名就是一枚纯名签
+- 两种版式：`variant="tile"` 竖向小方块（高 `--control-height`，成片铺开的牌池）/ `variant="row"` 横向一行（内容多宽就多宽，一条一条挨着排就是一枚枚小牌签）
+- `selected`（金描边 + 淡金底 + 金辉光）与 `hidden`（斜纹牌背 + 居中一行「已隐藏」）都只是加一个类 —— **组件不带任何交互，也不自己记状态**
+- **盖牌不改尺寸**：`hidden` 只把牌名与角标 `visibility: hidden`，那行提示绝对定位压在正中。牌签是接着排的，盖住一枚就缩一截会让整排跟着挪
+- 要塞进 `<button>`（按钮里只允许短语内容）就传 `as="span"`；两块的契约各由同目录 `Index.test.js` 覆盖，`npm test` 可跑
+- 花色字形用牌桌上的通用记号（♠ ♥ ♣ ♦，U+2660 系）并带 U+FE0E 变体选择符，钉在「文字表现」上，不走 emoji
+
+**左滑删除**：记录页（`src/pages/tool/JiLu/`）把列表结构与样式都留在页面里，`useSwipeDelete.js` 只管几何与位移，DOM 契约只有两条：`li.jlp-card`（`overflow: hidden` 裁住滑走的牌面，底下是朱砂滑出层）与 `.jlp-card__card`（位移施加在它身上）；状态类 `is-swiping` 挂 li。
+
+- **阈值随牌面宽度走**（`min(72, max(40, 宽/2))`）：牌面是一枚小牌签，一个比它自己还宽的固定阈值，手指得划过头才认账
+- **删除分两拍**：牌面先滑走淡出，再摘数据，最后给还在场的同伴补一次 FLIP —— 已记录的牌是一行两张的网格（再窄下去，最长的牌名带上花色点数角标就装不下一行），摘掉一张后面的会整体往前挪，不补这一下会「啪」地跳过去
+- 左滑过的那一下会紧接着触发一次 click，调用方在 click 里先问 `shouldIgnoreClick()`，为真就不当点按（否则删完还会顺手把牌面盖一下）
 
 ## 表单选择 (Select / RadioGroup / SearchSelect)
 

@@ -58,6 +58,9 @@ describe('全局搜索 —— 落点身份（section + hit）', () => {
         '趁火打劫 → /da-qi/cheng-lv-bu',
         '洞烛先机 → /da-qi/zhuan-guo-jia',
         '推心置腹 → /da-qi/cheng-lv-bu',
+        '出其不意 → /you-xi-pai/chu-qi-bu-yi',
+        '冰杀 → /you-xi-pai/bing-sha',
+        '刺杀 → /you-xi-pai/ci-sha',
       ]),
     )
   })
