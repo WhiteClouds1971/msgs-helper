@@ -147,6 +147,25 @@ const menus = [
     orientation: 'vertical',
   },
   {
+    code: 'luo-tong',
+    name: '骆统',
+    route: '/heroes/luo-tong',
+    component: () => import('@/pages/heroes/LuoTong/Index.vue'),
+    image: {
+      src: 'src/assets/images/menus/武将-骆统-勤政.webp',
+      focalX: 46,
+      focalY: 41,
+      fit: 'cover',
+    },
+    themeColor: ThemeColor.JADE,
+    packageName: PackageName.HEROES,
+    // 补充检索标签（全局搜索用，也显示在结果行）：骆统的技能名
+    tags: ['勤政'],
+    // 空白布局：无装饰、无教学导览（不配 tourKey）；有页面数据（本回合出牌数存 route.fullPath）
+    layout: MenuLayout.BLANK,
+    orientation: 'vertical',
+  },
+  {
     code: 'shen-hua-tuo',
     name: '神华佗',
     route: '/heroes/shen-hua-tuo',

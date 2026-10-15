@@ -187,6 +187,17 @@
     overflow-wrap: anywhere;
   }
 
+  /* 记录列表里的角标比牌池那档各高一格：
+     一条牌面有一两百像素宽，花色与点数是最先要认出来的东西，
+     缩在 12px 里太费眼；牌池那档不动（那里没有角标，且格子只 36px 高） */
+  .playing-card--row .playing-card__mark {
+    font-size: var(--text-sm);
+  }
+
+  .playing-card--row .playing-card__pip {
+    font-size: var(--text-base);
+  }
+
   .playing-card--row .playing-card__name {
     min-width: 0;
     font-size: var(--text-sm);

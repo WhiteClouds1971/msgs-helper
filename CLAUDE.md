@@ -61,6 +61,7 @@ msgs-helper/
 │   │   ├── Select/                       # 单选下拉框（reka-ui 封装）
 │   │   ├── SkillCard/                    # 单个三国杀技能展示（居中技能名 + 标签 + 规则）
 │   │   ├── SplashScreen/                 # 启动画面
+│   │   ├── Stepper/                      # 数值步进器（加减 + 可手输，控件 44px）
 │   │   ├── Table/                        # 数据表格（columns + rows，单元格走插槽）
 │   │   ├── Tabs/                         # 页签切换（reka-ui 封装，内容只挂当前这一枚）
 │   │   └── Tooltip/                      # 悬停提示
@@ -255,6 +256,7 @@ import guiZeCunGuiMd from '@/assets/md/gui-ze-cun-gui.md?raw'
 | `src/ui/Select/` | 值域大或会长（模式、将池） | 下拉，收着 |
 | `src/ui/RadioGroup/` | 两三枚、扫一眼就能定（身份、位置、对局） | 一行按钮，摊开 |
 | `src/ui/SearchSelect/` | 候选多到要找（武将：可搜、可手填） | 输入框 + 候选浮层 |
+| `src/ui/Stepper/` | 数字一类的量（出牌数、标记数） | 加减按钮 + 可手输的数字格 |
 
 - RadioGroup 每个选项是一枚按钮面，选中态＝金描边 + 淡金底 + 金辉光 + 半档字重（**不靠金色写字**：Light 模式下 `--accent-gold` 只有 3.0:1，见设计系统 §4.1）
 - 单选语义整个交给原生 `<input type="radio">`：同组自动同名（不传 `name` 按实例生成，一页放几组也不串台），方向键切换、表单提交、屏幕阅读器都是白拿的；按钮面只是它的 `label`

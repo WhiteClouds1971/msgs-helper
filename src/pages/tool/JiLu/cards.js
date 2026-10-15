@@ -46,6 +46,10 @@ export const CARD_GROUPS = Object.freeze([
       { code: 'LeBuSiShu', label: '乐不思蜀' },
       { code: 'BingLiangCunDuan', label: '兵粮寸断' },
       { code: 'ShanDian', label: '闪电' },
+      { code: 'QiZhengXiangSheng', label: '奇正相生' },
+      { code: 'ChuQiBuYi', label: '出其不意' },
+      { code: 'TuiXinZhiFu', label: '推心置腹' },
+      { code: 'ChenHuoDaJie', label: '趁火打劫' },
     ]),
   },
   {
